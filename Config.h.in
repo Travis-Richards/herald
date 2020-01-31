@@ -1,0 +1,9 @@
+#pragma once
+
+#define HERALD_VERSION "@herald_VERSION@"
+
+#define HERALD_VERSION_MAJOR @herald_VERSION_MAJOR@
+#define HERALD_VERSION_MINOR @herald_VERSION_MINOR@
+#define HERALD_VERSION_PATCH @herald_VERSION_PATCH@
+
+#cmakedefine JNI_FOUND
