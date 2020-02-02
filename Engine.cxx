@@ -57,14 +57,13 @@ void Engine::play_game() {
 
   auto game_info = GameInfo::open(game_path, this);
   if (!game_info) {
-    // TODO : error dialog
     return;
   }
 
   if (game_info->get_api() == "Java") {
     api = make_java_api(game_path);
   } else {
-    // TODO : error
+    return;
   }
 
   api->init_game();
@@ -110,7 +109,6 @@ bool Engine::store_settings() {
 bool Engine::load_level(int id, Scene* scene) {
 
   if (!api) {
-    emit panic("No API available");
     return false;
   }
 

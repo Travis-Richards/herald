@@ -24,9 +24,6 @@ signals:
   /// Emitted when the user wants to play a certain game.
   void play_requested();
 public slots:
-  /// Handles the case that the game engine has a panic.
-  /// @param msg The message describing what happened.
-  void handle_engine_panic(const QString& msg);
   /// Updates the game in the game list view.
   /// This should be connected to the signal from @ref Engine
   /// that updates the game list either after a dialog window

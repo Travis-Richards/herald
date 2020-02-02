@@ -25,6 +25,10 @@ find_package(Qt5 REQUIRED
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# Add components
+
+add_subdirectory("lang")
+
 # Here we declare the main program.
 
 add_executable("herald" WIN32
@@ -35,37 +39,29 @@ add_executable("herald" WIN32
   "CentralWidget.cxx"
   "ControlPanel.h"
   "ControlPanel.cxx"
+  "Engine.h"
+  "Engine.cxx"
   "GameInfo.h"
   "GameInfo.cxx"
   "GameList.h"
   "GameList.cxx"
   "GameListView.h"
   "GameListView.cxx"
-  "Engine.h"
-  "Engine.cxx"
-  "Interpreter.h"
-  "Interpreter.cxx"
-  "Lexer.h"
-  "Lexer.cxx"
   "LineBuffer.h"
   "LineBuffer.cxx"
   "MainWindow.h"
   "MainWindow.cxx"
-  "PanicWidget.h"
-  "PanicWidget.cxx"
-  "Parser.h"
-  "Parser.cxx"
+  "MenuBuilder.h"
+  "MenuBuilder.cxx"
   "ProcessApi.h"
   "ProcessApi.cxx"
   "Scene.h"
   "Scene.cxx"
   "SceneView.h"
   "SceneView.cxx"
-  "Writer.h"
-  "Writer.cxx"
   "Icons.qrc")
 
-target_link_libraries("herald" PRIVATE Qt5::Widgets ${LIBS})
+target_link_libraries("herald" PRIVATE Qt5::Widgets ${LIBS} "herald-lang")
 
 target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})
 

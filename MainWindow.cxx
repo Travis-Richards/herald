@@ -20,10 +20,6 @@ MainWindow::MainWindow() {
   connect(central_widget, &CentralWidget::game_selected, this, &MainWindow::game_selected);
 }
 
-void MainWindow::handle_engine_panic(const QString& msg) {
-  central_widget->panic(msg);
-}
-
 void MainWindow::update_game_list(const GameList& game_list) {
   central_widget->update_game_list(game_list);
 }

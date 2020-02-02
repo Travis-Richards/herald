@@ -1,10 +1,12 @@
 #include "ProcessApi.h"
 
 #include "Api.h"
-#include "Interpreter.h"
 #include "LineBuffer.h"
+#include "MenuBuilder.h"
 #include "Scene.h"
-#include "Writer.h"
+
+#include "lang/Interpreter.h"
+#include "lang/Writer.h"
 
 #include <QProcess>
 #include <QString>
@@ -40,7 +42,9 @@ public:
       delete interpreter;
     }
 
-    interpreter = Interpreter::make_menu_builder(scene, this);
+    interpreter = make_menu_builder(scene, this);
+
+    interpreter->set_root_path(process.workingDirectory());
 
     process.write(Writer::build_menu());
 
@@ -99,7 +103,7 @@ protected slots:
   /// @param line The line emitted from the process.
   void handle_line(const QString& line) {
     if (interpreter) {
-      interpreter->interpret(line);
+      interpreter->interpret_line(line);
       if (interpreter->done()) {
         delete interpreter;
         interpreter = nullptr;

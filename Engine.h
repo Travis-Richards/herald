@@ -3,6 +3,7 @@
 #include <QObject>
 
 class Api;
+class Error;
 class GameList;
 class Scene;
 class QSettings;
@@ -39,6 +40,10 @@ public:
   /// Accesses the number of levels in the loaded game.
   int get_level_count();
 signals:
+  /// This signal is emitted when a runtime
+  /// error occurs in the game.
+  /// @param error The error that occurred.
+  void error_occurred(const Error& error);
   /// This signal is emitted when a game
   /// is successfully opened so that the
   /// window for the game can be opened.

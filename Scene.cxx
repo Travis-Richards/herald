@@ -4,6 +4,8 @@
 #include <QList>
 #include <QPixmap>
 
+#include <iostream>
+
 /// Represents an arbitrary texture.
 /// Since some images may fail to load
 /// from the game, a texture also has a flag
@@ -32,6 +34,12 @@ public:
     } else {
       return new Texture(QBrush(), false, parent);
     }
+  }
+  /// Creates a texture from a solid color.
+  /// @param color The color to assign the texture.
+  /// @param parent A pointer to the parent object.
+  static Texture* from_color(const QColor& color, QObject* parent) {
+    return new Texture(QBrush(color), true, parent);
   }
   /// Accesses the brush for the texture.
   const QBrush& get_brush() const noexcept {
@@ -72,6 +80,10 @@ public:
 
     return texture->get_brush();
   }
+  /// Adds an arbitrary texture.
+  void add(Texture* texture) {
+    textures.append(texture);
+  }
   /// Loads an image texture.
   /// @param path The path to the image to load.
   void load(const QString& path);
@@ -95,6 +107,15 @@ void TextureList::load(const QString&path) {
 Scene::Scene(QObject* parent) : QGraphicsScene(parent) {
   textures = new TextureList(this);
   setBackgroundBrush(QBrush(Qt::black));
+  setSceneRect(0, 0, 2000, 2000);
+}
+
+void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
+  addPolygon(polygon, QPen(), textures->brush_of(texture_id));
+}
+
+void Scene::load_color_texture(const QColor& color) {
+  textures->add(Texture::from_color(color, textures));
 }
 
 void Scene::load_image_texture(const QString& path) {

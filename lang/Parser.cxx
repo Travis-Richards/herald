@@ -1,10 +1,11 @@
 #include "Parser.h"
 
 #include "Lexer.h"
+#include "ParseTree.h"
 
+#include <QColor>
 #include <QLatin1String>
-
-#include <iostream>
+#include <QPolygonF>
 
 namespace {
 
@@ -27,13 +28,36 @@ struct Token final {
   }
 };
 
-/// Converts a string reference to a string.
-/// @param ref The reference to convert.
-QString to_string(const QStringRef& ref) {
-  QString out;
-  out.append(ref);
-  return out;
-}
+class ColorTextureDeclImpl final : public ColorTextureDecl {
+  QColor color;
+public:
+  ColorTextureDeclImpl(const QColor& c) : color(c) { }
+
+  const QColor& get_color() const noexcept override {
+    return color;
+  }
+};
+
+class ImageTextureDeclImpl final : public ImageTextureDecl {
+  QString path;
+public:
+  ImageTextureDeclImpl(const QStringRef& path_ref) {
+    path.append(path_ref);
+  }
+  const QString& get_image_path() const noexcept override {
+    return path;
+  }
+};
+
+class PolygonObjectStmtImpl final : public PolygonObjectStmt {
+  QPolygonF polygon;
+public:
+  PolygonObjectStmtImpl(const QPolygonF& p, int t) : PolygonObjectStmt(t), polygon(p) {}
+  /// Accesses the polygon that was assigned.
+  const QPolygonF& get_polygon() const noexcept override {
+    return polygon;
+  }
+};
 
 } // namespace
 
@@ -129,8 +153,10 @@ bool Parser::parse() {
   }
 
   return parse_background_stmt()
+      || parse_color_texture_decl()
       || parse_finish_stmt()
-      || parse_image_texture_stmt();
+      || parse_image_texture_decl()
+      || parse_polygon_object_stmt();
 }
 
 bool Parser::parse_background_stmt() {
@@ -143,21 +169,38 @@ bool Parser::parse_background_stmt() {
     return false;
   }
 
-  if (!tokens->check_eq(1, TokenType::Number)) {
+  int texture_id = 0;
+
+  if (!parse_int(1, texture_id)) {
     return false;
   }
 
-  bool ok = false;
+  emit found_node(BackgroundStmt(texture_id));
 
-  int texture_id = tokens->at(1).data.toInt(&ok);
+  return true;
+}
 
-  if (ok) {
-    emit found_background(texture_id);
-    return true;
-  } else {
-    // TODO : error message
+bool Parser::parse_color_texture_decl() {
+
+  if (tokens->size() != 5) {
     return false;
   }
+
+  if (!tokens->check_eq(0, "decl_color_texture")) {
+    return false;
+  }
+
+  QColor color;
+
+  if (!parse_color(1, color)) {
+    return false;
+  }
+
+  ColorTextureDeclImpl color_texture_decl(color);
+
+  emit found_node(color_texture_decl);
+
+  return true;
 }
 
 bool Parser::parse_finish_stmt() {
@@ -170,12 +213,47 @@ bool Parser::parse_finish_stmt() {
     return false;
   }
 
-  emit found_finish();
+  emit found_node(FinishStmt());
 
   return true;
 }
 
-bool Parser::parse_image_texture_stmt() {
+bool Parser::parse_polygon_object_stmt() {
+
+  if (tokens->size() < 6) {
+    return false;
+  }
+
+  if (!tokens->check_eq(0, "add_polygon_object")) {
+    return false;
+  }
+
+  int texture_id = 0;
+
+  if (!parse_int(1, texture_id)) {
+    return false;
+  }
+
+  QPolygonF polygon;
+
+  int token_count = parse_polygon(2, polygon);
+  if (!token_count) {
+    return false;
+  }
+
+  if ((token_count + 2) != tokens->size()) {
+    // TODO : error : Extra tokens found at end
+    return false;
+  }
+
+  PolygonObjectStmtImpl polygon_object_stmt(polygon, texture_id);
+
+  emit found_node(polygon_object_stmt);
+
+  return true;
+}
+
+bool Parser::parse_image_texture_decl() {
 
   if (tokens->size() != 2) {
     return false;
@@ -189,9 +267,104 @@ bool Parser::parse_image_texture_stmt() {
     return false;
   }
 
-  emit found_image_texture(to_string(tokens->at(1).data));
+  ImageTextureDeclImpl image_texture(tokens->at(1).data);
+
+  emit found_node(image_texture);
 
   return true;
+}
+
+int Parser::parse_polygon(int offset, QPolygonF& polygon) {
+
+  int count = 0;
+
+  while (count < tokens->size()) {
+
+    QPointF point;
+
+    int result = parse_point(offset + count, point);
+    if (!result) {
+      break;
+    }
+
+    polygon << point;
+
+    count += result;
+  }
+
+  return count;
+}
+
+int Parser::parse_color(int offset, QColor& color) {
+
+  qreal r = 0;
+  qreal g = 0;
+  qreal b = 0;
+  qreal a = 0;
+
+  if (!parse_real(offset + 0, r)
+   || !parse_real(offset + 1, g)
+   || !parse_real(offset + 2, b)
+   || !parse_real(offset + 3, a)) {
+    return 0;
+  }
+
+  color.setRedF(r);
+  color.setGreenF(g);
+  color.setBlueF(b);
+  color.setAlphaF(a);
+
+  return 4;
+}
+
+int Parser::parse_point(int offset, QPointF& point) {
+
+  qreal a = 0;
+  qreal b = 0;
+
+  if (!parse_real(offset + 0, a)
+   || !parse_real(offset + 1, b)) {
+    return 0;
+  }
+
+  point.setX(a);
+  point.setY(b);
+
+  return 2;
+}
+
+int Parser::parse_int(int offset, int& value) {
+
+  if (offset >= tokens->size()) {
+    return 0;
+  }
+
+  if (!tokens->check_eq(offset, TokenType::Number)) {
+    return 0;
+  }
+
+  bool ok = false;
+
+  value = tokens->at(offset).data.toInt(&ok);
+
+  return ok ? 1 : 0;
+}
+
+int Parser::parse_real(int offset, qreal& value) {
+
+  if (offset >= tokens->size()) {
+    return 0;
+  }
+
+  if (!tokens->check_eq(offset, TokenType::Number)) {
+    return 0;
+  }
+
+  bool ok = false;
+
+  value = tokens->at(offset).data.toDouble(&ok);
+
+  return ok ? 1 : 0;
 }
 
 void Parser::on_token(TokenType type, const QStringRef& data) {

@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
   main_window.resize(640, 480);
   main_window.show();
 
-  QObject::connect(&engine, &Engine::panic, &main_window, &MainWindow::handle_engine_panic);
   QObject::connect(&engine, &Engine::updated_game_list, &main_window, &MainWindow::update_game_list);
 
   QObject::connect(&engine, &Engine::game_started, &scene_view, &SceneView::on_game_start);
