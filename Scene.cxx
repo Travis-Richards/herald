@@ -3,6 +3,15 @@
 #include "Texture.h"
 #include "TextureList.h"
 
+Scene::Scene(QObject* parent) : QObject(parent) {
+  root_entity = new Qt3DCore::QEntity();
+  textures = TextureList::make(this);
+}
+
+Scene::~Scene() {
+
+}
+
 void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
 
   (void)polygon;
@@ -17,6 +26,11 @@ void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
 
 void Scene::clear() {
 
+  if (root_entity) {
+    delete root_entity;
+  }
+
+  root_entity = new Qt3DCore::QEntity();
 }
 
 void Scene::load_color_texture(const QColor& color) {
