@@ -1,117 +1,22 @@
 #include "Scene.h"
 
-#include <QBrush>
-#include <QList>
-#include <QPixmap>
-
-#include <iostream>
-
-/// Represents an arbitrary texture.
-/// Since some images may fail to load
-/// from the game, a texture also has a flag
-/// to indicate if it is valid or not.
-class Texture final : public QObject {
-  /// The brush to paint the texture with.
-  QBrush brush;
-  /// Whether or not this is a valid texture.
-  bool valid;
-  /// Constructs the texture internally,
-  /// with a flag to indicate if it is valid or not.
-  Texture(const QBrush& b, bool v, QObject* parent)
-    : QObject(parent), brush(b), valid(v) {}
-public:
-  /// No default constructors allowed.
-  Texture() = delete;
-  /// Creates a texture from an image.
-  /// @param path The path of the image to
-  /// generate the texture with.
-  /// @param parent A pointer to the parent object.
-  /// @returns A new texture instance.
-  static Texture* from_image(const QString& path, QObject* parent) {
-    QPixmap pixmap;
-    if (pixmap.load(path)) {
-      return new Texture(QBrush(pixmap), true, parent);
-    } else {
-      return new Texture(QBrush(), false, parent);
-    }
-  }
-  /// Creates a texture from a solid color.
-  /// @param color The color to assign the texture.
-  /// @param parent A pointer to the parent object.
-  static Texture* from_color(const QColor& color, QObject* parent) {
-    return new Texture(QBrush(color), true, parent);
-  }
-  /// Accesses the brush for the texture.
-  const QBrush& get_brush() const noexcept {
-    return brush;
-  }
-  /// Indicates if the texture is valid or not.
-  bool is_valid() const noexcept {
-    return valid;
-  }
-};
-
-/// This class contains a list of textures.
-/// Each texture in the list may be valid or
-/// invalid (in the case of a missing image.)
-/// Invalid textures are kept for indexing purposes.
-class TextureList : public QObject {
-public:
-  /// Constructs an empty texture list.
-  /// @param parent A pointer to the parent object.
-  TextureList(QObject* parent)
-    : QObject(parent), default_brush(Qt::black) {}
-  /// Accesses the brush of a texture.
-  /// @param id The ID of the texture
-  /// to get the brush of. This is not
-  /// bounds checked and should be before
-  /// calling this function.
-  const QBrush& brush_of(int id) {
-
-    if (id >= size()) {
-      return default_brush;
-    }
-
-    const auto* texture = textures[id];
-
-    if (!texture->is_valid()) {
-      return default_brush;
-    }
-
-    return texture->get_brush();
-  }
-  /// Adds an arbitrary texture.
-  void add(Texture* texture) {
-    textures.append(texture);
-  }
-  /// Loads an image texture.
-  /// @param path The path to the image to load.
-  void load(const QString& path);
-  /// Indicates the number of textures in the list.
-  int size() const noexcept {
-    return textures.size();
-  }
-private:
-  /// The default brush if a texture ID
-  /// is out of bounds or the texture is
-  /// invalid.
-  QBrush default_brush;
-  /// The textures added to the list.
-  QList<Texture*> textures;
-};
-
-void TextureList::load(const QString&path) {
-  textures.push_back(Texture::from_image(path, this));
-}
+#include "Texture.h"
+#include "TextureList.h"
 
 Scene::Scene(QObject* parent) : QGraphicsScene(parent) {
-  textures = new TextureList(this);
+  textures = TextureList::make(this);
   setBackgroundBrush(QBrush(Qt::black));
   setSceneRect(0, 0, 2000, 2000);
 }
 
 void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
-  addPolygon(polygon, QPen(), textures->brush_of(texture_id));
+
+  const auto* texture = textures->at(texture_id);
+  if (!texture) {
+    addPolygon(polygon, QPen(), QBrush());
+  } else {
+    addPolygon(polygon, QPen(), texture->get_brush());
+  }
 }
 
 void Scene::load_color_texture(const QColor& color) {
@@ -119,9 +24,14 @@ void Scene::load_color_texture(const QColor& color) {
 }
 
 void Scene::load_image_texture(const QString& path) {
-  textures->load(path);
+  textures->add(Texture::from_image(path, textures));
 }
 
 void Scene::set_background_texture(int id) {
-  setBackgroundBrush(textures->brush_of(id));
+  const auto* texture = textures->at(id);
+  if (!texture) {
+    setBackgroundBrush(QBrush(Qt::black));
+  } else {
+    setBackgroundBrush(texture->get_brush());
+  }
 }

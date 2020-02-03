@@ -1,7 +1,6 @@
 #include "Engine.h"
 
 #include "Api.h"
-#include "Config.h"
 #include "GameInfo.h"
 #include "GameList.h"
 #include "ProcessApi.h"

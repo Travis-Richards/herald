@@ -51,6 +51,7 @@ class Game {
     System.out.println("set_background 0");
 
     System.out.println("finish");
+
     return true;
   }
 }

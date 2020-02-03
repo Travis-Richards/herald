@@ -1,7 +1,10 @@
 #include "MainWindow.h"
 
 #include "CentralWidget.h"
+
+#ifndef NO_CONFIG
 #include "Config.h"
+#endif
 
 #include <QAction>
 #include <QFileDialog>
@@ -12,7 +15,12 @@ MainWindow::MainWindow() {
 
   setCentralWidget(central_widget);
 
-  QString title("Herald" + QString(" " HERALD_VERSION));
+  QString title("Herald");
+
+#ifdef HERALD_VERSION
+  title += QString(" " HERALD_VERSION);
+#endif
+
   setWindowTitle(title);
 
   connect(central_widget, &CentralWidget::open_requested, this, &MainWindow::open_from_dialog);

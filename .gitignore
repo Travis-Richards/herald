@@ -1,2 +1,9 @@
 build
 *.class
+Makefile
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+.qmake.stash
+herald

@@ -20,7 +20,14 @@ list(APPEND INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}")
 find_package(Qt5 REQUIRED
   COMPONENTS
     Core
-    Widgets)
+    Widgets
+    3DCore)
+
+find_package(Qt53DExtras)
+
+list(APPEND LIBS
+  Qt5::Widgets
+  Qt5::3DCore)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -32,7 +39,7 @@ add_subdirectory("lang")
 # Here we declare the main program.
 
 add_executable("herald" WIN32
-  "main.cc"
+  "main.cxx"
   "Api.h"
   "Api.cxx"
   "CentralWidget.h"
@@ -59,9 +66,13 @@ add_executable("herald" WIN32
   "Scene.cxx"
   "SceneView.h"
   "SceneView.cxx"
+  "Texture.h"
+  "Texture.cxx"
+  "TextureList.h"
+  "TextureList.cxx"
   "Icons.qrc")
 
-target_link_libraries("herald" PRIVATE Qt5::Widgets ${LIBS} "herald-lang")
+target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")
 
 target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})
 
