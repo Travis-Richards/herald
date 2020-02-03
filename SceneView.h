@@ -1,20 +1,19 @@
 #pragma once
 
-#include <QGraphicsView>
+#include <Qt3DExtras/Qt3DWindow>
 
 class Scene;
-class QCloseEvent;
+class QEvent;
 
 /// A view of the game scene.
 /// This is hidden until a game is started.
-class SceneView : public QGraphicsView {
+class SceneView : public Qt3DExtras::Qt3DWindow {
   Q_OBJECT
 public:
   /// Constructs the scene view.
   /// @param scene The scene to be viewed.
-  /// @param parent A pointer to the parent widget.
-  /// Normally, this should be null.
-  SceneView(Scene* scene, QWidget* parent = nullptr);
+  /// @param screen The screen to place the window on.
+  SceneView(Scene* scene, QScreen* screen = nullptr);
 signals:
   /// This signal is emitted right
   /// before the window for the scene
@@ -26,8 +25,8 @@ public slots:
   /// This title is assigned to the window name.
   void on_game_start(const QString& title);
 protected:
-  /// Overrides the close event so that a signal
+  /// Overrides the event handler so that a signal
   /// can be emitted and the API can be released
   /// for the window.
-  void closeEvent(QCloseEvent* close_event) override;
+  bool event(QEvent* event) override;
 };

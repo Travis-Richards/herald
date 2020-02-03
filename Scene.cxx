@@ -3,20 +3,20 @@
 #include "Texture.h"
 #include "TextureList.h"
 
-Scene::Scene(QObject* parent) : QGraphicsScene(parent) {
-  textures = TextureList::make(this);
-  setBackgroundBrush(QBrush(Qt::black));
-  setSceneRect(0, 0, 2000, 2000);
-}
-
 void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
+
+  (void)polygon;
 
   const auto* texture = textures->at(texture_id);
   if (!texture) {
-    addPolygon(polygon, QPen(), QBrush());
+    //addPolygon(polygon, QPen(), QBrush());
   } else {
-    addPolygon(polygon, QPen(), texture->get_brush());
+    //addPolygon(polygon, QPen(), texture->get_brush());
   }
+}
+
+void Scene::clear() {
+
 }
 
 void Scene::load_color_texture(const QColor& color) {
@@ -29,9 +29,10 @@ void Scene::load_image_texture(const QString& path) {
 
 void Scene::set_background_texture(int id) {
   const auto* texture = textures->at(id);
+  (void)texture;
   if (!texture) {
-    setBackgroundBrush(QBrush(Qt::black));
+    //setBackgroundBrush(QBrush(Qt::black));
   } else {
-    setBackgroundBrush(texture->get_brush());
+    //setBackgroundBrush(texture->get_brush());
   }
 }
