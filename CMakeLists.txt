@@ -20,14 +20,11 @@ list(APPEND INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}")
 find_package(Qt5 REQUIRED
   COMPONENTS
     Core
-    Widgets
-    3DCore)
-
-find_package(Qt53DExtras)
+    Widgets)
 
 list(APPEND LIBS
-  Qt5::Widgets
-  Qt5::3DCore)
+  Qt5::Core
+  Qt5::Widgets)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
