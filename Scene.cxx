@@ -18,6 +18,16 @@
 
 namespace {
 
+/// Creates a simple color material.
+/// @param root_entity The root entity of the material.
+/// @param color The color to assign the material.
+/// @returns A new material instance.
+Qt3DRender::QMaterial* make_simple_color(Qt3DCore::QEntity* root_entity, const QColor& color) {
+  auto* material = new Qt3DExtras::QDiffuseSpecularMaterial(root_entity);
+  material->setDiffuse(color);
+  return material;
+}
+
 /// Creates the default background material.
 /// @param root_entity The root entity of the material being made.
 /// @returns A new material instance with the default values.
@@ -82,7 +92,7 @@ void Scene::draw_box(const QPointF& a, const QPointF& b, int texture_id) {
 
   // Add entity
 
-  auto* entity = new Qt3DCore::QEntity(root_entity);
+  auto* entity = new Qt3DCore::QEntity(tmp_entity);
 
   auto* plane = new Qt3DExtras::QPlaneMesh(entity);
   plane->setWidth(x_diff);
@@ -110,8 +120,7 @@ void Scene::clear() {
 }
 
 void Scene::load_color_texture(const QColor& color) {
-  (void)color;
-  materials->add(nullptr);
+  materials->add(make_simple_color(tmp_entity, color));
 }
 
 void Scene::load_image_texture(const QString& path) {
