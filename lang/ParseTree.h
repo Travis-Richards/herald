@@ -106,4 +106,3 @@ public:
   /// @returns The path of the image to load.
   virtual const QString& get_image_path() const noexcept = 0;
 };
-
