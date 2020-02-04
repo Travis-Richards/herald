@@ -34,9 +34,10 @@ public:
     scene->load_image_texture(texture_prefix + image_texture_decl.get_image_path());
   }
   /// Adds a polygon object to the scene.
-  void interpret(const PolygonObjectStmt& polygon_object_stmt) override {
-    scene->add_polygon_object(polygon_object_stmt.get_polygon(),
-                              polygon_object_stmt.get_texture_id());
+  void interpret(const DrawBoxStmt& draw_box_stmt) override {
+    scene->draw_box(draw_box_stmt.get_point_a(),
+                    draw_box_stmt.get_point_b(),
+                    draw_box_stmt.get_texture_id());
   }
 protected slots:
   /// Called when a background texture is being set.

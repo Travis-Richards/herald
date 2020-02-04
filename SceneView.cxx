@@ -2,16 +2,15 @@
 
 #include "Scene.h"
 
-SceneView::SceneView(Scene* scene, QWidget* parent) : QGraphicsView(scene, parent) {
-  resize(640, 480);
+SceneView::SceneView(Scene* scene, QScreen* screen) : Qt3DExtras::Qt3DWindow(screen) {
+  setRootEntity(scene->get_root_entity());
 }
 
-void SceneView::on_game_start(const QString& title) {
-  setWindowTitle(title);
-  show();
-}
+bool SceneView::event(QEvent* event) {
 
-void SceneView::closeEvent(QCloseEvent* event) {
-  emit window_closing();
-  QGraphicsView::closeEvent(event);
+  if (event->type() == QEvent::Close) {
+    emit window_closing();
+  }
+
+  return Qt3DExtras::Qt3DWindow::event(event);
 }
