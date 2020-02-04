@@ -2,6 +2,8 @@
 
 #include "Interpreter.h"
 
+#include <QRectF>
+
 void BackgroundStmt::accept(Interpreter& interpreter) const {
   interpreter.set_background(texture_id);
 }
@@ -18,6 +20,19 @@ void ImageTextureDecl::accept(Interpreter& interpreter) const {
   interpreter.interpret(*this);
 }
 
-void PolygonObjectStmt::accept(Interpreter& interpreter) const {
+DrawBoxStmt::DrawBoxStmt(const QPointF& a,
+                           const QPointF& b,
+                           int texture_id_) {
+  point_a = new QPointF(a);
+  point_b = new QPointF(b);
+  texture_id = texture_id_;
+}
+
+DrawBoxStmt::~DrawBoxStmt() {
+  delete point_a;
+  delete point_b;
+}
+
+void DrawBoxStmt::accept(Interpreter& interpreter) const {
   interpreter.interpret(*this);
 }

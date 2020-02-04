@@ -5,6 +5,8 @@
 #include "Scene.h"
 #include "SceneView.h"
 
+#include <Qt3DRender/QCamera>
+
 #include <QScreen>
 
 int main(int argc, char** argv) {
@@ -17,6 +19,12 @@ int main(int argc, char** argv) {
 
   SceneView scene_view(&scene);
 
+  auto* camera = scene_view.camera();
+  camera->setPosition(QVector3D(0, 0, 1));
+  camera->setUpVector(QVector3D(0, 1, 0));
+  camera->setViewCenter(QVector3D(0, 0, 0));
+  camera->setFieldOfView(90);
+
   auto* scene_view_widget = QWidget::createWindowContainer(&scene_view);
   scene_view_widget->setMinimumSize(QSize(320, 240));
   scene_view_widget->setMaximumSize(scene_view.screen()->size());
@@ -28,8 +36,6 @@ int main(int argc, char** argv) {
   main_window.show();
 
   QObject::connect(&engine, &Engine::updated_game_list, &main_window, &MainWindow::update_game_list);
-
-  //QObject::connect(&engine, &Engine::game_started, &scene_view, &SceneView::on_game_start);
 
   auto start_game = [scene_view_widget, &scene_view](const QString& title) {
     scene_view.show();

@@ -49,16 +49,6 @@ public:
   }
 };
 
-class PolygonObjectStmtImpl final : public PolygonObjectStmt {
-  QPolygonF polygon;
-public:
-  PolygonObjectStmtImpl(const QPolygonF& p, int t) : PolygonObjectStmt(t), polygon(p) {}
-  /// Accesses the polygon that was assigned.
-  const QPolygonF& get_polygon() const noexcept override {
-    return polygon;
-  }
-};
-
 } // namespace
 
 /// A class for containing a token list.
@@ -154,9 +144,9 @@ bool Parser::parse() {
 
   return parse_background_stmt()
       || parse_color_texture_decl()
+      || parse_draw_box_stmt()
       || parse_finish_stmt()
-      || parse_image_texture_decl()
-      || parse_polygon_object_stmt();
+      || parse_image_texture_decl();
 }
 
 bool Parser::parse_background_stmt() {
@@ -203,6 +193,36 @@ bool Parser::parse_color_texture_decl() {
   return true;
 }
 
+bool Parser::parse_draw_box_stmt() {
+
+  if (tokens->size() < 6) {
+    return false;
+  }
+
+  if (!tokens->check_eq(0, "draw_box")) {
+    return false;
+  }
+
+  int texture_id = 0;
+
+  if (!parse_int(1, texture_id)) {
+    return false;
+  }
+
+  QPointF points[2];
+
+  if (!parse_point(2, points[0])
+   || !parse_point(4, points[1])) {
+    return false;
+  }
+
+  DrawBoxStmt draw_box_stmt(points[0], points[1], texture_id);
+
+  emit found_node(draw_box_stmt);
+
+  return true;
+}
+
 bool Parser::parse_finish_stmt() {
 
   if (tokens->size() != 1) {
@@ -214,41 +234,6 @@ bool Parser::parse_finish_stmt() {
   }
 
   emit found_node(FinishStmt());
-
-  return true;
-}
-
-bool Parser::parse_polygon_object_stmt() {
-
-  if (tokens->size() < 6) {
-    return false;
-  }
-
-  if (!tokens->check_eq(0, "add_polygon_object")) {
-    return false;
-  }
-
-  int texture_id = 0;
-
-  if (!parse_int(1, texture_id)) {
-    return false;
-  }
-
-  QPolygonF polygon;
-
-  int token_count = parse_polygon(2, polygon);
-  if (!token_count) {
-    return false;
-  }
-
-  if ((token_count + 2) != tokens->size()) {
-    // TODO : error : Extra tokens found at end
-    return false;
-  }
-
-  PolygonObjectStmtImpl polygon_object_stmt(polygon, texture_id);
-
-  emit found_node(polygon_object_stmt);
 
   return true;
 }
@@ -274,25 +259,23 @@ bool Parser::parse_image_texture_decl() {
   return true;
 }
 
-int Parser::parse_polygon(int offset, QPolygonF& polygon) {
+int Parser::parse_rect(int offset, QRectF& rect) {
 
-  int count = 0;
+  QPointF points[4];
 
-  while (count < tokens->size()) {
-
-    QPointF point;
-
-    int result = parse_point(offset + count, point);
-    if (!result) {
-      break;
-    }
-
-    polygon << point;
-
-    count += result;
+  if (!parse_point(offset + 0, points[0])
+   || !parse_point(offset + 2, points[1])
+   || !parse_point(offset + 4, points[2])
+   || !parse_point(offset + 6, points[3])) {
+    return 0;
   }
 
-  return count;
+  rect.setTopLeft(points[0]);
+  rect.setTopRight(points[1]);
+  rect.setBottomRight(points[2]);
+  rect.setBottomLeft(points[3]);
+
+  return 8;
 }
 
 int Parser::parse_color(int offset, QColor& color) {

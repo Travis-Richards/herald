@@ -19,11 +19,6 @@ signals:
   /// before the window for the scene
   /// view is going to get closed.
   void window_closing();
-public slots:
-  /// Handles the starting of a game.
-  /// @param title The title of the game being started.
-  /// This title is assigned to the window name.
-  void on_game_start(const QString& title);
 protected:
   /// Overrides the event handler so that a signal
   /// can be emitted and the API can be released

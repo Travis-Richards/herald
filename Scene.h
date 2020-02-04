@@ -1,10 +1,30 @@
 #pragma once
 
-#include <Qt3DCore/QEntity>
+#include <QObject>
 
-class TextureList;
+class MaterialList;
 class QColor;
+class QPointF;
 class QString;
+
+namespace Qt3DCore {
+
+class QEntity;
+class QTransform;
+
+} // namespace Qt3DCore
+
+namespace Qt3DExtras {
+
+class QPlaneMesh;
+
+} // namespace Qt3DExtras
+
+namespace Qt3DRender {
+
+class QMaterial;
+
+} // namespace Qt3DRender
 
 /// A scene contains the data to be rendered.
 /// It may, for example, be a menu or a playable level.
@@ -16,12 +36,13 @@ public:
   Scene(QObject* parent = nullptr);
   /// Releases memory allocated by the scene.
   ~Scene();
-  /// Adds a polygon object to the scene.
-  /// @param polygon The polygon to add to the scene.
-  /// @param texture_id The ID of the texture to map onto the polygon.
-  void add_polygon_object(const QPolygonF& polygon, int texture_id);
   /// Clears the contents in the scene.
   void clear();
+  /// Draws an axis-aligned box onto the scene.
+  /// @param a The first point of the box.
+  /// @param b The second point of the box.
+  /// @param texture_id The ID of the texture to assign.
+  void draw_box(const QPointF& a, const QPointF& b, int texture_id);
   /// Accesse a pointer to the root entity of the scene.
   inline Qt3DCore::QEntity* get_root_entity() noexcept {
     return root_entity;
@@ -39,6 +60,14 @@ public:
 private:
   /// A pointer to the root entity of the scene.
   Qt3DCore::QEntity* root_entity;
-  /// The textures loaded for the scene.
-  TextureList* textures;
+  /// The entity for the background.
+  Qt3DCore::QEntity* background_entity;
+  /// The plane mesh for the background.
+  Qt3DExtras::QPlaneMesh* background_plane;
+  /// The material assigned to the background.
+  Qt3DRender::QMaterial* background_material;
+  /// The transformation matrix for the background plane.
+  Qt3DCore::QTransform* background_transform;
+  /// The materials loaded for the scene.
+  MaterialList* materials;
 };

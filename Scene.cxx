@@ -1,52 +1,130 @@
 #include "Scene.h"
 
-#include "Texture.h"
-#include "TextureList.h"
+#include "MaterialList.h"
+
+#include <Qt3DCore/QEntity>
+
+#include <QAbstractTexture>
+#include <QTextureMaterial>
+#include <QTextureImage>
+#include <QUrl>
+
+#include <Qt3DCore/QTransform>
+
+#include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DExtras/QPlaneMesh>
 
 Scene::Scene(QObject* parent) : QObject(parent) {
+
   root_entity = new Qt3DCore::QEntity();
-  textures = TextureList::make(this);
+
+  background_entity = new Qt3DCore::QEntity(root_entity);
+
+  background_plane = new Qt3DExtras::QPlaneMesh(background_entity);
+  background_plane->setHeight(4);
+  background_plane->setWidth(4);
+
+  background_material = nullptr;
+
+  background_transform = new Qt3DCore::QTransform(background_entity);
+  background_transform->setScale(1);
+  background_transform->setRotationX(90);
+  background_transform->setTranslation(QVector3D(0, 0, -1));
+
+  background_entity->addComponent(background_plane);
+  background_entity->addComponent(background_transform);
+
+  materials = MaterialList::make(this);
 }
 
 Scene::~Scene() {
 
 }
 
-void Scene::add_polygon_object(const QPolygonF& polygon, int texture_id) {
+void Scene::draw_box(const QPointF& a, const QPointF& b, int texture_id) {
 
-  (void)polygon;
+  // Adjust points to get proper min/max
 
-  const auto* texture = textures->at(texture_id);
+  auto min = [](qreal a, qreal b) -> qreal {
+    return a < b ? a : b;
+  };
+
+  QPointF min_point(min(a.x(), b.x()),
+                    min(a.y(), b.y()));
+
+  auto max = [](qreal a, qreal b) -> qreal {
+    return a > b ? a : b;
+  };
+
+  QPointF max_point(max(a.x(), b.x()),
+                    max(a.y(), b.y()));
+
+  auto x_diff = max_point.x() - min_point.x();
+  auto y_diff = max_point.y() - min_point.y();
+
+  // Add entity
+
+  auto* entity = new Qt3DCore::QEntity(root_entity);
+
+  auto* plane = new Qt3DExtras::QPlaneMesh(entity);
+  plane->setWidth(x_diff);
+  plane->setHeight(y_diff);
+  entity->addComponent(plane);
+
+  auto* transform = new Qt3DCore::QTransform(entity);
+  transform->setRotationX(90);
+  transform->setTranslation(QVector3D(min_point.x(), min_point.y(), 0));
+  entity->addComponent(transform);
+
+  auto* texture = materials->at(texture_id);
   if (!texture) {
-    //addPolygon(polygon, QPen(), QBrush());
+    // TODO : fallback texture
   } else {
-    //addPolygon(polygon, QPen(), texture->get_brush());
+    entity->addComponent(texture);
   }
 }
 
 void Scene::clear() {
 
+#if 0
   if (root_entity) {
     delete root_entity;
   }
 
   root_entity = new Qt3DCore::QEntity();
+#endif
 }
 
 void Scene::load_color_texture(const QColor& color) {
-  textures->add(Texture::from_color(color, textures));
+  (void)color;
+  materials->add(nullptr);
 }
 
 void Scene::load_image_texture(const QString& path) {
-  textures->add(Texture::from_image(path, textures));
+
+  auto* material = new Qt3DExtras::QTextureMaterial(background_entity);
+
+  auto* texture = material->texture();
+
+  auto* texture_image = new Qt3DRender::QTextureImage(texture);
+  texture_image->setMirrored(false);
+  texture_image->setSource(QUrl::fromLocalFile(path));
+
+  texture->addTextureImage(texture_image);
+
+  materials->add(material);
 }
 
 void Scene::set_background_texture(int id) {
-  const auto* texture = textures->at(id);
-  (void)texture;
-  if (!texture) {
-    //setBackgroundBrush(QBrush(Qt::black));
-  } else {
-    //setBackgroundBrush(texture->get_brush());
+
+  if (background_material) {
+    background_entity->removeComponent(background_material);
+    delete background_material;
+  }
+
+  background_material = materials->at(id);
+
+  if (background_material) {
+    background_entity->addComponent(background_material);
   }
 }

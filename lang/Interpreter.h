@@ -4,8 +4,8 @@
 
 class Node;
 class ColorTextureDecl;
+class DrawBoxStmt;
 class ImageTextureDecl;
-class PolygonObjectStmt;
 class Scene;
 
 /// An interpreter is used to handle
@@ -38,10 +38,10 @@ public:
   virtual void set_background(int texture_id) = 0;
   /// Interprets a color texture declaration.
   virtual void interpret(const ColorTextureDecl& color_texture_decl) = 0;
+  /// Interprets a draw box statement.
+  virtual void interpret(const DrawBoxStmt& draw_box_stmt) = 0;
   /// Interprets an image texture declaration.
   virtual void interpret(const ImageTextureDecl& image_texture_decl) = 0;
-  /// Interprets a polygon object statement.
-  virtual void interpret(const PolygonObjectStmt& polygon_object_stmt) = 0;
 protected slots:
   /// Handles an arbitrary node.
   virtual void handle_node(const Node& node);
