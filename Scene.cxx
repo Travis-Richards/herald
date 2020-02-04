@@ -2,6 +2,8 @@
 
 #include "MaterialList.h"
 
+#include <QSize>
+
 #include <Qt3DCore/QEntity>
 
 #include <QAbstractTexture>
@@ -126,5 +128,18 @@ void Scene::set_background_texture(int id) {
 
   if (background_material) {
     background_entity->addComponent(background_material);
+  }
+}
+
+void Scene::set_view_size(const QSize& view_size) {
+
+  qreal h = view_size.height();
+  qreal w = view_size.width();
+  auto aspect_ratio = w / h;
+
+  if (h > w) {
+    background_plane->setHeight(background_plane->height() * aspect_ratio);
+  } else {
+    background_plane->setWidth(background_plane->width() * aspect_ratio);
   }
 }

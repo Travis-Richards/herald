@@ -5,6 +5,7 @@
 class MaterialList;
 class QColor;
 class QPointF;
+class QSize;
 class QString;
 
 namespace Qt3DCore {
@@ -57,6 +58,10 @@ public:
   /// @param texture_id The ID of the texture
   /// to assign as the background.
   void set_background_texture(int texture_id);
+public slots:
+  /// Sets the resolution of the scene view.
+  /// This is used to determine mesh resolutions and sizes.
+  void set_view_size(const QSize& view_size);
 private:
   /// A pointer to the root entity of the scene.
   Qt3DCore::QEntity* root_entity;

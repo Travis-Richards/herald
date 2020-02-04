@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
 
   QObject::connect(&scene_view, &SceneView::window_closing, &engine, &Engine::close_game);
 
+  QObject::connect(&scene_view, &SceneView::window_resized, &scene, &Scene::set_view_size);
+
   QObject::connect(&main_window, &MainWindow::open_requested, &engine, &Engine::open_game);
   QObject::connect(&main_window, &MainWindow::play_requested, &engine, &Engine::play_game);
   QObject::connect(&main_window, &MainWindow::exit_requested, &engine, &Engine::handle_exit);

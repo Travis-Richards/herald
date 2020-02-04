@@ -2,8 +2,13 @@
 
 #include "Scene.h"
 
+#include <QResizeEvent>
+
 SceneView::SceneView(Scene* scene, QScreen* screen) : Qt3DExtras::Qt3DWindow(screen) {
+
   setRootEntity(scene->get_root_entity());
+
+  scene->set_view_size(size());
 }
 
 bool SceneView::event(QEvent* event) {
@@ -13,4 +18,11 @@ bool SceneView::event(QEvent* event) {
   }
 
   return Qt3DExtras::Qt3DWindow::event(event);
+}
+
+void SceneView::resizeEvent(QResizeEvent* resize_event) {
+
+  emit window_resized(resize_event->size());
+
+  Qt3DExtras::Qt3DWindow::resizeEvent(resize_event);
 }
