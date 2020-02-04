@@ -73,6 +73,11 @@ private:
   Qt3DRender::QMaterial* background_material;
   /// The transformation matrix for the background plane.
   Qt3DCore::QTransform* background_transform;
+  /// A temporary entity for building scenes.
+  /// Anything not related to the background
+  /// plane is added to this entity so that it
+  /// the content can be removed easily.
+  Qt3DCore::QEntity* tmp_entity;
   /// The materials loaded for the scene.
   MaterialList* materials;
 };

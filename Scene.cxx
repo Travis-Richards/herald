@@ -13,8 +13,21 @@
 
 #include <Qt3DCore/QTransform>
 
-#include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DExtras/QDiffuseSpecularMaterial>
 #include <Qt3DExtras/QPlaneMesh>
+
+namespace {
+
+/// Creates the default background material.
+/// @param root_entity The root entity of the material being made.
+/// @returns A new material instance with the default values.
+Qt3DRender::QMaterial* make_default_material(Qt3DCore::QEntity* root_entity) {
+  auto* material = new Qt3DExtras::QDiffuseSpecularMaterial(root_entity);
+  material->setDiffuse(QColor(16, 16, 16));
+  return material;
+}
+
+} // namespace
 
 Scene::Scene(QObject* parent) : QObject(parent) {
 
@@ -26,7 +39,7 @@ Scene::Scene(QObject* parent) : QObject(parent) {
   background_plane->setHeight(4);
   background_plane->setWidth(4);
 
-  background_material = nullptr;
+  background_material = make_default_material(background_entity);
 
   background_transform = new Qt3DCore::QTransform(background_entity);
   background_transform->setScale(1);
@@ -35,6 +48,9 @@ Scene::Scene(QObject* parent) : QObject(parent) {
 
   background_entity->addComponent(background_plane);
   background_entity->addComponent(background_transform);
+  background_entity->addComponent(background_material);
+
+  tmp_entity = new Qt3DCore::QEntity(root_entity);
 
   materials = MaterialList::make(this);
 }
@@ -88,13 +104,9 @@ void Scene::draw_box(const QPointF& a, const QPointF& b, int texture_id) {
 
 void Scene::clear() {
 
-#if 0
-  if (root_entity) {
-    delete root_entity;
-  }
+  delete tmp_entity;
 
-  root_entity = new Qt3DCore::QEntity();
-#endif
+  tmp_entity = new Qt3DCore::QEntity(root_entity);
 }
 
 void Scene::load_color_texture(const QColor& color) {
@@ -119,10 +131,9 @@ void Scene::load_image_texture(const QString& path) {
 
 void Scene::set_background_texture(int id) {
 
-  if (background_material) {
-    background_entity->removeComponent(background_material);
-    delete background_material;
-  }
+  background_entity->removeComponent(background_material);
+
+  delete background_material;
 
   background_material = materials->at(id);
 
