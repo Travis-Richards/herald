@@ -2,10 +2,9 @@
 
 #include "Lexer.h"
 #include "ParseTree.h"
+#include "Matrix.h"
 
-#include <QColor>
-#include <QLatin1String>
-#include <QPolygonF>
+#include <QSize>
 
 namespace {
 
@@ -25,27 +24,6 @@ struct Token final {
   /// has specified string content.
   bool equal_to(const QLatin1String& str) const {
     return data.compare(str) == 0;
-  }
-};
-
-class ColorTextureDeclImpl final : public ColorTextureDecl {
-  QColor color;
-public:
-  ColorTextureDeclImpl(const QColor& c) : color(c) { }
-
-  const QColor& get_color() const noexcept override {
-    return color;
-  }
-};
-
-class ImageTextureDeclImpl final : public ImageTextureDecl {
-  QString path;
-public:
-  ImageTextureDeclImpl(const QStringRef& path_ref) {
-    path.append(path_ref);
-  }
-  const QString& get_image_path() const noexcept override {
-    return path;
   }
 };
 
@@ -126,7 +104,48 @@ Parser::Parser(const QString& input, QObject* parent) : QObject(parent) {
   connect(lexer, &Lexer::token_found, this, &Parser::on_token);
 }
 
-bool Parser::parse() {
+BuildRoomResponse* Parser::parse_build_room_response() {
+
+  if (tokens->empty()) {
+    return nullptr;
+  }
+
+  int offset = 0;
+
+  QSize room_size;
+
+  int result = parse_size(offset, room_size);
+  if (!result) {
+    return nullptr;
+  } else {
+    offset += result;
+  }
+
+  Matrix* texture_matrix = Matrix::make(room_size);
+
+  result = parse_matrix(offset, *texture_matrix);
+  if (!result) {
+    delete texture_matrix;
+    return 0;
+  } else {
+    offset += result;
+  }
+
+  Matrix* flag_matrix = Matrix::make(room_size);
+
+  result = parse_matrix(offset, *flag_matrix);
+  if (!result) {
+    delete texture_matrix;
+    delete flag_matrix;
+    return 0;
+  } else {
+    offset += result;
+  }
+
+  return BuildRoomResponse::make(texture_matrix, flag_matrix);
+}
+
+void Parser::prepare_tokens() {
 
   tokens->reset();
 
@@ -137,181 +156,43 @@ bool Parser::parse() {
   }
 
   tokens->filter();
-
-  if (tokens->empty()) {
-    return false;
-  }
-
-  return parse_background_stmt()
-      || parse_color_texture_decl()
-      || parse_draw_box_stmt()
-      || parse_finish_stmt()
-      || parse_image_texture_decl();
 }
 
-bool Parser::parse_background_stmt() {
+int Parser::parse_matrix(int offset, Matrix& matrix) {
 
-  if (tokens->size() != 2) {
-    return false;
+  int count = 0;
+
+  for (int y = 0; y < matrix.height(); y++) {
+
+    for (int x = 0; x < matrix.width(); x++) {
+
+      int value = 0;
+
+      int result = parse_int(offset, value);
+      if (!result) {
+        return 0;
+      }
+
+      count += result;
+
+      offset += result;
+    }
   }
 
-  if (!tokens->check_eq(0, "set_background")) {
-    return false;
-  }
-
-  int texture_id = 0;
-
-  if (!parse_int(1, texture_id)) {
-    return false;
-  }
-
-  emit found_node(BackgroundStmt(texture_id));
-
-  return true;
+  return count;
 }
 
-bool Parser::parse_color_texture_decl() {
+int Parser::parse_size(int offset, QSize& size) {
 
-  if (tokens->size() != 5) {
-    return false;
-  }
+  int w = 0;
+  int h = 0;
 
-  if (!tokens->check_eq(0, "decl_color_texture")) {
-    return false;
-  }
-
-  QColor color;
-
-  if (!parse_color(1, color)) {
-    return false;
-  }
-
-  ColorTextureDeclImpl color_texture_decl(color);
-
-  emit found_node(color_texture_decl);
-
-  return true;
-}
-
-bool Parser::parse_draw_box_stmt() {
-
-  if (tokens->size() < 6) {
-    return false;
-  }
-
-  if (!tokens->check_eq(0, "draw_box")) {
-    return false;
-  }
-
-  int texture_id = 0;
-
-  if (!parse_int(1, texture_id)) {
-    return false;
-  }
-
-  QPointF points[2];
-
-  if (!parse_point(2, points[0])
-   || !parse_point(4, points[1])) {
-    return false;
-  }
-
-  DrawBoxStmt draw_box_stmt(points[0], points[1], texture_id);
-
-  emit found_node(draw_box_stmt);
-
-  return true;
-}
-
-bool Parser::parse_finish_stmt() {
-
-  if (tokens->size() != 1) {
-    return false;
-  }
-
-  if (!tokens->check_eq(0, "finish")) {
-    return false;
-  }
-
-  emit found_node(FinishStmt());
-
-  return true;
-}
-
-bool Parser::parse_image_texture_decl() {
-
-  if (tokens->size() != 2) {
-    return false;
-  }
-
-  if (!tokens->check_eq(0, "load_image_texture")) {
-    return false;
-  }
-
-  if (!tokens->check_eq(1, TokenType::StringLiteral)) {
-    return false;
-  }
-
-  ImageTextureDeclImpl image_texture(tokens->at(1).data);
-
-  emit found_node(image_texture);
-
-  return true;
-}
-
-int Parser::parse_rect(int offset, QRectF& rect) {
-
-  QPointF points[4];
-
-  if (!parse_point(offset + 0, points[0])
-   || !parse_point(offset + 2, points[1])
-   || !parse_point(offset + 4, points[2])
-   || !parse_point(offset + 6, points[3])) {
+  if (!parse_int(offset + 0, w)
+   || !parse_int(offset + 1, h)) {
     return 0;
   }
 
-  rect.setTopLeft(points[0]);
-  rect.setTopRight(points[1]);
-  rect.setBottomRight(points[2]);
-  rect.setBottomLeft(points[3]);
-
-  return 8;
-}
-
-int Parser::parse_color(int offset, QColor& color) {
-
-  qreal r = 0;
-  qreal g = 0;
-  qreal b = 0;
-  qreal a = 0;
-
-  if (!parse_real(offset + 0, r)
-   || !parse_real(offset + 1, g)
-   || !parse_real(offset + 2, b)
-   || !parse_real(offset + 3, a)) {
-    return 0;
-  }
-
-  color.setRedF(r);
-  color.setGreenF(g);
-  color.setBlueF(b);
-  color.setAlphaF(a);
-
-  return 4;
-}
-
-int Parser::parse_point(int offset, QPointF& point) {
-
-  qreal a = 0;
-  qreal b = 0;
-
-  if (!parse_real(offset + 0, a)
-   || !parse_real(offset + 1, b)) {
-    return 0;
-  }
-
-  point.setX(a);
-  point.setY(b);
+  size = QSize(w, h);
 
   return 2;
 }
@@ -329,23 +210,6 @@ int Parser::parse_int(int offset, int& value) {
   bool ok = false;
 
   value = tokens->at(offset).data.toInt(&ok);
-
-  return ok ? 1 : 0;
-}
-
-int Parser::parse_real(int offset, qreal& value) {
-
-  if (offset >= tokens->size()) {
-    return 0;
-  }
-
-  if (!tokens->check_eq(offset, TokenType::Number)) {
-    return 0;
-  }
-
-  bool ok = false;
-
-  value = tokens->at(offset).data.toDouble(&ok);
 
   return ok ? 1 : 0;
 }

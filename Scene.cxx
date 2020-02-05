@@ -1,39 +1,39 @@
 #include "Scene.h"
 
+#include "Texture.h"
 #include "TextureList.h"
 
 #include <QSize>
 
-Scene::Scene(QObject* parent) : QGraphicsScene(parent) {
-  textures = TextureList::make(this);
-}
+namespace {
 
-Scene::~Scene() {
+/// An implementation of the scene interface.
+class SceneImpl final : public Scene {
+  /// The size of the map, in tiles.
+  QSize map_size;
+  /// The size of the level, in tiles.
+  QSize level_size;
+public:
+  /// Constructs an instance of the scene implementation.
+  /// @param parent A pointer to the parent object.
+  SceneImpl(QObject* parent) : Scene(parent) { }
+  /// Assigns the map size.
+  void set_map_size(const QSize& map_size_) {
+    map_size = map_size_;
+  }
+  /// Assigns the level size.
+  void set_level_size(const QSize& level_size_) {
+    level_size = level_size_;
+  }
+  /// Loads a texture to be used by the tiles.
+  /// @param path The path of the texture to load.
+  void load_texture(const QString& path) override {
+    (void)path;
+  }
+};
 
-}
+} // namespace
 
-void Scene::draw_box(const QPointF& a, const QPointF& b, int texture_id) {
-  (void)a;
-  (void)b;
-  (void)texture_id;
-}
-
-void Scene::clear() {
-
-}
-
-void Scene::load_color_texture(const QColor& color) {
-  (void)color;
-}
-
-void Scene::load_image_texture(const QString& path) {
-  (void)path;
-}
-
-void Scene::set_background_texture(int id) {
-  (void)id;
-}
-
-void Scene::set_view_size(const QSize& view_size) {
-  (void)view_size;
+Scene* Scene::make(QObject* parent) {
+  return new SceneImpl(parent);
 }

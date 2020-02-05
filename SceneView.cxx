@@ -5,7 +5,7 @@
 #include <QResizeEvent>
 
 SceneView::SceneView(Scene* scene) : QGraphicsView(scene) {
-  scene->set_view_size(size());
+
 }
 
 bool SceneView::event(QEvent* event) {

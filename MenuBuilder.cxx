@@ -26,24 +26,22 @@ public:
   }
   /// Defines a color texture.
   void interpret(const ColorTextureDecl& color_texture_decl) override {
-    scene->load_color_texture(color_texture_decl.get_color());
+    (void)color_texture_decl;
   }
   /// Called when an image texture declaration is found.
   /// @param path The path to the image texture to set.
   virtual void interpret(const ImageTextureDecl& image_texture_decl) override {
-    scene->load_image_texture(texture_prefix + image_texture_decl.get_image_path());
+    scene->load_texture(texture_prefix + image_texture_decl.get_image_path());
   }
   /// Adds a polygon object to the scene.
   void interpret(const DrawBoxStmt& draw_box_stmt) override {
-    scene->draw_box(draw_box_stmt.get_point_a(),
-                    draw_box_stmt.get_point_b(),
-                    draw_box_stmt.get_texture_id());
+    (void)draw_box_stmt;
   }
 protected slots:
   /// Called when a background texture is being set.
   /// @param texture_id The ID of the texture to set the background to.
   virtual void set_background(int texture_id) override {
-    scene->set_background_texture(texture_id);
+    (void)texture_id;
   }
   /// Called when a "finish" statement is on.
   virtual void finish() override {

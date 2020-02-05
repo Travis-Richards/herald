@@ -142,7 +142,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
     return fail("Failed to initialize game");
   }
 
-  scene = new Scene(this);
+  scene = Scene::make(this);
 
   scene_view = new SceneView(scene);
 
@@ -151,8 +151,6 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   scene_view->show();
 
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
-
-  connect(scene_view, &SceneView::resized, scene, &Scene::set_view_size);
 
   return api->build_menu(scene);
 }
