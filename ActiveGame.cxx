@@ -84,9 +84,6 @@ protected:
   bool fail(const QString& message);
   /// Handles closing of the scene view.
   void handle_scene_view_closing();
-  /// Sets up the camera for a scene view.
-  /// @param view The view to setup the camera for.
-  void setup_camera(SceneView* view);
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
@@ -147,11 +144,9 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   scene = new Scene(this);
 
-  scene_view = new SceneView(scene, nullptr);
+  scene_view = new SceneView(scene);
 
-  setup_camera(scene_view);
-
-  scene_view->setTitle(info.get_title());
+  scene_view->setWindowTitle(info.get_title());
 
   scene_view->show();
 
@@ -169,14 +164,6 @@ bool ActiveGameImpl::fail(const QString& message) {
 
 void ActiveGameImpl::handle_scene_view_closing() {
   emit closing(this);
-}
-
-void ActiveGameImpl::setup_camera(SceneView* view) {
-  auto* camera = view->camera();
-  camera->setPosition(QVector3D(0, 0, 1));
-  camera->setUpVector(QVector3D(0, 1, 0));
-  camera->setViewCenter(QVector3D(0, 0, 0));
-  camera->setFieldOfView(90);
 }
 
 } // namespace

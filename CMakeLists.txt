@@ -20,17 +20,11 @@ list(APPEND INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}")
 find_package(Qt5 REQUIRED
   COMPONENTS
     Core
-    Widgets
-    3DCore
-    3DExtras
-    3DRender)
+    Widgets)
 
 list(APPEND LIBS
   Qt5::Core
-  Qt5::Widgets
-  Qt5::3DCore
-  Qt5::3DExtras
-  Qt5::3DRender)
+  Qt5::Widgets)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -74,8 +68,10 @@ add_executable("herald" WIN32
   "SceneView.h"
   "SceneView.cxx"
   "SelectionIndex.h"
-  "MaterialList.h"
-  "MaterialList.cxx"
+  "Texture.h"
+  "Texture.cxx"
+  "TextureList.h"
+  "TextureList.cxx"
   "Icons.qrc")
 
 target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")
