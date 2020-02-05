@@ -1,3 +1,0 @@
-Example Java Game
-Taylor Holberton
-Java

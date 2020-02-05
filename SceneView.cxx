@@ -14,7 +14,7 @@ SceneView::SceneView(Scene* scene, QScreen* screen) : Qt3DExtras::Qt3DWindow(scr
 bool SceneView::event(QEvent* event) {
 
   if (event->type() == QEvent::Close) {
-    emit window_closing();
+    emit closing();
   }
 
   return Qt3DExtras::Qt3DWindow::event(event);
@@ -22,7 +22,7 @@ bool SceneView::event(QEvent* event) {
 
 void SceneView::resizeEvent(QResizeEvent* resize_event) {
 
-  emit window_resized(resize_event->size());
+  emit resized(resize_event->size());
 
   Qt3DExtras::Qt3DWindow::resizeEvent(resize_event);
 }

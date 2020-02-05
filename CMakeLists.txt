@@ -43,6 +43,10 @@ add_subdirectory("lang")
 
 add_executable("herald" WIN32
   "main.cxx"
+  "ActiveGame.h"
+  "ActiveGame.cxx"
+  "ActiveGameList.h"
+  "ActiveGameList.cxx"
   "Api.h"
   "Api.cxx"
   "CentralWidget.h"
@@ -69,6 +73,7 @@ add_executable("herald" WIN32
   "Scene.cxx"
   "SceneView.h"
   "SceneView.cxx"
+  "SelectionIndex.h"
   "MaterialList.h"
   "MaterialList.cxx"
   "Icons.qrc")
