@@ -10,8 +10,8 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QMessageBox>
+#include <QStringList>
 #include <QWidget>
-#include <QScreen>
 
 namespace {
 
@@ -178,8 +178,16 @@ bool ActiveGameImpl::open_textures(const QString& path) {
 
   QDirIterator it(textures_path, QDir::Files);
 
+  QStringList texture_list;
+
   while (it.hasNext()) {
-    scene->load_texture(it.next());
+    texture_list << it.next();
+  }
+
+  texture_list.sort();
+
+  for (auto texture_path : texture_list) {
+    scene->load_texture(texture_path);
   }
 
   return true;
