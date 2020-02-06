@@ -1,7 +1,6 @@
 #include "Lexer.h"
 
 #include <QString>
-#include <QStringView>
 
 Lexer::Lexer(const QString& input_, QObject* parent) : QObject(parent), input(input_), pos(0) {
 
