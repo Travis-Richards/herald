@@ -15,41 +15,6 @@
 
 namespace {
 
-/// Enumerates the known API types.
-enum class ApiType {
-  /// No API was specified.
-  None,
-  /// The Java API was specified.
-  Java,
-  /// An unknown API detected.
-  Unknown
-};
-
-/// Converts the name of an API to
-/// an enumerated API type.
-ApiType parse_api_name(const QString& name) {
-  if (name.isEmpty()) {
-    return ApiType::None;
-  } else if (name.compare("Java", Qt::CaseInsensitive) == 0) {
-    return ApiType::Java;
-  } else {
-    return ApiType::Unknown;
-  }
-}
-
-/// Finds a java executable program.
-/// @returns A java executable path.
-QString find_java() {
-  // TODO : Search in:
-  //   PATH
-  //   JAVA_HOME
-#ifdef _WIN32
-  return "java.exe";
-#else
-  return "java";
-#endif
-}
-
 /// Implements the active game interface.
 class ActiveGameImpl final : public ActiveGame {
   /// The widget responsible for logging errors.
@@ -135,19 +100,9 @@ void ActiveGameImpl::close() {
 
 bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
-  auto api_type = parse_api_name(info.get_api());
-  switch (api_type) {
-    case ApiType::None:
-      return fail("No API was specified in 'info.txt'");
-    case ApiType::Unknown:
-      return fail("Unknown API '" + info.get_api() + "'");
-    case ApiType::Java:
-      api = make_process_api(find_java(), path, QStringList("Game"), this);
-      break;
-  }
-
+  api = info.make_api(path, this);
   if (!api) {
-    return fail("Failed to create " + info.get_api() + " API");
+    return fail("Failed to create API instance");
   } else if (!api->init_game()) {
     return fail("Failed to initialize game");
   }

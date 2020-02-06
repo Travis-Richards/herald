@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+class Api;
 class QString;
 
 /// Used to store information of a game.
@@ -19,12 +20,15 @@ public:
   virtual ~GameInfo() {}
   /// Indicates whether or not an error occurred opening the info.
   virtual bool has_error() const = 0;
-  /// Gets the API used by the game.
-  virtual QString get_api() const = 0;
   /// Gets the author or maker of the game.
   virtual QString get_author() const = 0;
   /// Gets the error description.
   virtual QString get_error() const = 0;
   /// Gets the title of the game.
   virtual QString get_title() const = 0;
+  /// Creates an API based on the game info.
+  /// @param path The path to run the API from.
+  /// @param parent A pointer to the parent object for the API.
+  /// @returns A new API instance on success, null on failure.
+  virtual Api* make_api(const QString& path, QObject* parent) const = 0;
 };
