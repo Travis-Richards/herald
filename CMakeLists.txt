@@ -11,7 +11,7 @@ endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 # Configure the build time header
 # so that we know what APIs we can use.
 
-configure_file(Config.h.in Config.h)
+configure_file("source/Config.h.in" "Config.h")
 
 list(APPEND INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -31,50 +31,50 @@ set(CMAKE_AUTORCC ON)
 
 # Add components
 
-add_subdirectory("lang")
+add_subdirectory("source/lang")
 
 # Here we declare the main program.
 
 add_executable("herald" WIN32
-  "main.cxx"
-  "ActiveGame.h"
-  "ActiveGame.cxx"
-  "ActiveGameList.h"
-  "ActiveGameList.cxx"
-  "Api.h"
-  "Api.cxx"
-  "CentralWidget.h"
-  "CentralWidget.cxx"
-  "ControlPanel.h"
-  "ControlPanel.cxx"
-  "Engine.h"
-  "Engine.cxx"
-  "GameInfo.h"
-  "GameInfo.cxx"
-  "GameList.h"
-  "GameList.cxx"
-  "GameListView.h"
-  "GameListView.cxx"
-  "LineBuffer.h"
-  "LineBuffer.cxx"
-  "MainWindow.h"
-  "MainWindow.cxx"
-  "MenuBuilder.h"
-  "MenuBuilder.cxx"
-  "ProcessApi.h"
-  "ProcessApi.cxx"
-  "RoomBuilder.h"
-  "RoomBuilder.cxx"
-  "Scene.h"
-  "Scene.cxx"
-  "SceneView.h"
-  "SceneView.cxx"
-  "SelectionIndex.h"
-  "Texture.h"
-  "Texture.cxx"
-  "TextureList.h"
-  "TextureList.cxx"
-  "Icons.qrc")
+  "source/main.cxx"
+  "source/ActiveGame.h"
+  "source/ActiveGame.cxx"
+  "source/ActiveGameList.h"
+  "source/ActiveGameList.cxx"
+  "source/Api.h"
+  "source/Api.cxx"
+  "source/CentralWidget.h"
+  "source/CentralWidget.cxx"
+  "source/ControlPanel.h"
+  "source/ControlPanel.cxx"
+  "source/Engine.h"
+  "source/Engine.cxx"
+  "source/GameInfo.h"
+  "source/GameInfo.cxx"
+  "source/GameList.h"
+  "source/GameList.cxx"
+  "source/GameListView.h"
+  "source/GameListView.cxx"
+  "source/LineBuffer.h"
+  "source/LineBuffer.cxx"
+  "source/MainWindow.h"
+  "source/MainWindow.cxx"
+  "source/MenuBuilder.h"
+  "source/MenuBuilder.cxx"
+  "source/ProcessApi.h"
+  "source/ProcessApi.cxx"
+  "source/RoomBuilder.h"
+  "source/RoomBuilder.cxx"
+  "source/Scene.h"
+  "source/Scene.cxx"
+  "source/SceneView.h"
+  "source/SceneView.cxx"
+  "source/SelectionIndex.h"
+  "source/Texture.h"
+  "source/Texture.cxx"
+  "source/TextureList.h"
+  "source/TextureList.cxx"
+  "icons.qrc")
 
 target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")
 
