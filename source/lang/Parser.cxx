@@ -175,6 +175,8 @@ int Parser::parse_matrix(int offset, Matrix& matrix) {
         return 0;
       }
 
+      matrix.set(x, y, value);
+
       count += result;
 
       offset += result;

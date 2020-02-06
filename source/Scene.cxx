@@ -10,8 +10,6 @@
 
 #include <vector>
 
-#include <iostream>
-
 namespace {
 
 /// Contains data for one tile.
