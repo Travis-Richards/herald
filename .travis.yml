@@ -21,3 +21,4 @@ deploy:
   file: build/herald.dmg
   on:
     repo: tay10r/herald
+    tags: true
