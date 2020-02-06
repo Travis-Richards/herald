@@ -6,8 +6,8 @@
 #include "Scene.h"
 #include "SceneView.h"
 
-#include <Qt3DRender/QCamera>
-
+#include <QDir>
+#include <QDirIterator>
 #include <QMessageBox>
 #include <QWidget>
 #include <QScreen>
@@ -78,15 +78,16 @@ protected:
   /// @param path The path to the game to open.
   /// @param info Information regarding the game and how to open it.
   bool open(const QString& path, const GameInfo& info);
+  /// Opens the textures to be used in the game.
+  /// @param path The path to the game.
+  /// @returns True on success, false on failure.
+  bool open_textures(const QString& path);
   /// Opens a message box and prints a message indicating why
   /// the game failed to open.
   /// @returns Always returns false.
   bool fail(const QString& message);
   /// Handles closing of the scene view.
   void handle_scene_view_closing();
-  /// Sets up the camera for a scene view.
-  /// @param view The view to setup the camera for.
-  void setup_camera(SceneView* view);
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
@@ -145,21 +146,34 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
     return fail("Failed to initialize game");
   }
 
-  scene = new Scene(this);
+  scene = Scene::make(this);
 
-  scene_view = new SceneView(scene, nullptr);
+  scene_view = new SceneView(scene);
 
-  setup_camera(scene_view);
-
-  scene_view->setTitle(info.get_title());
-
-  scene_view->show();
+  scene_view->setWindowTitle(info.get_title());
 
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
 
-  connect(scene_view, &SceneView::resized, scene, &Scene::set_view_size);
+  connect(scene_view, &SceneView::resized, scene, &Scene::resize);
 
-  return api->build_menu(scene);
+  scene_view->show();
+
+  open_textures(path);
+
+  return api->build_room(scene);
+}
+
+bool ActiveGameImpl::open_textures(const QString& path) {
+
+  auto textures_path = QDir::cleanPath(path + QDir::separator() + "textures"); 
+
+  QDirIterator it(textures_path, QDir::Files);
+
+  while (it.hasNext()) {
+    scene->load_texture(it.next());
+  }
+
+  return true;
 }
 
 bool ActiveGameImpl::fail(const QString& message) {
@@ -169,14 +183,6 @@ bool ActiveGameImpl::fail(const QString& message) {
 
 void ActiveGameImpl::handle_scene_view_closing() {
   emit closing(this);
-}
-
-void ActiveGameImpl::setup_camera(SceneView* view) {
-  auto* camera = view->camera();
-  camera->setPosition(QVector3D(0, 0, 1));
-  camera->setUpVector(QVector3D(0, 1, 0));
-  camera->setViewCenter(QVector3D(0, 0, 0));
-  camera->setFieldOfView(90);
 }
 
 } // namespace

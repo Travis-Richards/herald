@@ -6,8 +6,8 @@ class QByteArray;
 /// sent to a game as a command.
 class Writer {
 public:
-  /// Creates a build menu request.
-  static QByteArray build_menu();
+  /// Creates a build room request.
+  static QByteArray build_room();
   /// Creates an exit request.
   static QByteArray exit();
 };

@@ -1,38 +1,35 @@
 #include "ParseTree.h"
 
-#include "Interpreter.h"
+#include "Matrix.h"
 
-#include <QRectF>
+#include <QSize>
 
-void BackgroundStmt::accept(Interpreter& interpreter) const {
-  interpreter.set_background(texture_id);
-}
+namespace {
 
-void ColorTextureDecl::accept(Interpreter& interpreter) const {
-  interpreter.interpret(*this);
-}
+/// The implementation of the "build room" response.
+class BuildRoomResponseImpl : public BuildRoomResponse {
+  /// The texture matrix.
+  Matrix* texture_matrix;
+  /// The tile flag matrix.
+  Matrix* flag_matrix;
+public:
+  /// Constructs an instance of the response.
+  BuildRoomResponseImpl(Matrix* tm, Matrix* fm) {
+    texture_matrix = tm ? tm : Matrix::make(0, 0);
+    flag_matrix    = fm ? fm : Matrix::make(0, 0);
+  }
+  /// Accesses the flag matrix.
+  const Matrix& get_flag_matrix() const noexcept override {
+    return *flag_matrix;
+  }
+  /// Accesses the texture matrix.
+  const Matrix& get_texture_matrix() const noexcept override {
+    return *texture_matrix;
+  }
+};
 
-void FinishStmt::accept(Interpreter& interpreter) const {
-  interpreter.finish();
-}
+} // namespace
 
-void ImageTextureDecl::accept(Interpreter& interpreter) const {
-  interpreter.interpret(*this);
-}
-
-DrawBoxStmt::DrawBoxStmt(const QPointF& a,
-                           const QPointF& b,
-                           int texture_id_) {
-  point_a = new QPointF(a);
-  point_b = new QPointF(b);
-  texture_id = texture_id_;
-}
-
-DrawBoxStmt::~DrawBoxStmt() {
-  delete point_a;
-  delete point_b;
-}
-
-void DrawBoxStmt::accept(Interpreter& interpreter) const {
-  interpreter.interpret(*this);
+BuildRoomResponse* BuildRoomResponse::make(Matrix* tm, Matrix* fm) {
+  return new BuildRoomResponseImpl(tm, fm);
 }

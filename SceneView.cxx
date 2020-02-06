@@ -4,11 +4,8 @@
 
 #include <QResizeEvent>
 
-SceneView::SceneView(Scene* scene, QScreen* screen) : Qt3DExtras::Qt3DWindow(screen) {
+SceneView::SceneView(Scene* scene) : QGraphicsView(scene) {
 
-  setRootEntity(scene->get_root_entity());
-
-  scene->set_view_size(size());
 }
 
 bool SceneView::event(QEvent* event) {
@@ -17,12 +14,12 @@ bool SceneView::event(QEvent* event) {
     emit closing();
   }
 
-  return Qt3DExtras::Qt3DWindow::event(event);
+  return QGraphicsView::event(event);
 }
 
 void SceneView::resizeEvent(QResizeEvent* resize_event) {
 
   emit resized(resize_event->size());
 
-  Qt3DExtras::Qt3DWindow::resizeEvent(resize_event);
+  QGraphicsView::resizeEvent(resize_event);
 }

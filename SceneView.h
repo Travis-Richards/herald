@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Qt3DExtras/Qt3DWindow>
+#include <QGraphicsView>
 
 class Scene;
 class QEvent;
@@ -8,13 +8,12 @@ class QSize;
 
 /// A view of the game scene.
 /// This is hidden until a game is started.
-class SceneView : public Qt3DExtras::Qt3DWindow {
+class SceneView : public QGraphicsView {
   Q_OBJECT
 public:
   /// Constructs the scene view.
   /// @param scene The scene to be viewed.
-  /// @param screen The screen to place the window on.
-  SceneView(Scene* scene, QScreen* screen = nullptr);
+  SceneView(Scene* scene);
 signals:
   /// This signal is emitted right
   /// before the window for the scene

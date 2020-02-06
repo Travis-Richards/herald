@@ -6,58 +6,26 @@
 
 #include "Scene.h"
 
-#include <QDir>
-#include <QString>
-
 namespace {
 
-/// This is the base for any class
-/// that builds a type of scene.
-class SceneBuilder : public Interpreter {
-public:
-  /// Constructs a new scene builder instance.
-  /// @param scene_ The scene to receive the data.
-  /// @param parent A pointer to a parent object.
-  SceneBuilder(Scene* scene_, QObject* parent)
-    : Interpreter(parent), scene(scene_) {}
-  /// Assigns the root path to open files from.
-  void set_root_path(const QString& path) override {
-    texture_prefix = QDir::cleanPath(path) + QDir::separator() + "textures" + QDir::separator();
-  }
-  /// Defines a color texture.
-  void interpret(const ColorTextureDecl& color_texture_decl) override {
-    scene->load_color_texture(color_texture_decl.get_color());
-  }
-  /// Called when an image texture declaration is found.
-  /// @param path The path to the image texture to set.
-  virtual void interpret(const ImageTextureDecl& image_texture_decl) override {
-    scene->load_image_texture(texture_prefix + image_texture_decl.get_image_path());
-  }
-  /// Adds a polygon object to the scene.
-  void interpret(const DrawBoxStmt& draw_box_stmt) override {
-    scene->draw_box(draw_box_stmt.get_point_a(),
-                    draw_box_stmt.get_point_b(),
-                    draw_box_stmt.get_texture_id());
-  }
-protected slots:
-  /// Called when a background texture is being set.
-  /// @param texture_id The ID of the texture to set the background to.
-  virtual void set_background(int texture_id) override {
-    scene->set_background_texture(texture_id);
-  }
-  /// Called when a "finish" statement is on.
-  virtual void finish() override {
-    Interpreter::finish();
-  }
-private:
-  /// The scene to build.
+/// Used for constructing the game menu.
+class MenuBuilder final : public Interpreter {
+  /// The scene to build the menu onto.
   Scene* scene;
-  /// The path to get texture images from.
-  QString texture_prefix;
+public:
+  /// Constructs an instance of the menu builder.
+  /// @param s The scene to put the menu onto.
+  /// @param parent A pointer to the parent object.
+  MenuBuilder(Scene* s, QObject* parent)
+    : Interpreter(parent), scene(s) {}
+  /// Interpreters the response to the command.
+  void interpret(Parser&) override {
+
+  }
 };
 
 } // namespace
 
 Interpreter* make_menu_builder(Scene* scene, QObject* parent) {
-  return new SceneBuilder(scene, parent);
+  return new MenuBuilder(scene, parent);
 }

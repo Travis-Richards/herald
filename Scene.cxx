@@ -1,165 +1,144 @@
 #include "Scene.h"
 
-#include "MaterialList.h"
+#include "lang/Matrix.h"
 
+#include "Texture.h"
+#include "TextureList.h"
+
+#include <QRectF>
 #include <QSize>
 
-#include <Qt3DCore/QEntity>
+#include <vector>
 
-#include <QAbstractTexture>
-#include <QTextureMaterial>
-#include <QTextureImage>
-#include <QUrl>
-
-#include <Qt3DCore/QTransform>
-
-#include <Qt3DExtras/QDiffuseSpecularMaterial>
-#include <Qt3DExtras/QPlaneMesh>
+#include <iostream>
 
 namespace {
 
-/// Creates a simple color material.
-/// @param root_entity The root entity of the material.
-/// @param color The color to assign the material.
-/// @returns A new material instance.
-Qt3DRender::QMaterial* make_simple_color(Qt3DCore::QEntity* root_entity, const QColor& color) {
-  auto* material = new Qt3DExtras::QDiffuseSpecularMaterial(root_entity);
-  material->setDiffuse(color);
-  return material;
-}
+/// Contains data for one tile.
+struct Tile final {
+  /// The ID of the texture used
+  /// to render this tile.
+  int texture_id;
+  /// Constructs a tile instance.
+  constexpr Tile() noexcept
+    : texture_id(0) {}
+};
 
-/// Creates the default background material.
-/// @param root_entity The root entity of the material being made.
-/// @returns A new material instance with the default values.
-Qt3DRender::QMaterial* make_default_material(Qt3DCore::QEntity* root_entity) {
-  auto* material = new Qt3DExtras::QDiffuseSpecularMaterial(root_entity);
-  material->setDiffuse(QColor(16, 16, 16));
-  return material;
-}
+/// An implementation of the scene interface.
+class SceneImpl final : public Scene {
+  /// The textures to be used by the scene.
+  TextureList* textures;
+  /// The size of the window being rendered to.
+  QSize window_size;
+  /// The size of the room being rendered.
+  QSize room_size;
+  /// The tiles part of the scene.
+  std::vector<Tile> tiles;
+public:
+  /// Constructs an instance of the scene implementation.
+  /// @param parent A pointer to the parent object.
+  SceneImpl(QObject* parent) : Scene(parent), textures(nullptr) {
+    textures = TextureList::make(this);
+  }
+  /// Builds the room with a texture matrix.
+  /// @param texture_matrix The texture matrix to assign the room.
+  void build_room(const Matrix& texture_matrix) override {
+
+    auto w = texture_matrix.width();
+    auto h = texture_matrix.height();
+
+    room_size = QSize(w, h);
+
+    tiles.resize(w * h);
+
+    int tile_index = 0;
+
+    for (int y = 0; y < h; y++) {
+      for (int x = 0; x < w; x++) {
+        tiles[tile_index++].texture_id = texture_matrix.at(x, y);
+      }
+    }
+
+    add_tile_items();
+  }
+  /// Loads a texture to be used by the tiles.
+  /// @param path The path of the texture to load.
+  void load_texture(const QString& path) override {
+    textures->add(Texture::open(path, this));
+  }
+protected:
+  /// Calculates the size of a tile.
+  /// @returns The size, in pixels, of a tile.
+  QSize calc_tile_size() const noexcept {
+    return QSize(window_size.width() / room_size.width(),
+                 window_size.height() / room_size.height());
+  }
+  /// Creates a rectangle that represents a certain tile.
+  /// @param tile_size The size of the tile.
+  /// @param x The X coordinate to place the tile at.
+  /// @param y The Y coordinate to place the tile at.
+  /// @returns A rectangle containing the tile area.
+  QRectF make_tile_rect(const QSize& tile_size, int x, int y) {
+    return QRectF(x * tile_size.width(),
+                  y * tile_size.height(),
+                  tile_size.width(),
+                  tile_size.height());
+  }
+  /// Adds the tiles to the scene as graphic items.
+  void add_tile_items() {
+
+    auto tile_size = calc_tile_size();
+
+    for (int y = 0; y < room_size.height(); y++) {
+
+      for (int x = 0; x < room_size.width(); x++) {
+
+        auto tile_rect = make_tile_rect(tile_size, x, y);
+
+        addRect(tile_rect, QPen(Qt::NoPen), brush_of_tile(tile_size, x, y));
+      }
+    }
+  }
+  /// Gets the brush for a certain tile.
+  /// @param tile_size The size of the tile that the brush is for.
+  /// @param x The X coordinate of the tile.
+  /// @param y The Y coordinate of the tile.
+  QBrush brush_of_tile(const QSize& tile_size, int x, int y) {
+    if ((x < room_size.width()) && (y < room_size.height())) {
+      return brush_of_texture(tile_size, tiles[(y * room_size.width()) + x].texture_id);
+    } else {
+      return QBrush();
+    }
+  }
+  /// Gets the brush for a certain texture.
+  /// @param tile_size The size of the tile the texture is getting made for.
+  /// @param texture_id The ID of the texture to get the brush of.
+  /// @returns The brush for the specified texture.
+  QBrush brush_of_texture(const QSize& tile_size, int texture_id) {
+    if (texture_id < textures->size()) {
+      auto* texture = textures->at(texture_id);
+      if (texture) {
+        return texture->as_brush(tile_size);
+      } else {
+        return QBrush();
+      }
+    } else {
+      return QBrush();
+    }
+  }
+  /// Handles resizing of the scene.
+  void resize(const QSize& size) override {
+
+    window_size = size;
+
+    clear();
+
+    add_tile_items();
+  }
+};
 
 } // namespace
 
-Scene::Scene(QObject* parent) : QObject(parent) {
-
-  root_entity = new Qt3DCore::QEntity();
-
-  background_entity = new Qt3DCore::QEntity(root_entity);
-
-  background_plane = new Qt3DExtras::QPlaneMesh(background_entity);
-  background_plane->setHeight(4);
-  background_plane->setWidth(4);
-
-  background_material = make_default_material(background_entity);
-
-  background_transform = new Qt3DCore::QTransform(background_entity);
-  background_transform->setScale(1);
-  background_transform->setRotationX(90);
-  background_transform->setTranslation(QVector3D(0, 0, -1));
-
-  background_entity->addComponent(background_plane);
-  background_entity->addComponent(background_transform);
-  background_entity->addComponent(background_material);
-
-  tmp_entity = new Qt3DCore::QEntity(root_entity);
-
-  materials = MaterialList::make(this);
-}
-
-Scene::~Scene() {
-
-}
-
-void Scene::draw_box(const QPointF& a, const QPointF& b, int texture_id) {
-
-  // Adjust points to get proper min/max
-
-  auto min = [](qreal a, qreal b) -> qreal {
-    return a < b ? a : b;
-  };
-
-  QPointF min_point(min(a.x(), b.x()),
-                    min(a.y(), b.y()));
-
-  auto max = [](qreal a, qreal b) -> qreal {
-    return a > b ? a : b;
-  };
-
-  QPointF max_point(max(a.x(), b.x()),
-                    max(a.y(), b.y()));
-
-  auto x_diff = max_point.x() - min_point.x();
-  auto y_diff = max_point.y() - min_point.y();
-
-  // Add entity
-
-  auto* entity = new Qt3DCore::QEntity(tmp_entity);
-
-  auto* plane = new Qt3DExtras::QPlaneMesh(entity);
-  plane->setWidth(x_diff);
-  plane->setHeight(y_diff);
-  entity->addComponent(plane);
-
-  auto* transform = new Qt3DCore::QTransform(entity);
-  transform->setRotationX(90);
-  transform->setTranslation(QVector3D(min_point.x(), min_point.y(), 0));
-  entity->addComponent(transform);
-
-  auto* texture = materials->at(texture_id);
-  if (!texture) {
-    // TODO : fallback texture
-  } else {
-    entity->addComponent(texture);
-  }
-}
-
-void Scene::clear() {
-
-  delete tmp_entity;
-
-  tmp_entity = new Qt3DCore::QEntity(root_entity);
-}
-
-void Scene::load_color_texture(const QColor& color) {
-  materials->add(make_simple_color(tmp_entity, color));
-}
-
-void Scene::load_image_texture(const QString& path) {
-
-  auto* material = new Qt3DExtras::QTextureMaterial(background_entity);
-
-  auto* texture = material->texture();
-
-  auto* texture_image = new Qt3DRender::QTextureImage(texture);
-  texture_image->setMirrored(false);
-  texture_image->setSource(QUrl::fromLocalFile(path));
-
-  texture->addTextureImage(texture_image);
-
-  materials->add(material);
-}
-
-void Scene::set_background_texture(int id) {
-
-  background_entity->removeComponent(background_material);
-
-  delete background_material;
-
-  background_material = materials->at(id);
-
-  if (background_material) {
-    background_entity->addComponent(background_material);
-  }
-}
-
-void Scene::set_view_size(const QSize& view_size) {
-
-  qreal h = view_size.height();
-  qreal w = view_size.width();
-  auto aspect_ratio = w / h;
-
-  if (h > w) {
-    background_plane->setHeight(background_plane->height() * aspect_ratio);
-  } else {
-    background_plane->setWidth(background_plane->width() * aspect_ratio);
-  }
+Scene* Scene::make(QObject* parent) {
+  return new SceneImpl(parent);
 }
