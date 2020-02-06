@@ -37,7 +37,25 @@ class Game {
    * @return Always returns true.
    * */
   static boolean buildRoom() {
-    System.out.println("2 2  0 0 0 0  0 0 0 0");
+
+    String response = "";
+    // 5x5 matrix
+    response += "5 5 ";
+    // Texture matrix data
+    response += "1 1 2 1 1 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    // Flag matrix data
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0";
+
+    System.out.println(response);
+
     return true;
   }
 }
