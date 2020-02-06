@@ -3,6 +3,7 @@
 #include "Api.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
+#include "RoomBuilder.h"
 #include "Scene.h"
 
 #include "lang/Interpreter.h"
@@ -32,9 +33,9 @@ public:
 
     connect(line_buffer, &LineBuffer::line, this, &ProcessApi::handle_line);
   }
-  /// Builds the main menu.
+  /// Builds a room.
   /// @returns True on success, false on failure.
-  bool build_menu(Scene* scene) override {
+  bool build_room(Scene* scene) override {
 
     scene->clear();
 
@@ -42,22 +43,10 @@ public:
       delete interpreter;
     }
 
-    interpreter = make_menu_builder(scene, this);
+    interpreter = make_room_builder(scene, this);
 
-    interpreter->set_root_path(process.workingDirectory());
+    process.write(Writer::build_room());
 
-    process.write(Writer::build_menu());
-
-    return true;
-  }
-  /// Builds a level specified by @p id.
-  /// @param id The ID of the level to build.
-  /// @param scene A pointer of the scene to
-  /// put the level data into.
-  /// @returns True on success, false on failure.
-  bool build_level(int id, Scene* scene) override {
-    (void)id;
-    (void)scene;
     return true;
   }
   /// Sends a message to the process that the engine is exiting
@@ -72,11 +61,6 @@ public:
       process.kill();
       process.waitForFinished(timeout_ms);
     }
-  }
-  /// Gets the number of playable levels.
-  /// @returns The number of playable levels.
-  int get_level_count() override {
-    return 0;
   }
   /// Initializes the game in the process' working directory.
   /// @returns True on success, false on failure.
@@ -102,13 +86,16 @@ protected slots:
   /// If no interpreter is active, then the line is ignored.
   /// @param line The line emitted from the process.
   void handle_line(const QString& line) {
-    if (interpreter) {
-      interpreter->interpret_line(line);
-      if (interpreter->done()) {
-        delete interpreter;
-        interpreter = nullptr;
-      }
+
+    if (!interpreter) {
+      return;
     }
+
+    interpreter->interpret_text(line);
+
+    delete interpreter;
+
+    interpreter = nullptr;
   }
 };
 

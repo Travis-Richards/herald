@@ -2,8 +2,8 @@
 
 #include <QByteArray>
 
-QByteArray Writer::build_menu() {
-  return QByteArray("build_menu\n");
+QByteArray Writer::build_room() {
+  return QByteArray("build_room\n");
 }
 
 QByteArray Writer::exit() {

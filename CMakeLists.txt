@@ -63,6 +63,8 @@ add_executable("herald" WIN32
   "MenuBuilder.cxx"
   "ProcessApi.h"
   "ProcessApi.cxx"
+  "RoomBuilder.h"
+  "RoomBuilder.cxx"
   "Scene.h"
   "Scene.cxx"
   "SceneView.h"

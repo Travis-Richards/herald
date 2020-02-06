@@ -21,14 +21,8 @@ class Game {
     String command = scanner.nextLine();
 
     switch (command) {
-      case "build_menu":
-        return buildMenu();
-      case "build_level":
-        // TODO
-        break;
-      case "get_level_count":
-        // TODO
-        break;
+      case "build_room":
+        return buildRoom();
       case "exit":
         return false;
       default:
@@ -39,19 +33,11 @@ class Game {
 
     return false;
   }
-  /** Builds the game menu.
+  /** Builds the room.
    * @return Always returns true.
    * */
-  static boolean buildMenu() {
-
-    System.out.println("load_image_texture 'background.png'");
-    System.out.println("decl_color_texture 1.0 1.0 1.0 0.5");
-
-    System.out.println("draw_box 0 0 0 0.5 0.5");
-    System.out.println("set_background 0");
-
-    System.out.println("finish");
-
+  static boolean buildRoom() {
+    System.out.println("2 2  0 0 0 0  0 0 0 0");
     return true;
   }
 }

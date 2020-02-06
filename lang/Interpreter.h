@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+class Parser;
 class QString;
 
 /// An interpreter is used to handle

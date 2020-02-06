@@ -6,8 +6,8 @@
 #include "Scene.h"
 #include "SceneView.h"
 
-#include <Qt3DRender/QCamera>
-
+#include <QDir>
+#include <QDirIterator>
 #include <QMessageBox>
 #include <QWidget>
 #include <QScreen>
@@ -78,6 +78,10 @@ protected:
   /// @param path The path to the game to open.
   /// @param info Information regarding the game and how to open it.
   bool open(const QString& path, const GameInfo& info);
+  /// Opens the textures to be used in the game.
+  /// @param path The path to the game.
+  /// @returns True on success, false on failure.
+  bool open_textures(const QString& path);
   /// Opens a message box and prints a message indicating why
   /// the game failed to open.
   /// @returns Always returns false.
@@ -148,11 +152,28 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   scene_view->setWindowTitle(info.get_title());
 
-  scene_view->show();
-
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
 
-  return api->build_menu(scene);
+  connect(scene_view, &SceneView::resized, scene, &Scene::resize);
+
+  scene_view->show();
+
+  open_textures(path);
+
+  return api->build_room(scene);
+}
+
+bool ActiveGameImpl::open_textures(const QString& path) {
+
+  auto textures_path = QDir::cleanPath(path + QDir::separator() + "textures"); 
+
+  QDirIterator it(textures_path, QDir::Files);
+
+  while (it.hasNext()) {
+    scene->load_texture(it.next());
+  }
+
+  return true;
 }
 
 bool ActiveGameImpl::fail(const QString& message) {

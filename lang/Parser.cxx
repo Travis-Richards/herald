@@ -106,6 +106,8 @@ Parser::Parser(const QString& input, QObject* parent) : QObject(parent) {
 
 BuildRoomResponse* Parser::parse_build_room_response() {
 
+  prepare_tokens();
+
   if (tokens->empty()) {
     return nullptr;
   }

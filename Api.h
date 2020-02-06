@@ -29,17 +29,12 @@ public:
   virtual ~Api();
   /// Initializes the game object.
   virtual bool init_game() = 0;
-  /// Builds the main menu of the game.
+  /// Builds a room from the game.
   /// @param scene The scene to put the menu data into.
   /// @returns True on success, false on failure.
-  virtual bool build_menu(Scene* scene) = 0;
-  /// Builds a specified level.
-  /// @returns True on success, false on failure.
-  virtual bool build_level(int id, Scene* scene) = 0;
+  virtual bool build_room(Scene* scene) = 0;
   /// Exits the game.
   virtual void exit() = 0;
-  /// Gets the number of levels defined by the API.
-  virtual int get_level_count() = 0;
 signals:
   /// This signal is emitted when a symbol failed to load from the API implementation.
   /// This happens when, for example, a Java class can't be found.

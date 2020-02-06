@@ -4,6 +4,7 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui)
 
 add_library("herald-lang" STATIC
   "Interpreter.h"
+  "Interpreter.cxx"
   "Lexer.h"
   "Lexer.cxx"
   "Matrix.h"
