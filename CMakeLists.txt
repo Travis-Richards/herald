@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 
-project("herald" VERSION 0.1.0)
+project("herald" VERSION 0.2.0)
 
 # Detect compiler, adjust CXX flags
 
