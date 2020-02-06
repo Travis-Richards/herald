@@ -1,0 +1,22 @@
+dist: xenial
+
+sudo: false
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - qt5-default
+  homebrew:
+    update: true
+    packages:
+      - qt5
+
+language: cpp
+
+compiler: clang
+
+script: scripts/travis-build.sh
