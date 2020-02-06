@@ -38,11 +38,14 @@ ControlPanel::ControlPanel(QWidget* parent) : QWidget(parent) {
 
   save_button = make_button(":/icons/save.svg", tr("Save"), this);
 
+  trash_button = make_button(":/icons/trash.svg", tr("Delete"), this);
+
   connect(open_button,    &QPushButton::clicked, this, &ControlPanel::open_requested);
   connect(refresh_button, &QPushButton::clicked, this, &ControlPanel::refresh_requested);
   connect(play_button,    &QPushButton::clicked, this, &ControlPanel::play_requested);
   connect(pause_button,   &QPushButton::clicked, this, &ControlPanel::pause_requested);
   connect(save_button,    &QPushButton::clicked, this, &ControlPanel::save_requested);
+  connect(trash_button,   &QPushButton::clicked, this, &ControlPanel::delete_requested);
 
   connect(game_list_view, &GameListView::game_selected, this, &ControlPanel::game_selected);
   connect(game_list_view, &GameListView::game_play_requested, this, &ControlPanel::on_game_play_request);
@@ -53,7 +56,9 @@ ControlPanel::ControlPanel(QWidget* parent) : QWidget(parent) {
   layout->addWidget(play_button,    0, 2, 1, 1);
   layout->addWidget(pause_button,   0, 3, 1, 1);
   layout->addWidget(save_button,    0, 4, 1, 1);
-  layout->addWidget(game_list_view, 1, 0, 4, 5);
+  layout->addWidget(trash_button,   0, 5, 1, 1);
+  layout->addWidget(game_list_view, 1, 0, 4, 6);
+
   setLayout(layout);
 }
 

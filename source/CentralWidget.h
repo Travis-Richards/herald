@@ -27,6 +27,9 @@ signals:
   /// Emitted when the "play" button
   /// is clicked from the control panel.
   void play_requested();
+  /// Emitted when the "delete" button
+  /// is clicked from the control panel.
+  void delete_requested();
   /// Emitted when a game is selected
   /// from the control panel.
   void game_selected(int index);

@@ -15,6 +15,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
 
   connect(control_panel, &ControlPanel::open_requested, this, &CentralWidget::open_requested);
   connect(control_panel, &ControlPanel::play_requested, this, &CentralWidget::play_requested);
+  connect(control_panel, &ControlPanel::delete_requested, this, &CentralWidget::delete_requested);
   connect(control_panel, &ControlPanel::game_selected, this, &CentralWidget::game_selected);
 }
 

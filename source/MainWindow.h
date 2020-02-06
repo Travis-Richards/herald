@@ -23,6 +23,8 @@ signals:
   void exit_requested();
   /// Emitted when the user wants to play a certain game.
   void play_requested();
+  /// Emitted when the user wants to delete a certain game.
+  void delete_requested();
 public slots:
   /// Updates the game in the game list view.
   /// This should be connected to the signal from @ref Engine

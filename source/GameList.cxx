@@ -18,6 +18,10 @@ void GameList::add(const QString& path) {
   path_list->sort();
 }
 
+void GameList::remove(int index) {
+  path_list->removeAt(index);
+}
+
 void GameList::load(QSettings& settings) {
   *path_list = settings.value("gamelist").value<QStringList>();
 }

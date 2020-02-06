@@ -48,6 +48,8 @@ void GameListView::update(const GameList& game_list) {
 
     setItem(i, 2, new QTableWidgetItem(path));
   }
+
+  clearSelection();
 }
 
 void GameListView::on_game_clicked(const QModelIndex& index) {

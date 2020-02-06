@@ -18,6 +18,9 @@ public:
   ~GameList();
   /// Adds a path to the game list.
   void add(const QString& path);
+  /// Removes a game from the game list.
+  /// @param index The index of the game to remove.
+  void remove(int index);
   /// Gets an entry from the game list.
   /// @returns An entry from the game list.
   /// This string is a path to the directory

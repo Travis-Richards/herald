@@ -23,9 +23,10 @@ MainWindow::MainWindow() {
 
   setWindowTitle(title);
 
-  connect(central_widget, &CentralWidget::open_requested, this, &MainWindow::open_from_dialog);
-  connect(central_widget, &CentralWidget::play_requested, this, &MainWindow::play_requested);
-  connect(central_widget, &CentralWidget::game_selected, this, &MainWindow::game_selected);
+  connect(central_widget, &CentralWidget::open_requested,   this, &MainWindow::open_from_dialog);
+  connect(central_widget, &CentralWidget::play_requested,   this, &MainWindow::play_requested);
+  connect(central_widget, &CentralWidget::delete_requested, this, &MainWindow::delete_requested);
+  connect(central_widget, &CentralWidget::game_selected,    this, &MainWindow::game_selected);
 }
 
 void MainWindow::update_game_list(const GameList& game_list) {

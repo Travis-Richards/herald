@@ -23,6 +23,19 @@ void Engine::select_game(int index) {
   last_selected = index;
 }
 
+void Engine::delete_game() {
+
+  if (last_selected.invalid()) {
+    return;
+  }
+
+  game_list->remove(last_selected);
+
+  last_selected = -1;
+
+  emit updated_game_list(*game_list);
+}
+
 void Engine::open_game(const QString& path) {
 
   game_list->add(path);
@@ -31,6 +44,7 @@ void Engine::open_game(const QString& path) {
 }
 
 void Engine::close_game() {
+
 }
 
 bool Engine::play_selected_game() {

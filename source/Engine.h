@@ -38,6 +38,8 @@ signals:
   /// visibility.
   void game_closed();
 public slots:
+  /// Deletes the last selected game.
+  void delete_game();
   /// Opens a game with a specified directory path.
   /// @param path The path of the game to open.
   void open_game(const QString& path);
