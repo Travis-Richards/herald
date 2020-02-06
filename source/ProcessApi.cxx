@@ -21,17 +21,25 @@ class ProcessApi final : public Api {
   /// The process to emit the engine commands.
   QProcess process;
   /// The line buffer for the standard output.
-  LineBuffer* line_buffer;
+  LineBuffer* out_line_buffer;
+  /// The line buffer for standard error output.
+  LineBuffer* err_line_buffer;
   /// A pointer to the response interpreter.
   Interpreter* interpreter;
 public:
   /// Constructs an instance of the process API.
   /// @param parent A pointer to the parent object.
-  ProcessApi(QObject* parent) : Api(parent), line_buffer(nullptr), interpreter(nullptr) {
+  ProcessApi(QObject* parent)
+    : Api(parent),
+      out_line_buffer(nullptr),
+      err_line_buffer(nullptr),
+      interpreter(nullptr) {
 
-    line_buffer = LineBuffer::from_process_stdout(process, this);
+    out_line_buffer = LineBuffer::from_process_stdout(process, this);
+    err_line_buffer = LineBuffer::from_process_stderr(process, this);
 
-    connect(line_buffer, &LineBuffer::line, this, &ProcessApi::handle_line);
+    connect(out_line_buffer, &LineBuffer::line, this, &ProcessApi::handle_line);
+    connect(err_line_buffer, &LineBuffer::line, this, &Api::error_log);
   }
   /// Builds a room.
   /// @returns True on success, false on failure.

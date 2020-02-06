@@ -49,6 +49,8 @@ add_executable("herald" WIN32
   "source/ControlPanel.cxx"
   "source/Engine.h"
   "source/Engine.cxx"
+  "source/ErrorLog.h"
+  "source/ErrorLog.cxx"
   "source/GameInfo.h"
   "source/GameInfo.cxx"
   "source/GameList.h"

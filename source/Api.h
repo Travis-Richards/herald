@@ -36,12 +36,9 @@ public:
   /// Exits the game.
   virtual void exit() = 0;
 signals:
-  /// This signal is emitted when a symbol failed to load from the API implementation.
-  /// This happens when, for example, a Java class can't be found.
-  /// @param type The type of the symbol that is missing.
-  /// @param name The name of the symbol that is missing.
-  void symbol_not_found(SymbolType type, const char* name);
-  /// This is emitted when an unknown error occurs from the API code.
-  /// @param desc A description of the error.
-  void unknown_error(const QString& desc);
+  /// This signal is emitted when the game
+  /// sends an error message. It should not
+  /// be treated as a fatal error but should
+  /// be logged somewhere.
+  void error_log(const QString& line);
 };

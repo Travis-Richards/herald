@@ -2,8 +2,6 @@
 
 #include <QObject>
 
-class SceneView;
-
 /// This class represents a running game instance.
 class ActiveGame : public QObject {
   Q_OBJECT

@@ -1,6 +1,7 @@
 #include "ActiveGame.h"
 
 #include "Api.h"
+#include "ErrorLog.h"
 #include "GameInfo.h"
 #include "ProcessApi.h"
 #include "Scene.h"
@@ -51,6 +52,8 @@ QString find_java() {
 
 /// Implements the active game interface.
 class ActiveGameImpl final : public ActiveGame {
+  /// The widget responsible for logging errors.
+  ErrorLog* error_log;
   /// A view of the game scene.
   SceneView* scene_view;
   /// The game scene being rendered.
@@ -62,6 +65,7 @@ public:
   /// @param parent A pointer to the parent object.
   ActiveGameImpl(QObject* parent)
     : ActiveGame(parent),
+      error_log(nullptr),
       scene_view(nullptr),
       scene(nullptr),
       api(nullptr) {}
@@ -91,18 +95,7 @@ protected:
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
-
-  if (api) {
-    delete api;
-  }
-
-  if (scene_view) {
-    delete scene_view;
-  }
-
-  if (scene) {
-    delete scene;
-  }
+  close();
 }
 
 bool ActiveGameImpl::open(const QString& path) {
@@ -122,8 +115,21 @@ bool ActiveGameImpl::open(const QString& path) {
 }
 
 void ActiveGameImpl::close() {
+
   if (api) {
     api->exit();
+    delete api;
+    api = nullptr;
+  }
+
+  if (error_log) {
+    delete error_log;
+    error_log = nullptr;
+  }
+
+  if (scene) {
+    delete scene;
+    scene = nullptr;
   }
 }
 
@@ -149,12 +155,15 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   scene = Scene::make(this);
 
   scene_view = new SceneView(scene);
-
   scene_view->setWindowTitle(info.get_title());
 
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
 
   connect(scene_view, &SceneView::resized, scene, &Scene::resize);
+
+  error_log = new ErrorLog(nullptr);
+
+  connect(api, &Api::error_log, error_log, &ErrorLog::log);
 
   scene_view->show();
 
