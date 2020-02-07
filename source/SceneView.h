@@ -2,6 +2,7 @@
 
 #include <QGraphicsView>
 
+class Controller;
 class Scene;
 class QEvent;
 class QSize;
@@ -20,6 +21,10 @@ public:
   SceneView(Scene* scene);
   /// Just a stub.
   virtual ~SceneView() {}
+  /// Gets a controller instance for the scene view.
+  /// This can be used if there are no external controllers found.
+  /// @returns A pointer to the controller instance.
+  virtual Controller* get_controller() = 0;
 signals:
   /// This signal is emitted right
   /// before the window for the scene

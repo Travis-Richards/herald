@@ -1,6 +1,7 @@
 #include "ActiveGame.h"
 
 #include "Api.h"
+#include "Controller.h"
 #include "ErrorLog.h"
 #include "GameInfo.h"
 #include "ProcessApi.h"
@@ -115,6 +116,10 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
 
   connect(scene_view, &SceneView::resized, scene, &Scene::resize);
+
+  auto* controller = scene_view->get_controller();
+  connect(controller, &Controller::update_axis,   api, &Api::update_def_axis);
+  connect(controller, &Controller::update_button, api, &Api::update_def_button);
 
   error_log = new ErrorLog(nullptr);
 

@@ -1,6 +1,7 @@
 #include "ProcessApi.h"
 
 #include "Api.h"
+#include "Controller.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
 #include "RoomBuilder.h"
@@ -88,6 +89,20 @@ public:
   bool start(const QString& program, const QStringList& args) {
     process.start(program, args);
     return true;
+  }
+  /// Notifies the process in the change of an axis value.
+  /// @param controller The index of the controller.
+  /// @param x The X value of the axis.
+  /// @param y The Y value of the axis.
+  void update_axis(int controller, double x, double y) override {
+    process.write(Writer::update_axis(controller, x, y));
+  }
+  /// Notifies the process of a change in button state.
+  /// @param controller The index of the controller.
+  /// @param button The button that changed state.
+  /// @param state The new state of the button.
+  void update_button(int controller, Button button, bool state) override {
+    process.write(Writer::update_button(controller, button_id(button), state));
   }
 protected slots:
   /// Handles a line from the games standard output.

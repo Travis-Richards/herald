@@ -2,19 +2,10 @@
 
 #include <QObject>
 
+enum class Button : int;
+
 class QString;
 class Scene;
-
-/// Enumerates the types of symbols
-/// that can be loaded from an API.
-/// This is used for error reporting.
-enum class SymbolType : int {
-  Class,
-  Function
-};
-
-/// Accesses a human-readable name for @p type.
-const char* to_string(SymbolType type) noexcept;
 
 /// This class is responsible for abstracting
 /// the API in which the games are designed in.
@@ -35,6 +26,25 @@ public:
   virtual bool build_room(Scene* scene) = 0;
   /// Exits the game.
   virtual void exit() = 0;
+public slots:
+  /// Updates the axis for the default player.
+  void update_def_axis(double x, double y) {
+    update_axis(0, x, y);
+  }
+  /// Updates the button state for the default player.
+  void update_def_button(Button button, bool state) {
+    update_button(0, button, state);
+  }
+  /// Updates an axis value for a controller.
+  /// @param controller The index of the controller.
+  /// @param x The X value of the axis.
+  /// @param y The Y value of the axis.
+  virtual void update_axis(int controller, double x, double y) = 0;
+  /// Updates a button state from a controller.
+  /// @param controller The index of the controller sending the update.
+  /// @param button The button that changed state.
+  /// @param state The new state of the button.
+  virtual void update_button(int controller, Button button, bool state) = 0;
 signals:
   /// This signal is emitted when the game
   /// sends an error message. It should not

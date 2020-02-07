@@ -5,9 +5,6 @@
 /// Represents one tile within a room.
 class Tile : public QObject {
   Q_OBJECT
-  Q_PROPERTY(int flags READ get_flags WRITE set_flags)
-  Q_PROPERTY(int frame READ get_frame WRITE set_frame)
-  Q_PROPERTY(int texture READ get_texture WRITE set_texture)
 public:
   /// Constructs the tile instance.
   /// @param parent A pointer to the parent object.
