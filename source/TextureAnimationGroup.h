@@ -25,6 +25,11 @@ public:
   /// @returns A pointer to the texture animation at the specified index.
   /// If the index is out of bounds, then a null pointer is returned instead.
   virtual TextureAnimation* at(int index) noexcept = 0;
+  /// Accesses a constant pointer to a texture animation at a specific index.
+  /// @param index The index of the texture animation to access.
+  /// @returns On success, a pointer to the texture animation.
+  /// On failure, a null pointer.
+  virtual const TextureAnimation* at(int index) const noexcept = 0;
   /// Sets the target frames per second of the animation.
   /// The default value is 30.
   /// @param fps The target frames per second to assign.

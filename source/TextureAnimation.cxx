@@ -57,6 +57,17 @@ public:
 
     return frames[index % frames.size()].first;
   }
+  /// Accesses a frame at a specified index.
+  /// @returns A pointer to the frame's texture.
+  /// If the texture has no frames, then a null pointer is returned.
+  const Texture* get_frame(int index) const noexcept override {
+
+    if (!frames.size()) {
+      return nullptr;
+    }
+
+    return frames[index % frames.size()].first;
+  }
   /// Accesses the number of frames in the animation.
   int get_frame_count() const noexcept override {
     return frames.size();

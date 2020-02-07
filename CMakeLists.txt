@@ -72,6 +72,8 @@ add_executable("herald" WIN32
   "source/Room.cxx"
   "source/RoomBuilder.h"
   "source/RoomBuilder.cxx"
+  "source/RoomView.h"
+  "source/RoomView.cxx"
   "source/Scene.h"
   "source/Scene.cxx"
   "source/SceneView.h"

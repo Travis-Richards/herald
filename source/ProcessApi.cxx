@@ -46,8 +46,6 @@ public:
   /// @returns True on success, false on failure.
   bool build_room(Scene* scene) override {
 
-    scene->clear();
-
     if (interpreter) {
       delete interpreter;
     }

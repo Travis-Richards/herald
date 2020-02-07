@@ -26,5 +26,5 @@ public:
   /// @param tile_size The size of the tile
   /// this brush is getting made for.
   /// @returns The brush for the texture.
-  virtual QBrush as_brush(const QSize& tile_size) = 0;
+  virtual QBrush as_brush(const QSize& tile_size) const = 0;
 };

@@ -56,8 +56,16 @@ public:
     textures.push_back(TextureAnimation::open(path, this));
     return true;
   }
-  /// Accesse a texture at a specified index.
+  /// Accesses a texture at a specified index.
   TextureAnimation* at(int index) noexcept override {
+    if (index < textures.size()) {
+      return textures[index];
+    } else {
+      return nullptr;
+    }
+  }
+  /// Accesses a texture at a specified index.
+  const TextureAnimation* at(int index) const noexcept override {
     if (index < textures.size()) {
       return textures[index];
     } else {
