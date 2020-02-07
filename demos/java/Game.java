@@ -45,7 +45,13 @@ class Game {
     response += "1 1 2 1 1 ";
     response += "0 0 0 0 0 ";
     response += "0 0 0 0 0 ";
+    response += "3 3 3 3 3 ";
     response += "0 0 0 0 0 ";
+    // Frame matrix data
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "2 1 0 2 1 ";
     response += "0 0 0 0 0 ";
     // Flag matrix data
     response += "0 0 0 0 0 ";

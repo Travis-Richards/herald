@@ -6,6 +6,7 @@
 
 SceneView::SceneView(Scene* scene) : QGraphicsView(scene) {
   setMinimumSize(QSize(640, 480));
+  setRenderHints(QPainter::Antialiasing);
 }
 
 bool SceneView::event(QEvent* event) {

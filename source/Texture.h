@@ -3,6 +3,7 @@
 #include <QObject>
 
 class QBrush;
+class QPixmap;
 class QSize;
 
 /// This is the interface for a texture.
@@ -13,6 +14,10 @@ public:
   /// @param parent A pointer to the parent object.
   /// @returns A new texture instance.
   static Texture* open(const QString& path, QObject* parent);
+  /// Creates a texture from an existing pixmap.
+  /// @param pixmap The pixmap to create the texture for.
+  /// @param parent A pointer to the parent object.
+  static Texture* make(const QPixmap& pixmap, QObject* parent);
   /// Constructs the base texture instance.
   Texture(QObject* parent) : QObject(parent) {}
   /// Just a stub.

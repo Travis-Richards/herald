@@ -65,6 +65,8 @@ add_executable("herald" WIN32
   "source/MenuBuilder.cxx"
   "source/ProcessApi.h"
   "source/ProcessApi.cxx"
+  "source/Room.h"
+  "source/Room.cxx"
   "source/RoomBuilder.h"
   "source/RoomBuilder.cxx"
   "source/Scene.h"
@@ -74,8 +76,12 @@ add_executable("herald" WIN32
   "source/SelectionIndex.h"
   "source/Texture.h"
   "source/Texture.cxx"
-  "source/TextureList.h"
-  "source/TextureList.cxx"
+  "source/TextureAnimation.h"
+  "source/TextureAnimation.cxx"
+  "source/TextureAnimationGroup.h"
+  "source/TextureAnimationGroup.cxx"
+  "source/Tile.h"
+  "source/Tile.cxx"
   "icons.qrc")
 
 target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")

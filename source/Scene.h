@@ -2,7 +2,7 @@
 
 #include <QGraphicsScene>
 
-class Matrix;
+class Room;
 class QSize;
 class QString;
 
@@ -20,13 +20,14 @@ public:
   Scene(QObject* parent = nullptr) : QGraphicsScene(parent) {}
   /// Just a stub.
   virtual ~Scene() {}
-  /// Builds a room from a texture matrix.
-  /// @param texture_matrix A matrix containing the
-  /// texture indices for each tile in the room.
-  virtual void build_room(const Matrix& texture_matrix) = 0;
   /// Loads a texture to be used by the scene.
   /// @param path A path to the texture to open.
   virtual void load_texture(const QString& path) = 0;
+  /// Assigns the room being rendered.
+  /// @param room A pointer to the room to assign.
+  /// The scene class takes ownership of @p room
+  /// after calling this function.
+  virtual void set_room(Room* room) = 0;
 public slots:
   /// Handles the resizing of the video that's being drawn to.
   /// @param size The new size of the scene.

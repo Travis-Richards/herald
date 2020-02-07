@@ -133,18 +133,30 @@ BuildRoomResponse* Parser::parse_build_room_response() {
     offset += result;
   }
 
+  Matrix* frame_matrix = Matrix::make(room_size);
+
+  result = parse_matrix(offset, *frame_matrix);
+  if (!result) {
+    delete texture_matrix;
+    delete frame_matrix;
+    return 0;
+  } else {
+    offset += result;
+  }
+
   Matrix* flag_matrix = Matrix::make(room_size);
 
   result = parse_matrix(offset, *flag_matrix);
   if (!result) {
     delete texture_matrix;
+    delete frame_matrix;
     delete flag_matrix;
     return 0;
   } else {
     offset += result;
   }
 
-  return BuildRoomResponse::make(texture_matrix, flag_matrix);
+  return BuildRoomResponse::make(texture_matrix, frame_matrix, flag_matrix);
 }
 
 void Parser::prepare_tokens() {
