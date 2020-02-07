@@ -29,9 +29,11 @@ public:
   /// Accesses the number of entries in the game list.
   int size() const;
   /// Loads the game list from settings.
-  void load(QSettings& settings);
+  /// @returns True on success, false on failure.
+  bool load(QSettings& settings);
   /// Stores the game list into settings.
-  void store(QSettings& settings) const;
+  /// @returns True on success, false on failure.
+  bool store(QSettings& settings) const;
 private:
   /// A list of paths that point to games.
   QStringList* path_list;

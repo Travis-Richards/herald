@@ -3,51 +3,92 @@
 #include "ActiveGame.h"
 #include "ActiveGameList.h"
 #include "GameList.h"
+#include "SelectionIndex.h"
 
 #include <QSettings>
 #include <QString>
 #include <QStringList>
 
-Engine::Engine(QObject* parent) : QObject(parent), active_games(nullptr), game_list(nullptr) {
+namespace {
 
-  active_games = ActiveGameList::make(1, this);
-
-  game_list = new GameList(this);
-}
-
-Engine::~Engine() {
-
-}
-
-void Engine::select_game(int index) {
-  last_selected = index;
-}
-
-void Engine::delete_game() {
-
-  if (last_selected.invalid()) {
-    return;
+/// Implements the engine interface.
+class EngineImpl final : public Engine {
+  /// The actively running games.
+  ActiveGameList* active_games;
+  /// The list of available games.
+  GameList* game_list;
+  /// The last selected game.
+  SelectionIndex last_selected;
+public:
+  /// Constructs an instance of the engine implementation.
+  /// @param parent A pointer to the parent object.
+  EngineImpl(QObject* parent) : Engine(parent) {
+    active_games = ActiveGameList::make(1, this);
+    game_list = new GameList(this);
   }
+  /// Loads user-specific settings.
+  /// @returns True on success, false on failure.
+  bool load_settings() override {
 
-  game_list->remove(last_selected);
+    QSettings settings;
 
-  last_selected = -1;
+    if (!game_list->load(settings)) {
+      return false;
+    }
 
-  emit updated_game_list(*game_list);
-}
+    emit updated_game_list(*game_list);
 
-void Engine::open_game(const QString& path) {
+    return true;
+  }
+  /// Stores user settings.
+  /// @returns True on success, false on failure.
+  bool save_settings() const override {
+    QSettings settings;
+    return game_list->store(settings);
+  }
+  /// Selects a game by its index.
+  /// @param index The index of the game within the game list.
+  void select_game(int index) override {
+    if (index < game_list->size()) {
+      last_selected = index;
+    } else {
+      last_selected = -1;
+    }
+  }
+  /// Deletes the last selected game.
+  void delete_game() override {
 
-  game_list->add(path);
+    if (last_selected.invalid()) {
+      return;
+    }
 
-  emit updated_game_list(*game_list);
-}
+    game_list->remove(last_selected);
 
-void Engine::close_game() {
+    last_selected = -1;
 
-}
+    emit updated_game_list(*game_list);
+  }
+  /// Opens a game by its path.
+  /// @param path The path of the game to open.
+  void open_game(const QString& path) override {
+    game_list->add(path);
+    emit updated_game_list(*game_list);
+  }
+  /// Plays the last selected game.
+  /// @returns True on success, false on failure.
+  bool play_selected_game() override;
+  /// Plays a game by its specified path.
+  /// @param path The path of the game to play.
+  /// @returns True on success, false on failure.
+  bool play_game(const QString& path);
+  /// Handles the case of the game
+  /// engine exiting.
+  void handle_exit() override {
+    save_settings();
+  }
+};
 
-bool Engine::play_selected_game() {
+bool EngineImpl::play_selected_game() {
 
   if (last_selected.invalid()) {
     return false;
@@ -61,7 +102,7 @@ bool Engine::play_selected_game() {
   return play_game(game_path);
 }
 
-bool Engine::play_game(const QString& path) {
+bool EngineImpl::play_game(const QString& path) {
 
   if (active_games->maxed_out()) {
     return false;
@@ -77,19 +118,8 @@ bool Engine::play_game(const QString& path) {
   }
 }
 
-void Engine::handle_exit() {
-  store_settings();
-}
+} // namespace
 
-bool Engine::load_settings() {
-  QSettings settings;
-  game_list->load(settings);
-  emit updated_game_list(*game_list);
-  return true;
-}
-
-bool Engine::store_settings() {
-  QSettings settings;
-  game_list->store(settings);
-  return true;
+Engine* Engine::make(QObject* parent) {
+  return new EngineImpl(parent);
 }

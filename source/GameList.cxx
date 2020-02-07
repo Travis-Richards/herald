@@ -22,8 +22,9 @@ void GameList::remove(int index) {
   path_list->removeAt(index);
 }
 
-void GameList::load(QSettings& settings) {
+bool GameList::load(QSettings& settings) {
   *path_list = settings.value("gamelist").value<QStringList>();
+  return true;
 }
 
 QString GameList::at(int index) const {
@@ -34,6 +35,7 @@ int GameList::size() const {
   return path_list->size();
 }
 
-void GameList::store(QSettings& settings) const {
+bool GameList::store(QSettings& settings) const {
   settings.setValue("gamelist", *path_list);
+  return true;
 }
