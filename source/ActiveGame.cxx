@@ -136,7 +136,7 @@ bool ActiveGameImpl::open_textures(const QString& path) {
 
   auto textures_path = QDir::cleanPath(path + QDir::separator() + "textures"); 
 
-  QDirIterator it(textures_path, QDir::Files);
+  QDirIterator it(textures_path, QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Files | QDir::Dirs);
 
   QStringList texture_list;
 
