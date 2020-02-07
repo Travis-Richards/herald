@@ -109,7 +109,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   scene = Scene::make(this);
 
-  scene_view = new SceneView(scene);
+  scene_view = SceneView::make(scene);
   scene_view->setWindowTitle(info.get_title());
 
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);

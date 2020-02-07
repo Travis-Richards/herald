@@ -11,9 +11,15 @@ class QSize;
 class SceneView : public QGraphicsView {
   Q_OBJECT
 public:
-  /// Constructs the scene view.
-  /// @param scene The scene to be viewed.
+  /// Creates a new scene view instance.
+  /// @param scene A pointer to the scene being rendered.
+  /// @returns A new scene view instance.
+  static SceneView* make(Scene* scene);
+  /// Constructs the base scene view.
+  /// @param scene The scene to be rendered.
   SceneView(Scene* scene);
+  /// Just a stub.
+  virtual ~SceneView() {}
 signals:
   /// This signal is emitted right
   /// before the window for the scene
@@ -23,13 +29,4 @@ signals:
   /// resized by the user.
   /// @param size The new size of the window.
   void resized(const QSize& size);
-protected:
-  /// Overrides the event handler so that a signal
-  /// can be emitted and the API can be released
-  /// for the window.
-  bool event(QEvent* event) override;
-  /// Overrides the resize event handler so that
-  /// a signal can be emitted indicating that the
-  /// window size has changed.
-  void resizeEvent(QResizeEvent* resize_event) override;
 };
