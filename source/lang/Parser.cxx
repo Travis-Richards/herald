@@ -159,6 +159,68 @@ BuildRoomResponse* Parser::parse_build_room_response() {
   return BuildRoomResponse::make(texture_matrix, frame_matrix, flag_matrix);
 }
 
+FillObjectsResponse* Parser::parse_fill_objects_response() {
+
+  prepare_tokens();
+
+  if (tokens->empty()) {
+    return nullptr;
+  }
+
+  int offset = 0;
+
+  QSize room_size;
+
+  int result = parse_size(offset, room_size);
+  if (!result) {
+    return nullptr;
+  }
+
+  Matrix* action_matrix = Matrix::make(room_size);
+
+  result = parse_matrix(offset, *action_matrix);
+  if (!result) {
+    delete action_matrix;
+    return nullptr;
+  }
+
+  Matrix* flag_matrix = Matrix::make(room_size);
+
+  result = parse_matrix(offset, *flag_matrix);
+  if (!result) {
+    delete flag_matrix;
+    delete action_matrix;
+    return nullptr;
+  }
+
+  return new FillObjectsResponse(action_matrix, flag_matrix);
+}
+
+SetBackgroundResponse* Parser::parse_set_background_response() {
+
+  prepare_tokens();
+
+  if (tokens->empty()) {
+    return nullptr;
+  }
+
+  int animation = 0;
+
+  int result = parse_int(0, animation);
+  if (!result) {
+    return nullptr;
+  }
+
+  int frame = 0;
+
+  result = parse_int(1, frame);
+  if (!result) {
+    return nullptr;
+  }
+
+  return new SetBackgroundResponse(animation, frame);
+}
+
 void Parser::prepare_tokens() {
 
   tokens->reset();

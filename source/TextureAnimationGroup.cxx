@@ -58,7 +58,9 @@ public:
   }
   /// Accesses a texture at a specified index.
   TextureAnimation* at(int index) noexcept override {
-    if (index < textures.size()) {
+    if (index < 0) {
+      return nullptr;
+    } else if (index < textures.size()) {
       return textures[index];
     } else {
       return nullptr;

@@ -43,6 +43,11 @@ add_executable("herald" WIN32
   "source/ActiveGameList.cxx"
   "source/Api.h"
   "source/Api.cxx"
+  "source/Background.h"
+  "source/BackgroundView.h"
+  "source/BackgroundView.cxx"
+  "source/BackgroundModifier.h"
+  "source/BackgroundModifier.cxx"
   "source/CentralWidget.h"
   "source/CentralWidget.cxx"
   "source/ControlPanel.h"
@@ -66,6 +71,13 @@ add_executable("herald" WIN32
   "source/MainWindow.cxx"
   "source/MenuBuilder.h"
   "source/MenuBuilder.cxx"
+  "source/Object.h"
+  "source/ObjectFiller.h"
+  "source/ObjectFiller.cxx"
+  "source/ObjectMap.h"
+  "source/ObjectMap.cxx"
+  "source/ObjectMapView.h"
+  "source/ObjectMapView.cxx"
   "source/ProcessApi.h"
   "source/ProcessApi.cxx"
   "source/Room.h"
@@ -97,11 +109,11 @@ target_compile_options("herald" PRIVATE ${cxxflags})
 
 install(TARGETS "herald" DESTINATION "bin")
 
-if (APPLE)
+if(APPLE)
 
-  if (EXISTS "/usr/local/opt/qt")
-    list (APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt")
-  endif (EXISTS "/usr/local/opt/qt")
+  if(EXISTS "/usr/local/opt/qt")
+    list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt")
+  endif(EXISTS "/usr/local/opt/qt")
 
   # Thank you RIP tutorial for this.
 
@@ -115,7 +127,7 @@ if (APPLE)
       COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald>/../.." -always-overwrite
       COMMENT "Running macdeployqt...")
 
-elseif (WIN32)
+elseif(WIN32)
 
   get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
 
@@ -123,8 +135,8 @@ elseif (WIN32)
 
   find_program(win_deploy_qt windeployqt HINTS "${qt_binary_dir}")
 
-  set (pkg_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64")
-  set (zip_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64.zip")
+  set(pkg_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64")
+  set(zip_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64.zip")
 
   add_custom_command(TARGET herald POST_BUILD
       COMMAND set PATH=%PATH%$<SEMICOLON>${qt_binary_dir}
@@ -133,7 +145,7 @@ elseif (WIN32)
       COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
       COMMENT "Running windeployqt...")
 
-endif (APPLE)
+endif(APPLE)
 
 set (CPACK_PACKAGE_NAME "Herald")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2D game engine")

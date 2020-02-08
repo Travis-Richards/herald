@@ -15,6 +15,14 @@ QByteArray Writer::exit() {
   return QByteArray("exit\n");
 }
 
+QByteArray Writer::fill_objects() {
+  return QByteArray("fill_objects\n");
+}
+
+QByteArray Writer::set_background() {
+  return QByteArray("set_background\n");
+}
+
 QByteArray Writer::update_axis(int c, double x, double y) {
 
   QByteArray output;

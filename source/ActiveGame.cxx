@@ -56,8 +56,16 @@ protected:
   /// the game failed to open.
   /// @returns Always returns false.
   bool fail(const QString& message);
+protected slots:
   /// Handles closing of the scene view.
   void handle_scene_view_closing();
+  /// Handles completion of the background modification.
+  void handle_set_background();
+  /// Handles the completion of a room construction.
+  void handle_built_room();
+  /// Handles the case where the objects
+  /// are done being added to the scene.
+  void handle_built_object_map();
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
@@ -104,8 +112,6 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   api = info.make_api(path, this);
   if (!api) {
     return fail("Failed to create API instance");
-  } else if (!api->init_game()) {
-    return fail("Failed to initialize game");
   }
 
   scene = Scene::make(this);
@@ -114,7 +120,6 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   scene_view->setWindowTitle(info.get_title());
 
   connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
-
   connect(scene_view, &SceneView::resized, scene, &Scene::resize);
 
   auto* controller = scene_view->get_controller();
@@ -124,12 +129,15 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   error_log = new ErrorLog(nullptr);
 
   connect(api, &Api::error_log, error_log, &ErrorLog::log);
+  connect(api, &Api::background_set, this, &ActiveGameImpl::handle_set_background);
+  connect(api, &Api::room_built, this, &ActiveGameImpl::handle_built_room);
+  connect(api, &Api::object_map_built, this, &ActiveGameImpl::handle_built_object_map);
 
   scene_view->show();
 
   open_textures(path);
 
-  return api->build_room(scene);
+  return api->set_background(scene);
 }
 
 bool ActiveGameImpl::open_textures(const QString& path) {
@@ -160,6 +168,18 @@ bool ActiveGameImpl::fail(const QString& message) {
 
 void ActiveGameImpl::handle_scene_view_closing() {
   emit closing(this);
+}
+
+void ActiveGameImpl::handle_set_background() {
+  api->build_room(scene);
+}
+
+void ActiveGameImpl::handle_built_room() {
+  api->fill_objects(scene);
+}
+
+void ActiveGameImpl::handle_built_object_map() {
+  scene->update_view();
 }
 
 } // namespace

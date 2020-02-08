@@ -1,9 +1,11 @@
 #include "ProcessApi.h"
 
 #include "Api.h"
+#include "BackgroundModifier.h"
 #include "Controller.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
+#include "ObjectFiller.h"
 #include "RoomBuilder.h"
 #include "Scene.h"
 
@@ -52,6 +54,8 @@ public:
 
     interpreter = make_room_builder(scene, this);
 
+    connect(interpreter, &Interpreter::finished, this, &Api::room_built);
+
     process.write(Writer::build_room());
 
     return true;
@@ -69,9 +73,38 @@ public:
       process.waitForFinished(timeout_ms);
     }
   }
-  /// Initializes the game in the process' working directory.
+  /// Fills the current room with objects.
+  /// @param scene The scene to fill.
   /// @returns True on success, false on failure.
-  bool init_game() override {
+  bool fill_objects(Scene* scene) override {
+
+    if (interpreter) {
+      delete interpreter;
+    }
+
+    interpreter = make_object_filler(scene, this);
+
+    connect(interpreter, &Interpreter::finished, this, &Api::object_map_built);
+
+    process.write(Writer::fill_objects());
+
+    return true;
+  }
+  /// Assigns the background of the scene.
+  /// @param scene The scene to assign the background of.
+  /// @returns True on success, false on failure.
+  bool set_background(Scene* scene) override {
+
+    if (interpreter) {
+      delete interpreter;
+    }
+
+    interpreter = make_background_modifier(scene, this);
+
+    connect(interpreter, &Interpreter::finished, this, &Api::background_set);
+
+    process.write(Writer::set_background());
+
     return true;
   }
   /// Assigns the working directory of the process.
@@ -107,16 +140,9 @@ protected slots:
   /// If no interpreter is active, then the line is ignored.
   /// @param line The line emitted from the process.
   void handle_line(const QString& line) {
-
-    if (!interpreter) {
-      return;
+    if (interpreter) {
+      interpreter->interpret_text(line);
     }
-
-    interpreter->interpret_text(line);
-
-    delete interpreter;
-
-    interpreter = nullptr;
   }
 };
 

@@ -39,17 +39,26 @@ ApiType parse_api_name(const QString& name) {
   }
 }
 
+/// Turns a base program name
+/// into an executable filename.
+/// On non-Windows platforms, this does nothing.
+/// @param base The base of the filename.
+/// @returns The resultant executable filename for @p base.
+QString executable_name(const QString& base) {
+#ifdef _WIN32
+  return base + ".exe";
+#else
+  return base;
+#endif
+}
+
 /// Finds a java executable program.
 /// @returns A java executable path.
 QString find_java() {
   // TODO : Search in:
   //   PATH
   //   JAVA_HOME
-#ifdef _WIN32
-  return "java.exe";
-#else
-  return "java";
-#endif
+  return executable_name("java");
 }
 
 /// The implementation of the game info interface.
@@ -139,13 +148,17 @@ Api* GameInfoImpl::make_executable_api(const QString& path, QObject* parent) con
 
   QStringList args;
 
+  auto program = QDir::cleanPath(QString(".") + QDir::separator() + executable_name("game"));
+
+  args << program;
+
   auto process_args = root_object["process_args"].toArray();
 
   for (auto arg : process_args) {
     args << arg.toString();
   }
 
-  return make_process_api(args[0], path, args, parent);
+  return make_process_api(program, path, args, parent);
 }
 
 } // namespace

@@ -9,6 +9,7 @@ class QString;
 /// the response of the game when
 /// issued a command.
 class Interpreter : public QObject {
+  Q_OBJECT
 public:
   /// Constructs the base interpreter.
   /// @param object A pointer to the parent object.
@@ -20,4 +21,8 @@ public:
   virtual void interpret_text(const QString& text);
   /// Interprets the input using a parser instance.
   virtual void interpret(Parser& parser) = 0;
+signals:
+  /// Emitted when the interpreter
+  /// has reached the end of its scope.
+  void finished();
 };

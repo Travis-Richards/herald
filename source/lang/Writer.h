@@ -12,6 +12,10 @@ public:
   static QByteArray build_room();
   /// Creates an exit request.
   static QByteArray exit();
+  /// Creates a "fill objects" command.
+  static QByteArray fill_objects();
+  /// Creates a "set background" command.
+  static QByteArray set_background();
   /// Updates an axis value.
   /// @param c The controller index.
   /// @param x The new X value.

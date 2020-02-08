@@ -25,6 +25,8 @@ class Game {
         return buildRoom();
       case "exit":
         return false;
+      case "fill_objects":
+        return fillObjects();
       case "update_axis":
         updateAxis(scanner);
         break;
@@ -116,5 +118,31 @@ class Game {
     System.out.println(response);
 
     return true;
+  }
+  /** Fills the room with objects.
+   * @return Always returns true.
+   * */
+  static boolean fillObjects() {
+
+    String response = "";
+    // 5x5 matrix
+    response += "5 5 ";
+    // Texture matrix data
+    response += "1 1 2 1 1 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "3 3 3 3 3 ";
+    response += "0 0 0 0 0 ";
+    // Frame matrix data
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "0 0 0 0 0 ";
+    response += "2 1 0 2 1 ";
+    response += "0 0 0 0 0 ";
+
+    System.out.println(response);
+
+    return true;
+
   }
 }

@@ -1,14 +1,15 @@
 #pragma once
 
-#include <QObject>
-
 /// Represents one tile within a room.
-class Tile : public QObject {
-  Q_OBJECT
+class Tile {
 public:
   /// Constructs the tile instance.
   /// @param parent A pointer to the parent object.
-  Tile(QObject* parent = nullptr);
+  constexpr Tile() noexcept
+    : flags(0),
+      frame(0),
+      frame_offset(0),
+      texture(0) { }
   /// Indicates whether or not the tile has a particular texture.
   bool has_texture(int texture) const noexcept;
   /// Accesses flags associated with the tile.

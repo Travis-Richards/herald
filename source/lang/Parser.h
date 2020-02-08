@@ -3,6 +3,9 @@
 #include <QObject>
 
 class BuildRoomResponse;
+class FillObjectsResponse;
+class SetBackgroundResponse;
+
 class Lexer;
 class Node;
 class TokenList;
@@ -22,6 +25,10 @@ public:
   Parser(const QString& input, QObject* parent = nullptr);
   /// Parses the response to a "build room" command.
   BuildRoomResponse* parse_build_room_response();
+  /// Parses the response to an "add objects" command.
+  FillObjectsResponse* parse_fill_objects_response();
+  /// Parses teh response to a "set background" command.
+  SetBackgroundResponse* parse_set_background_response();
 protected slots:
   /// Handles a token produced by the lexer.
   void on_token(TokenType type, const QStringRef& data);

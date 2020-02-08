@@ -7,7 +7,7 @@
 namespace {
 
 /// The implementation of the "build room" response.
-class BuildRoomResponseImpl : public BuildRoomResponse {
+class BuildRoomResponseImpl final : public BuildRoomResponse {
   /// The texture matrix.
   Matrix* texture_matrix;
   /// The frame offset matrix.
@@ -38,6 +38,16 @@ public:
 };
 
 } // namespace
+
+FillObjectsResponse::FillObjectsResponse(Matrix* a, Matrix* f) {
+  action_matrix = a ? a : Matrix::make(0, 0);
+  flag_matrix   = f ? f : Matrix::make(0, 0);
+}
+
+FillObjectsResponse::~FillObjectsResponse() {
+  delete action_matrix;
+  delete flag_matrix;
+}
 
 BuildRoomResponse* BuildRoomResponse::make(Matrix* textures,
                                            Matrix* frames,

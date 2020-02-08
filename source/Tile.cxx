@@ -1,12 +1,5 @@
 #include "Tile.h"
 
-Tile::Tile(QObject* parent) : QObject(parent) {
-  flags = 0;
-  frame = 0;
-  frame_offset = 0;
-  texture = 0;
-}
-
 bool Tile::has_texture(int t) const noexcept {
   return texture == t;
 }

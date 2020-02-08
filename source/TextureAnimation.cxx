@@ -64,6 +64,8 @@ public:
 
     if (!frames.size()) {
       return nullptr;
+    } else if (index < 0) {
+      return nullptr;
     }
 
     return frames[index % frames.size()].first;
