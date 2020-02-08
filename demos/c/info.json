@@ -1,0 +1,8 @@
+{
+  "title" : "Example C Game",
+  "author" : "Taylor Holberton",
+  "api" : "Executable",
+  "process_args" : [
+    "game"
+  ]
+}
