@@ -36,6 +36,10 @@ public:
   /// the object map view.
   /// Not to be confused with Qt's QGraphicsView.
   virtual void update_view() = 0;
+  /// Starts the scene's animation sequence.
+  virtual void start() = 0;
+  /// Pauses the scenes animation sequence.
+  virtual void pause() = 0;
 public slots:
   /// Handles the resizing of the video that's being drawn to.
   /// @param size The new size of the scene.

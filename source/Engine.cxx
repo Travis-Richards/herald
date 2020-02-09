@@ -111,6 +111,7 @@ bool EngineImpl::play_game(const QString& path) {
   auto* game = ActiveGame::make(this);
 
   if (game->open(path)) {
+    game->start();
     active_games->add(game);
     return true;
   } else {

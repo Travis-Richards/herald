@@ -5,9 +5,10 @@
 #include "Scene.h"
 
 #include "lang/Interpreter.h"
+#include "lang/Matrix.h"
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/Matrix.h"
+#include "lang/ScopedPtr.h"
 
 namespace {
 
@@ -26,7 +27,7 @@ public:
   /// @param parser The parser to parse the response with.
   void interpret(Parser& parser) override {
 
-    auto* response = parser.parse_fill_objects_response();
+    auto response = parser.parse_fill_objects_response();
     if (response) {
       handle_response(*response);
     }

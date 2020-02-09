@@ -1,6 +1,7 @@
 #include "ParseTree.h"
 
 #include "Matrix.h"
+#include "ScopedPtr.h"
 
 #include <QSize>
 
@@ -20,9 +21,9 @@ public:
                         Matrix* frames,
                         Matrix* flags) {
 
-    texture_matrix = textures ? textures : Matrix::make(0, 0);
-    frame_matrix   = frames   ? frames   : Matrix::make(0, 0);
-    flag_matrix    = flags    ? flags    : Matrix::make(0, 0);
+    texture_matrix = textures ? textures : Matrix::make(0, 0).release();
+    frame_matrix   = frames   ? frames   : Matrix::make(0, 0).release();
+    flag_matrix    = flags    ? flags    : Matrix::make(0, 0).release();
   }
   /// Accesses the flag matrix.
   const Matrix& get_flag_matrix() const noexcept override {
@@ -40,8 +41,8 @@ public:
 } // namespace
 
 FillObjectsResponse::FillObjectsResponse(Matrix* a, Matrix* f) {
-  action_matrix = a ? a : Matrix::make(0, 0);
-  flag_matrix   = f ? f : Matrix::make(0, 0);
+  action_matrix = a ? a : Matrix::make(0, 0).release();
+  flag_matrix   = f ? f : Matrix::make(0, 0).release();
 }
 
 FillObjectsResponse::~FillObjectsResponse() {

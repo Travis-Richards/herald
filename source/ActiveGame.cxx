@@ -14,6 +14,8 @@
 #include <QStringList>
 #include <QWidget>
 
+#include <iostream>
+
 namespace {
 
 /// Implements the active game interface.
@@ -43,6 +45,18 @@ public:
   /// @param path The path to open the game at.
   /// @returns True on success, false on failure.
   bool open(const QString& path) override;
+  /// Starts the scene animation.
+  void start() override {
+    if (scene) {
+      scene->start();
+    }
+  }
+  /// Pauses the scene animation.
+  void pause() override {
+    if (scene) {
+      scene->pause();
+    }
+  }
 protected:
   /// Opesn a game at a specific path with supplemental info.
   /// @param path The path to the game to open.

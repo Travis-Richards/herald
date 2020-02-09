@@ -2,6 +2,9 @@
 
 #include <QObject>
 
+template <typename T>
+class ScopedPtr;
+
 class BuildRoomResponse;
 class FillObjectsResponse;
 class SetBackgroundResponse;
@@ -24,15 +27,24 @@ public:
   /// @param parent A pointer to the parent object.
   Parser(const QString& input, QObject* parent = nullptr);
   /// Parses the response to a "build room" command.
-  BuildRoomResponse* parse_build_room_response();
+  ScopedPtr<BuildRoomResponse> parse_build_room_response();
   /// Parses the response to an "add objects" command.
-  FillObjectsResponse* parse_fill_objects_response();
+  ScopedPtr<FillObjectsResponse> parse_fill_objects_response();
   /// Parses teh response to a "set background" command.
-  SetBackgroundResponse* parse_set_background_response();
+  ScopedPtr<SetBackgroundResponse> parse_set_background_response();
+signals:
+  /// This signal is emitted when an error
+  /// occurs during parsing.
+  /// @param msg A message describing the error.
+  void error(const QString& msg);
 protected slots:
   /// Handles a token produced by the lexer.
   void on_token(TokenType type, const QStringRef& data);
 protected:
+  /// Emits a failure message.
+  /// @param msg A message describing the error.
+  /// @returns Always returns false.
+  bool fail(const QString& msg);
   /// Prepares the token list for parsing.
   /// It fills the token list and gets rid
   /// of spaces and newline characters.

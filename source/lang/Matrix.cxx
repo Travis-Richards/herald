@@ -1,5 +1,7 @@
 #include "Matrix.h"
 
+#include "ScopedPtr.h"
+
 #include <QSize>
 
 #include <vector>
@@ -46,10 +48,10 @@ public:
 
 } // namespace
 
-Matrix* Matrix::make(int w, int h) {
-  return new MatrixImpl(w, h);
+ScopedPtr<Matrix> Matrix::make(int w, int h) {
+  return ScopedPtr<Matrix>(new MatrixImpl(w, h));
 }
 
-Matrix* Matrix::make(const QSize& size) {
+ScopedPtr<Matrix> Matrix::make(const QSize& size) {
   return Matrix::make(size.width(), size.height());
 }

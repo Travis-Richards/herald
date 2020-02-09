@@ -1,8 +1,9 @@
 #include "Parser.h"
 
 #include "Lexer.h"
-#include "ParseTree.h"
 #include "Matrix.h"
+#include "ParseTree.h"
+#include "ScopedPtr.h"
 
 #include <QSize>
 
@@ -50,7 +51,7 @@ public:
   }
   /// Gets a token at a certain index.
   const Token& at(int index) const noexcept {
-    if ((index > tokens.size()) || (index < 0)) {
+    if ((index >= tokens.size()) || (index < 0)) {
       return null_token;
     } else {
       return tokens[index];
@@ -105,7 +106,7 @@ Parser::Parser(const QString& input, QObject* parent) : QObject(parent) {
   connect(lexer, &Lexer::token_found, this, &Parser::on_token);
 }
 
-BuildRoomResponse* Parser::parse_build_room_response() {
+ScopedPtr<BuildRoomResponse> Parser::parse_build_room_response() {
 
   if (!prepare_tokens()) {
     return nullptr;
@@ -117,34 +118,30 @@ BuildRoomResponse* Parser::parse_build_room_response() {
     return nullptr;
   }
 
-  Matrix* texture_matrix = Matrix::make(room_size);
+  auto texture_matrix = Matrix::make(room_size);
 
   if (!parse_matrix(*texture_matrix)) {
-    delete texture_matrix;
     return nullptr;
   }
 
-  Matrix* frame_matrix = Matrix::make(room_size);
+  auto frame_matrix = Matrix::make(room_size);
 
   if (!parse_matrix(*frame_matrix)) {
-    delete texture_matrix;
-    delete frame_matrix;
     return nullptr;
   }
 
-  Matrix* flag_matrix = Matrix::make(room_size);
+  auto flag_matrix = Matrix::make(room_size);
 
   if (!parse_matrix(*flag_matrix)) {
-    delete texture_matrix;
-    delete frame_matrix;
-    delete flag_matrix;
     return nullptr;
   }
 
-  return BuildRoomResponse::make(texture_matrix, frame_matrix, flag_matrix);
+  return BuildRoomResponse::make(texture_matrix.release(),
+                                 frame_matrix.release(),
+                                 flag_matrix.release());
 }
 
-FillObjectsResponse* Parser::parse_fill_objects_response() {
+ScopedPtr<FillObjectsResponse> Parser::parse_fill_objects_response() {
 
   if (!prepare_tokens()) {
     return nullptr;
@@ -156,25 +153,23 @@ FillObjectsResponse* Parser::parse_fill_objects_response() {
     return nullptr;
   }
 
-  Matrix* action_matrix = Matrix::make(room_size);
+  auto action_matrix = Matrix::make(room_size);
 
   if (!parse_matrix(*action_matrix)) {
-    delete action_matrix;
     return nullptr;
   }
 
-  Matrix* flag_matrix = Matrix::make(room_size);
+  auto flag_matrix = Matrix::make(room_size);
 
   if (!parse_matrix(*flag_matrix)) {
-    delete flag_matrix;
-    delete action_matrix;
     return nullptr;
   }
 
-  return new FillObjectsResponse(action_matrix, flag_matrix);
+  return new FillObjectsResponse(action_matrix.release(),
+                                 flag_matrix.release());
 }
 
-SetBackgroundResponse* Parser::parse_set_background_response() {
+ScopedPtr<SetBackgroundResponse> Parser::parse_set_background_response() {
 
   if (!prepare_tokens()) {
     return nullptr;
@@ -189,10 +184,15 @@ SetBackgroundResponse* Parser::parse_set_background_response() {
   int frame = 0;
 
   if (!parse_int(frame)) {
-    return nullptr;
+    return new SetBackgroundResponse(animation, 0);
   }
 
   return new SetBackgroundResponse(animation, frame);
+}
+
+bool Parser::fail(const QString& msg) {
+  emit error(msg);
+  return false;
 }
 
 bool Parser::prepare_tokens() {
@@ -218,7 +218,7 @@ bool Parser::parse_matrix(Matrix& matrix) {
     for (int x = 0; x < matrix.width(); x++) {
       int value = 0;
       if (!parse_int(value)) {
-        return false;
+        return fail(tr("Missing matrix value"));
       } else {
         matrix.set(x, y, value);
       }
@@ -231,8 +231,10 @@ bool Parser::parse_matrix(Matrix& matrix) {
 bool Parser::parse_size(QSize& size) {
   int w = 0;
   int h = 0;
-  if (!parse_int(w) || !parse_int(h)) {
-    return false;
+  if (!parse_int(w)) {
+    return fail(tr("Missing width specifier"));
+  } else if (!parse_int(h)) {
+    return fail(tr("Missing height specifier"));
   } else {
     size = QSize(w, h);
     return true;
@@ -245,11 +247,11 @@ bool Parser::parse_int(int& value) {
     return false;
   }
 
-  position++;
-
   bool ok = false;
 
   value = tokens->at(position).data.toInt(&ok);
+
+  position++;
 
   return ok;
 }

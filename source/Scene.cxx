@@ -69,6 +69,14 @@ public:
   void load_texture(const QString& path) override {
     textures->open(path);
   }
+  /// Starts the animation sequence.
+  void start() override {
+    textures->start();
+  }
+  /// Pauses the animation sequence.
+  void pause() override {
+    textures->stop();
+  }
   /// Updates the view entities of the scene.
   void update_view() override {
 

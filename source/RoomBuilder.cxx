@@ -4,6 +4,7 @@
 #include "lang/Matrix.h"
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
+#include "lang/ScopedPtr.h"
 
 #include "Room.h"
 #include "Scene.h"
@@ -22,13 +23,10 @@ public:
   RoomBuilder(Scene* s, QObject* parent) : Interpreter(parent), scene(s) {}
   /// Interprets the response from the game.
   void interpret(Parser& parser) override {
-
-    auto* response = parser.parse_build_room_response();
+    auto response = parser.parse_build_room_response();
     if (response) {
       handle(*response);
     }
-
-    delete response;
   }
 protected:
   /// Handles the build room response.

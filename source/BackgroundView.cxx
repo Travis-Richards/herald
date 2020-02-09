@@ -14,7 +14,9 @@ class BackgroundViewImpl final : public BackgroundView {
 public:
   /// Constructs an instance of the background view implementation.
   /// @param parent A pointer to the parent graphics info.
-  BackgroundViewImpl(QGraphicsItem* parent) : BackgroundView(parent) {}
+  BackgroundViewImpl(QGraphicsItem* parent) : BackgroundView(parent) {
+    setZValue(-1);
+  }
   /// Maps the background data into the view.
   /// @param background The background data to map.
   /// @param animations The animation group containing the map-able frames.

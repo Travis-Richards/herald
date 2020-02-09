@@ -1,5 +1,8 @@
 #pragma once
 
+template <typename T>
+class ScopedPtr;
+
 class QSize;
 
 /// A matrix is used to specify texture
@@ -9,9 +12,9 @@ public:
   /// Creates a new matrix instance.
   /// @param width The width of the matrix.
   /// @param height The height of the matrix.
-  static Matrix* make(int width, int height);
+  static ScopedPtr<Matrix> make(int width, int height);
   /// Creates a new matrix.
-  static Matrix* make(const QSize& size);
+  static ScopedPtr<Matrix> make(const QSize& size);
   /// Just a stub.
   virtual ~Matrix() {}
   /// Accesses a number within the matrix.

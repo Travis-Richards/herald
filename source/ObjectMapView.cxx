@@ -6,7 +6,9 @@ namespace {
 class ObjectMapViewImpl final : public ObjectMapView {
 public:
   /// Constructs an instance of the object map view implementation.
-  ObjectMapViewImpl(QGraphicsItem* parent) : ObjectMapView(parent) {}
+  ObjectMapViewImpl(QGraphicsItem* parent) : ObjectMapView(parent) {
+    setZValue(1);
+  }
   /// Resizes a view of the object map.
   /// @param size The window size to adjust the view to.
   void resize_view(const QSize& size) override {

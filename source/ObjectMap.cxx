@@ -11,7 +11,7 @@ class ObjectMapImpl final : public ObjectMap {
 public:
   /// Constructs the object map implementation.
   /// @param parent A pointer to the parent Qt object.
-  ObjectMapImpl(QObject* parent) : ObjectMap(parent) {}
+  ObjectMapImpl(QObject* parent) : ObjectMap(parent) { }
   /// Adds an object to the map.
   /// @param object The object to add to the map.
   void add(Object* object) override {

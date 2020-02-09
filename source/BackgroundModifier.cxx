@@ -3,9 +3,10 @@
 #include "Background.h"
 #include "Scene.h"
 
+#include "lang/Interpreter.h"
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/Interpreter.h"
+#include "lang/ScopedPtr.h"
 
 namespace {
 
@@ -23,10 +24,9 @@ public:
   /// the background modification command.
   void interpret(Parser& parser) override {
 
-    auto* response = parser.parse_set_background_response();
+    auto response = parser.parse_set_background_response();
     if (response) {
       handle(*response);
-      delete response;
     }
 
     emit finished();

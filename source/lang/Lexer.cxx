@@ -21,6 +21,8 @@ bool Lexer::scan() {
     return complete_space();
   } else if ((first == '\'') || (first == '"')) {
     return complete_string_literal(first);
+  } else if ((first == '-') && peek(1).isNumber()) {
+    return complete_number();
   }
 
   if (first.isLetter() || (first == '_')) {

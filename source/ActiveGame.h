@@ -19,6 +19,10 @@ public:
   /// @param path The path to the game to open.
   /// @returns True on success, false on failure.
   virtual bool open(const QString& path) = 0;
+  /// Starts the game.
+  virtual void start() = 0;
+  /// Pauses the game.
+  virtual void pause() = 0;
 signals:
   /// Emitted when the game is shutting down.
   void closing(ActiveGame* game);

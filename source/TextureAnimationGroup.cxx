@@ -68,10 +68,12 @@ public:
   }
   /// Accesses a texture at a specified index.
   const TextureAnimation* at(int index) const noexcept override {
-    if (index < textures.size()) {
-      return textures[index];
-    } else {
+    if (index < 0) {
       return nullptr;
+    } else if (index >= textures.size()) {
+      return nullptr;
+    } else {
+      return textures[index];
     }
   }
   /// Sets the target frames per second.
