@@ -27,12 +27,12 @@ class Game {
         return false;
       case "fill_objects":
         return fillObjects();
+      case "set_background":
+        return setBackground();
       case "update_axis":
-        updateAxis(scanner);
-        break;
+        return updateAxis(scanner);
       case "update_button":
-        updateButton(scanner);
-        break;
+        return updateButton(scanner);
       default:
         // Unknown command
         System.err.println("unknown command: " + command);
@@ -40,6 +40,12 @@ class Game {
     }
 
     return false;
+  }
+  /** Sets the background of the room.
+   * */
+  static boolean setBackground() {
+    System.out.println("1 1\n");
+    return true;
   }
   /** Handles an "update axis" command.
    * @param scanner Used to read the axis values from the game engine.
