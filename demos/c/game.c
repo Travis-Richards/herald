@@ -5,12 +5,12 @@
 /** The width of a room,
  * in terms of tiles.
  * */
-#define ROOM_WIDTH 5
+#define ROOM_WIDTH 10
 
 /** The height of a room,
  * in terms of tiles.
  * */
-#define ROOM_HEIGHT 5
+#define ROOM_HEIGHT 10
 
 /** A type definition for a room matrix.
  * */
@@ -53,6 +53,14 @@ static void print_matrix(const int matrix[][ROOM_HEIGHT]);
  * */
 static char* readline();
 
+/** Updates a button state.
+ * */
+static int update_button();
+
+/** Updates the axis values.
+ * */
+static int update_axis();
+
 int main() {
 
   int keep_going = 1;
@@ -75,27 +83,42 @@ int main() {
 static int build_room() {
 
   const room_matrix_z textures = {
-    { 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 }
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { 34, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    {  0,  1,  1,  1,  1,  1,  2, -1,  0,  1 }
   };
 
   const room_matrix_z frames = {
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
   const room_matrix_z flags = {
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
   printf("%d %d ", ROOM_WIDTH, ROOM_HEIGHT);
@@ -111,19 +134,29 @@ static int build_room() {
 static int fill_objects() {
 
   const room_matrix_z actions = {
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
   const room_matrix_z flags = {
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
   printf("%d %d ", ROOM_WIDTH, ROOM_HEIGHT);
@@ -147,9 +180,9 @@ static int handle_command(const char* command) {
     printf("20 0\n");
     fflush(stdout);
   } else if (strcmp(command, "update_axis") == 0) {
-    /* TODO */
+    return update_axis();
   } else if (strcmp(command, "update_button") == 0) {
-    /* TODO */
+    return update_button();
   } else {
     fprintf(stderr, "Unknown command '%s'\n", command);
   }
@@ -194,4 +227,20 @@ static char* readline() {
   }
 
   return line;
+}
+
+static int update_button() {
+  int controller = 0;
+  int button = 0;
+  int state = 0;
+  scanf("%d %d %d", &controller, &button, &state);
+  return 1;
+}
+
+static int update_axis() {
+  int controller = 0;
+  float x = 0;
+  float y = 0;
+  scanf("%d %f %f", &controller, &x, &y);
+  return 1;
 }
