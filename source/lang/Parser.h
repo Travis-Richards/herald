@@ -36,14 +36,18 @@ protected:
   /// Prepares the token list for parsing.
   /// It fills the token list and gets rid
   /// of spaces and newline characters.
-  void prepare_tokens();
+  /// @returns True if there's tokens left over,
+  /// false if there's not.
+  bool prepare_tokens();
   /// Parses a matrix of a specified size.
-  int parse_matrix(int offset, Matrix& matrix);
+  /// @returns True on success, false on failure.
+  bool parse_matrix(Matrix& matrix);
   /// Parses a size specificiation.
-  int parse_size(int offset, QSize& size);
+  /// @returns True on success, false on failure.
+  bool parse_size(QSize& size);
   /// Parses an integer.
-  /// @param offset The token offset to begin at.
-  int parse_int(int offset, int& value);
+  /// @returns True on success, false on failure.
+  bool parse_int(int& value);
 private:
   /// A pointer to the lexer
   /// used to generate tokens
@@ -53,4 +57,7 @@ private:
   /// the lexer. They are accumulated
   /// on a line basis.
   TokenList* tokens;
+  /// The position of the parser
+  /// within the token list.
+  int position;
 };

@@ -101,59 +101,44 @@ public:
 Parser::Parser(const QString& input, QObject* parent) : QObject(parent) {
   tokens = new TokenList(this);
   lexer = new Lexer(input, this);
+  position = 0;
   connect(lexer, &Lexer::token_found, this, &Parser::on_token);
 }
 
 BuildRoomResponse* Parser::parse_build_room_response() {
 
-  prepare_tokens();
-
-  if (tokens->empty()) {
+  if (!prepare_tokens()) {
     return nullptr;
   }
 
-  int offset = 0;
-
   QSize room_size;
 
-  int result = parse_size(offset, room_size);
-  if (!result) {
+  if (!parse_size(room_size)) {
     return nullptr;
-  } else {
-    offset += result;
   }
 
   Matrix* texture_matrix = Matrix::make(room_size);
 
-  result = parse_matrix(offset, *texture_matrix);
-  if (!result) {
+  if (!parse_matrix(*texture_matrix)) {
     delete texture_matrix;
-    return 0;
-  } else {
-    offset += result;
+    return nullptr;
   }
 
   Matrix* frame_matrix = Matrix::make(room_size);
 
-  result = parse_matrix(offset, *frame_matrix);
-  if (!result) {
+  if (!parse_matrix(*frame_matrix)) {
     delete texture_matrix;
     delete frame_matrix;
-    return 0;
-  } else {
-    offset += result;
+    return nullptr;
   }
 
   Matrix* flag_matrix = Matrix::make(room_size);
 
-  result = parse_matrix(offset, *flag_matrix);
-  if (!result) {
+  if (!parse_matrix(*flag_matrix)) {
     delete texture_matrix;
     delete frame_matrix;
     delete flag_matrix;
-    return 0;
-  } else {
-    offset += result;
+    return nullptr;
   }
 
   return BuildRoomResponse::make(texture_matrix, frame_matrix, flag_matrix);
@@ -161,33 +146,26 @@ BuildRoomResponse* Parser::parse_build_room_response() {
 
 FillObjectsResponse* Parser::parse_fill_objects_response() {
 
-  prepare_tokens();
-
-  if (tokens->empty()) {
+  if (!prepare_tokens()) {
     return nullptr;
   }
 
-  int offset = 0;
-
   QSize room_size;
 
-  int result = parse_size(offset, room_size);
-  if (!result) {
+  if (!parse_size(room_size)) {
     return nullptr;
   }
 
   Matrix* action_matrix = Matrix::make(room_size);
 
-  result = parse_matrix(offset, *action_matrix);
-  if (!result) {
+  if (!parse_matrix(*action_matrix)) {
     delete action_matrix;
     return nullptr;
   }
 
   Matrix* flag_matrix = Matrix::make(room_size);
 
-  result = parse_matrix(offset, *flag_matrix);
-  if (!result) {
+  if (!parse_matrix(*flag_matrix)) {
     delete flag_matrix;
     delete action_matrix;
     return nullptr;
@@ -198,30 +176,28 @@ FillObjectsResponse* Parser::parse_fill_objects_response() {
 
 SetBackgroundResponse* Parser::parse_set_background_response() {
 
-  prepare_tokens();
-
-  if (tokens->empty()) {
+  if (!prepare_tokens()) {
     return nullptr;
   }
 
   int animation = 0;
 
-  int result = parse_int(0, animation);
-  if (!result) {
+  if (!parse_int(animation)) {
     return nullptr;
   }
 
   int frame = 0;
 
-  result = parse_int(1, frame);
-  if (!result) {
+  if (!parse_int(frame)) {
     return nullptr;
   }
 
   return new SetBackgroundResponse(animation, frame);
 }
 
-void Parser::prepare_tokens() {
+bool Parser::prepare_tokens() {
+
+  position = 0;
 
   tokens->reset();
 
@@ -232,64 +208,50 @@ void Parser::prepare_tokens() {
   }
 
   tokens->filter();
+
+  return !tokens->empty();
 }
 
-int Parser::parse_matrix(int offset, Matrix& matrix) {
-
-  int count = 0;
+bool Parser::parse_matrix(Matrix& matrix) {
 
   for (int y = 0; y < matrix.height(); y++) {
-
     for (int x = 0; x < matrix.width(); x++) {
-
       int value = 0;
-
-      int result = parse_int(offset, value);
-      if (!result) {
-        return 0;
+      if (!parse_int(value)) {
+        return false;
+      } else {
+        matrix.set(x, y, value);
       }
-
-      matrix.set(x, y, value);
-
-      count += result;
-
-      offset += result;
     }
   }
 
-  return count;
+  return true;
 }
 
-int Parser::parse_size(int offset, QSize& size) {
-
+bool Parser::parse_size(QSize& size) {
   int w = 0;
   int h = 0;
-
-  if (!parse_int(offset + 0, w)
-   || !parse_int(offset + 1, h)) {
-    return 0;
+  if (!parse_int(w) || !parse_int(h)) {
+    return false;
+  } else {
+    size = QSize(w, h);
+    return true;
   }
-
-  size = QSize(w, h);
-
-  return 2;
 }
 
-int Parser::parse_int(int offset, int& value) {
+bool Parser::parse_int(int& value) {
 
-  if (offset >= tokens->size()) {
-    return 0;
+  if (!tokens->check_eq(position, TokenType::Number)) {
+    return false;
   }
 
-  if (!tokens->check_eq(offset, TokenType::Number)) {
-    return 0;
-  }
+  position++;
 
   bool ok = false;
 
-  value = tokens->at(offset).data.toInt(&ok);
+  value = tokens->at(position).data.toInt(&ok);
 
-  return ok ? 1 : 0;
+  return ok;
 }
 
 void Parser::on_token(TokenType type, const QStringRef& data) {
