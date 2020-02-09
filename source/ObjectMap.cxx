@@ -1,13 +1,13 @@
 #include "ObjectMap.h"
 
-#include <vector>
+#include <QList>
 
 namespace {
 
 /// Implements the object map interface.
 class ObjectMapImpl final : public ObjectMap {
   /// The objects part of the map.
-  std::vector<Object*> objects;
+  QList<Object*> objects;
 public:
   /// Constructs the object map implementation.
   /// @param parent A pointer to the parent Qt object.
@@ -15,7 +15,21 @@ public:
   /// Adds an object to the map.
   /// @param object The object to add to the map.
   void add(Object* object) override {
-    objects.emplace_back(object);
+    objects.push_back(object);
+  }
+  /// Accesses an object at a specific index.
+  const Object* at(int index) const noexcept override {
+    if (index < 0) {
+      return nullptr;
+    } else if (index >= objects.size()) {
+      return nullptr;
+    } else {
+      return objects[index];
+    }
+  }
+  /// Accesses the number of objects in the map.
+  int size() const noexcept override {
+    return objects.size();
   }
 };
 
