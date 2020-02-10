@@ -1,58 +1,86 @@
 #include "ParseTree.h"
 
-#include "Matrix.h"
 #include "ScopedPtr.h"
+#include "Token.h"
 
-#include <QSize>
+#include <vector>
+
+namespace parse_tree {
 
 namespace {
 
-/// The implementation of the "build room" response.
-class BuildRoomResponseImpl final : public BuildRoomResponse {
-  /// The texture matrix.
-  Matrix* texture_matrix;
-  /// The frame offset matrix.
-  Matrix* frame_matrix;
-  /// The tile flag matrix.
-  Matrix* flag_matrix;
+/// The full matrix implementation.
+class MatrixImpl final : public Matrix {
+  /// The integers making up the matrix.
+  std::vector<Integer> values;
 public:
-  /// Constructs an instance of the response.
-  BuildRoomResponseImpl(Matrix* textures,
-                        Matrix* frames,
-                        Matrix* flags) {
-
-    texture_matrix = textures ? textures : Matrix::make(0, 0).release();
-    frame_matrix   = frames   ? frames   : Matrix::make(0, 0).release();
-    flag_matrix    = flags    ? flags    : Matrix::make(0, 0).release();
+  /// Constructs a new instance of the matrix implementation.
+  MatrixImpl(const Size& s) noexcept : Matrix(s) {}
+  /// Adds an integer to the matrix.
+  /// @param v The value to add.
+  void add(const Integer& v) override {
+    values.emplace_back(v);
   }
-  /// Accesses the flag matrix.
-  const Matrix& get_flag_matrix() const noexcept override {
-    return *flag_matrix;
+  /// Accesses an integer from the matrix.
+  /// @param index The index of the number to access.
+  /// @returns The specified integer value.
+  Integer get_integer(std::size_t index) const noexcept override {
+    if (index >= values.size()) {
+      return Integer(nullptr, nullptr);
+    } else {
+      return values[index];
+    }
   }
-  const Matrix& get_frame_matrix() const noexcept override {
-    return *frame_matrix;
-  }
-  /// Accesses the texture matrix.
-  const Matrix& get_texture_matrix() const noexcept override {
-    return *texture_matrix;
+  /// Accesses the number of integers in the matrix.
+  std::size_t get_integer_count() const noexcept override {
+    return values.size();
   }
 };
 
 } // namespace
 
-FillObjectsResponse::FillObjectsResponse(Matrix* a, Matrix* f) {
-  action_matrix = a ? a : Matrix::make(0, 0).release();
-  flag_matrix   = f ? f : Matrix::make(0, 0).release();
+bool Integer::is_negative() const noexcept {
+  return sign && sign->has_type(TokenType::NegativeSign);
 }
 
-FillObjectsResponse::~FillObjectsResponse() {
-  delete action_matrix;
-  delete flag_matrix;
+bool Integer::to_signed_value(int& n) const noexcept {
+
+  unsigned int n_unsigned = 0;
+
+  if (!to_unsigned_value(n_unsigned)) {
+    return false;
+  } else {
+    n = (int) n_unsigned;
+    n *= is_negative() ? -1 : 1;
+    return true;
+  }
 }
 
-BuildRoomResponse* BuildRoomResponse::make(Matrix* textures,
-                                           Matrix* frames,
-                                           Matrix* flags) {
+bool Integer::to_unsigned_value(unsigned int& n) const noexcept {
 
-  return new BuildRoomResponseImpl(textures, frames, flags);
+  if (!value || !value->has_type(TokenType::Number)) {
+    return false;
+  }
+
+  n = 0;
+
+  for (std::size_t i = 0; i < value->get_size(); i++) {
+
+    auto c = value->at(i);
+    if ((c < '0')
+     || (c > '9')) {
+      return false;
+    }
+
+    n *= 10;
+    n += int(c - '0');
+  }
+
+  return true;
 }
+
+ScopedPtr<Matrix> Matrix::make(const Size& s) {
+  return new MatrixImpl(s);
+}
+
+} // namespace parse_tree

@@ -1,80 +1,159 @@
 #pragma once
 
+#include <cstddef>
+
+template <typename T>
+class ScopedPtr;
+
+class Token;
+
+namespace parse_tree {
+
+class Integer;
+class Size;
 class Matrix;
-class QSize;
 
-/// This node contains a response from
-/// the "build room" command.
-class BuildRoomResponse {
+/// The base for any class that
+/// is used to interpret the parse tree.
+class Visitor {
 public:
-  /// Constructs an instance of the response.
-  /// @param textures The texture matrix.
-  /// @param frames The frame offset matrix.
-  /// @param flags The flag matrix.
-  /// @returns A new response instance.
-  static BuildRoomResponse* make(Matrix* textures,
-                                 Matrix* frames,
-                                 Matrix* flags);
   /// Just a stub.
-  virtual ~BuildRoomResponse() {}
-  /// Accesses the matrix containing the tile texture indices.
-  virtual const Matrix& get_texture_matrix() const noexcept = 0;
-  /// Accesses the matrix containing the tile frame offsets.
-  virtual const Matrix& get_frame_matrix() const noexcept = 0;
-  /// Accesses the matrix containing the flags for each tile.
-  virtual const Matrix& get_flag_matrix() const noexcept = 0;
+  virtual ~Visitor() {}
+  /// Visits an integer node.
+  virtual void visit(const Integer&) = 0;
+  /// Visits a matrix.
+  virtual void visit(const Matrix&) = 0;
+  /// Visits a size node.
+  virtual void visit(const Size&) = 0;
 };
 
-/// This node contains a response from
-/// the "add objects" command.
-class FillObjectsResponse final {
-  /// The matrix containing the indices
-  /// for each object actions.
-  Matrix* action_matrix;
-  /// The matrix containing flags for
-  /// each of the objects.
-  Matrix* flag_matrix;
+/// The base of any structure
+/// based from syntax.
+class Node {
 public:
-  /// Constructs the response instance.
-  /// @param a The action matrix to assign.
-  /// After calling this function, this response
-  /// will take ownership of the pointer.
-  /// @param f The flags containing information
-  /// about the objects.
-  FillObjectsResponse(Matrix* a, Matrix* f);
-  /// Releases memory allocated by the response.
-  ~FillObjectsResponse();
-  /// Accesses the matrix containing the action indices.
-  inline const Matrix& get_action_matrix() const noexcept {
-    return *action_matrix;
+  /// Just a stub.
+  virtual ~Node() {}
+  /// Accepts a node visitor.
+  /// @param visitor The visitor to accept.
+  virtual void accept(Visitor& visitor) const = 0;
+};
+
+/// An integer value.
+/// May be signed but will not
+/// contain a decimal point or
+/// fractional values.
+class Integer final : public Node {
+  /// The sign of the integer.
+  /// This token may be null,
+  /// in which case the integer
+  /// can be considered to be positive.
+  const Token* sign;
+  /// The value of the integer.
+  /// A null token here should
+  /// be considered an error.
+  const Token* value;
+public:
+  /// Constructs an integer node.
+  /// @param s The sign token to assign.
+  /// This may be a null pointer.
+  /// @param v The value token of the integer.
+  /// This must not be null.
+  constexpr Integer(const Token* s,
+                    const Token* v) noexcept
+    : sign(s), value(v) {}
+  /// Accepts a visitor.
+  void accept(Visitor& visitor) const override {
+    visitor.visit(*this);
   }
-  /// Accesses the matrix used to containg object flags.
-  inline const Matrix& get_flag_matrix() const noexcept {
-    return *flag_matrix;
+  /// Accesses the sign token.
+  const Token* get_sign_token() const noexcept {
+    return sign;
+  }
+  /// Accesses the value token.
+  const Token* get_value_token() const noexcept {
+    return value;
+  }
+  /// Indicates whether or not the integer is negative.
+  bool is_negative() const noexcept;
+  /// Converts the integer to a signed integer value.
+  /// @returns True on success, false on failure.
+  bool to_signed_value(int& value) const noexcept;
+  /// Converts the integer to an unsigned value.
+  /// The sign token is ignored in this function.
+  /// @returns True on success, false on failure.
+  bool to_unsigned_value(unsigned int& value) const noexcept;
+  /// Indicates whether or not the integer is valid.
+  inline bool valid() const noexcept {
+    return value;
   }
 };
 
-/// This node contains a response
-/// from the "set background" command.
-class SetBackgroundResponse final {
-  /// The animation to assign the background.
-  int animation;
-  /// The frame to start the animation at.
-  int frame;
+/// Specifies width and height.
+/// May be used to specified the
+/// size of a matrix.
+class Size final : public Node {
+  /// The width specification.
+  Integer width;
+  /// The height specification.
+  Integer height;
 public:
-  /// Constructs an instance of the response.
-  /// @param a The animation assigned.
-  /// @param f The starting frame.
-  constexpr SetBackgroundResponse(int a, int f) noexcept
-    : animation(a), frame(f) {}
-  /// Accesses the index of the animation.
-  /// @returns The animation to assign the background.
-  int get_animation() const noexcept {
-    return animation;
+  /// Constructs a size specification.
+  /// @param w The width to assign.
+  /// @param h The height to assign.
+  constexpr Size(const Integer& w,
+                 const Integer& h) noexcept
+    : width(w), height(h) {}
+  /// Accepts a visitor.
+  void accept(Visitor& visitor) const override {
+    visitor.visit(*this);
   }
-  /// Accesses the frame to start the animation at.
-  /// @returns The frame to start the animation at.
-  int get_frame() const noexcept {
-    return frame;
+  /// Accesses the width of the integer.
+  inline const Integer& get_width() const noexcept {
+    return width;
+  }
+  /// Accesses the height integer.
+  inline const Integer& get_height() const noexcept {
+    return height;
+  }
+  /// Quickly determines wether
+  /// or not the size is valid.
+  inline bool valid() const noexcept {
+    return width.valid() && !width.is_negative()
+       && height.valid() && !height.is_negative();
   }
 };
+
+/// Represents an integer matrix.
+class Matrix : public Node {
+  /// The size of the matrix.
+  Size size;
+public:
+  /// Creates a new matrix instance.
+  /// @param s The size of the matrix.
+  /// @returns A new matrix instance.
+  static ScopedPtr<Matrix> make(const Size& s);
+  /// Constructs the base matrix class.
+  constexpr Matrix(const Size& s) noexcept : size(s) {}
+  /// Just a stub.
+  virtual ~Matrix() {}
+  /// Accepts a visitor.
+  void accept(Visitor& visitor) const override {
+    visitor.visit(*this);
+  }
+  /// Adds an integer to the matrix.
+  /// @param i The integer to add.
+  virtual void add(const Integer& i) = 0;
+  /// Accesses the size of the matrix.
+  /// @returns The size specification of the matrix.
+  inline Size get_size() const noexcept {
+    return size;
+  }
+  /// Accesses an integer from the matrix.
+  /// @param index The index of the integer to get.
+  /// @returns The integer at the specified index.
+  virtual Integer get_integer(std::size_t index) const noexcept = 0;
+  /// Accesses the number of integers in the marix.
+  virtual std::size_t get_integer_count() const noexcept = 0;
+};
+
+} // namespace parse_tree
