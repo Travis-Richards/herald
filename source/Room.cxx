@@ -1,8 +1,7 @@
 #include "Room.h"
 
+#include "Matrix.h"
 #include "Tile.h"
-
-#include "lang/Matrix.h"
 
 namespace {
 

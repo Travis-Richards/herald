@@ -3,14 +3,15 @@
 #include "Api.h"
 #include "BackgroundModifier.h"
 #include "Controller.h"
+#include "Interpreter.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
 #include "ObjectFiller.h"
 #include "RoomBuilder.h"
 #include "Scene.h"
+#include "Writer.h"
 
-#include "lang/Interpreter.h"
-#include "lang/Writer.h"
+#include "lang/SyntaxChecker.h"
 
 #include <QProcess>
 #include <QString>
@@ -56,6 +57,8 @@ public:
 
     connect(interpreter, &Interpreter::finished, this, &Api::room_built);
 
+    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
+
     process.write(Writer::build_room());
 
     return true;
@@ -86,6 +89,8 @@ public:
 
     connect(interpreter, &Interpreter::finished, this, &Api::object_map_built);
 
+    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
+
     process.write(Writer::fill_objects());
 
     return true;
@@ -102,6 +107,8 @@ public:
     interpreter = make_background_modifier(scene, this);
 
     connect(interpreter, &Interpreter::finished, this, &Api::background_set);
+
+    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
 
     process.write(Writer::set_background());
 
@@ -143,6 +150,10 @@ protected slots:
     if (interpreter) {
       interpreter->interpret_text(line);
     }
+  }
+  /// Handles a syntax error from the response.
+  void handle_syntax_error(const SyntaxError& error) {
+    emit error_log(QString(error.get_description()));
   }
 };
 

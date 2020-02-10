@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iosfwd>
+
 #include <cstddef>
 
 /// Enumerates the several types of tokens
@@ -76,4 +78,14 @@ public:
   inline bool has_type(TokenType t) const noexcept {
     return type == t;
   }
+  /// Indicates whether or not the token has certain character data.
+  /// @param other_data The data to check for equality with.
+  /// @returns True if the token data and @p other_data is the same, false otherwise.
+  bool has_data(const char* other_data) const noexcept;
 };
+
+/// Prints a token to a stream.
+/// @param out The stream to print the token to.
+/// @param t The token to print.
+/// @returns A reference to @p out.
+std::ostream& operator << (std::ostream& out, const Token& t);

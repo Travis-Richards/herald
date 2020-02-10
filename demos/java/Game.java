@@ -44,7 +44,7 @@ class Game {
   /** Sets the background of the room.
    * */
   static boolean setBackground() {
-    System.out.println("1 1\n");
+    System.out.println("-1 -1");
     return true;
   }
   /** Handles an "update axis" command.
@@ -108,18 +108,6 @@ class Game {
     response += "0 0 0 0 0 ";
     response += "3 3 3 3 3 ";
     response += "0 0 0 0 0 ";
-    // Frame matrix data
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "2 1 0 2 1 ";
-    response += "0 0 0 0 0 ";
-    // Flag matrix data
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0";
 
     System.out.println(response);
 
@@ -131,20 +119,6 @@ class Game {
   static boolean fillObjects() {
 
     String response = "";
-    // 5x5 matrix
-    response += "5 5 ";
-    // Texture matrix data
-    response += "1 1 2 1 1 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "3 3 3 3 3 ";
-    response += "0 0 0 0 0 ";
-    // Frame matrix data
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "0 0 0 0 0 ";
-    response += "2 1 0 2 1 ";
-    response += "0 0 0 0 0 ";
 
     System.out.println(response);
 

@@ -31,27 +31,7 @@ public:
   /// Parses for a size structure.
   parse_tree::Size parse_size() noexcept override;
   /// Parses for a matrix.
-  ScopedPtr<parse_tree::Matrix> parse_matrix() override {
-
-    auto size = parse_size();
-
-    auto matrix = parse_tree::Matrix::make(size);
-
-    if (!size.valid()) {
-      return matrix;
-    }
-
-    while (!done()) {
-      auto value = parse_integer();
-      if (!value.valid()) {
-        break;
-      } else {
-        matrix->add(value);
-      }
-    }
-
-    return matrix;
-  }
+  ScopedPtr<parse_tree::Matrix> parse_matrix() override;
 protected:
   /// Safely indicates if a token has a certain type.
   /// @param token A pointer of the token to check for.
@@ -103,9 +83,11 @@ protected:
 
 parse_tree::Integer ParserImpl::parse_integer() noexcept {
 
-  const auto* sign = get_token(0);
+  const auto* first = get_token(0);
 
-  std::size_t value_offset = has_type(sign, TokenType::NegativeSign) ? 1 : 0;
+  const auto* sign = (first && first->has_type(TokenType::NegativeSign)) ? first : nullptr;
+
+  std::size_t value_offset = sign ? 1 : 0;
 
   const auto* value = get_token(value_offset);
 
@@ -118,6 +100,35 @@ parse_tree::Size ParserImpl::parse_size() noexcept {
   auto w = parse_integer();
   auto h = parse_integer();
   return parse_tree::Size(w, h);
+}
+
+ScopedPtr<parse_tree::Matrix> ParserImpl::parse_matrix() {
+
+  auto size = parse_size();
+
+  auto matrix = parse_tree::Matrix::make(size);
+
+  if (!size.valid()) {
+    return matrix;
+  }
+
+  int w = 0;
+  int h = 0;
+
+  if (!size.to_values(w, h)) {
+    return matrix;
+  }
+
+  for (int i = 0; (i < (w * h)) && !done(); i++) {
+    auto value = parse_integer();
+    if (!value.valid()) {
+      break;
+    } else {
+      matrix->add(value);
+    }
+  }
+
+  return matrix;
 }
 
 } // namespace

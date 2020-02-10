@@ -39,6 +39,10 @@ public:
 
 } // namespace
 
+bool Integer::valid() const noexcept {
+  return value && value->has_type(TokenType::Number);
+}
+
 bool Integer::is_negative() const noexcept {
   return sign && sign->has_type(TokenType::NegativeSign);
 }
@@ -77,6 +81,12 @@ bool Integer::to_unsigned_value(unsigned int& n) const noexcept {
   }
 
   return true;
+}
+
+bool Size::to_values(int& w, int& h) const noexcept {
+  return width.to_signed_value(w)
+     && height.to_signed_value(h)
+     && (w > 0) && (h > 0);
 }
 
 ScopedPtr<Matrix> Matrix::make(const Size& s) {

@@ -1,10 +1,10 @@
 #include "MenuBuilder.h"
 
-#include "lang/Interpreter.h"
+#include "Interpreter.h"
+#include "Scene.h"
+
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-
-#include "Scene.h"
 
 namespace {
 
@@ -19,8 +19,9 @@ public:
   MenuBuilder(Scene* s, QObject* parent)
     : Interpreter(parent), scene(s) {}
   /// Interpreters the response to the command.
-  void interpret(Parser&) override {
-
+  /// @returns True on success, false on failure.
+  bool interpret(Parser&) override {
+    return true;
   }
 };
 

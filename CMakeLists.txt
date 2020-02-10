@@ -42,7 +42,6 @@ add_executable("herald" WIN32
   "source/ActiveGameList.h"
   "source/ActiveGameList.cxx"
   "source/Api.h"
-  "source/Api.cxx"
   "source/Background.h"
   "source/BackgroundView.h"
   "source/BackgroundView.cxx"
@@ -63,12 +62,16 @@ add_executable("herald" WIN32
   "source/GameList.cxx"
   "source/GameListView.h"
   "source/GameListView.cxx"
+  "source/Interpreter.h"
+  "source/Interpreter.cxx"
   "source/KeyController.h"
   "source/KeyController.cxx"
   "source/LineBuffer.h"
   "source/LineBuffer.cxx"
   "source/MainWindow.h"
   "source/MainWindow.cxx"
+  "source/Matrix.h"
+  "source/Matrix.cxx"
   "source/MenuBuilder.h"
   "source/MenuBuilder.cxx"
   "source/Object.h"
@@ -99,6 +102,8 @@ add_executable("herald" WIN32
   "source/TextureAnimationGroup.cxx"
   "source/Tile.h"
   "source/Tile.cxx"
+  "source/Writer.h"
+  "source/Writer.cxx"
   "icons.qrc")
 
 target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")

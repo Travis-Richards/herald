@@ -1,14 +1,14 @@
 #include "RoomBuilder.h"
 
-#include "lang/Interpreter.h"
-#include "lang/Matrix.h"
-#include "lang/ParseTree.h"
-#include "lang/Parser.h"
-#include "lang/ScopedPtr.h"
-
+#include "Interpreter.h"
+#include "Matrix.h"
 #include "Room.h"
 #include "Scene.h"
 #include "Tile.h"
+
+#include "lang/ParseTree.h"
+#include "lang/Parser.h"
+#include "lang/ScopedPtr.h"
 
 namespace {
 
@@ -21,29 +21,23 @@ public:
   /// @param scene The scene to put the data into.
   /// @param parent A pointer to the parent object.
   RoomBuilder(Scene* s, QObject* parent) : Interpreter(parent), scene(s) {}
-  /// Interprets the response from the game.
-  void interpret(Parser& parser) override {
-    auto response = parser.parse_build_room_response();
-    if (response) {
-      handle(*response);
+  /// Interprets the response from the game
+  /// after issuing a "build room" command.
+  /// @returns True on success, false on failure.
+  bool interpret(Parser& parser) override {
+
+    auto tm_tree = parser.parse_matrix();
+    if (!check(*tm_tree)) {
+      return false;
     }
-  }
-protected:
-  /// Handles the build room response.
-  /// @param response The response to handle.
-  void handle(const BuildRoomResponse& response) {
+
+    auto tm = Matrix::make(*tm_tree);
 
     auto* room = scene->get_room();
+    room->resize(tm->width(), tm->height());
+    room->map_texture_matrix(*tm);
 
-    const auto& tm = response.get_texture_matrix();
-
-    room->resize(tm.width(), tm.height());
-
-    room->map_texture_matrix(tm);
-
-    room->map_frame_matrix(response.get_frame_matrix());
-
-    emit finished();
+    return true;
   }
 };
 

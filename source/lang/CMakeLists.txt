@@ -9,7 +9,8 @@ add_library("herald-lang" STATIC
   "Parser.cxx"
   "SyntaxChecker.h"
   "SyntaxChecker.cxx"
-  "Token.h")
+  "Token.h"
+  "Token.cxx")
 
 if (DEFINED cxxflags)
   target_compile_options("herald-lang" PRIVATE ${cxxflags})
@@ -22,6 +23,7 @@ find_package(GTest)
 if (GTest_FOUND)
 
   add_executable("herald-lang-test"
+    "LexerTest.cxx"
     "ParserTest.cxx"
     "SyntaxCheckerTest.cxx")
 

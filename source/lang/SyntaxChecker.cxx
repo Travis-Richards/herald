@@ -42,8 +42,8 @@ public:
     const auto* sign = integer.get_sign_token();
 
     if (sign && !sign->has_type(TokenType::NegativeSign)) {
-      auto formatter = [](std::ostream& err) {
-        err << "Integer sign symbol invalid.";
+      auto formatter = [sign](std::ostream& err) {
+        err << "Integer sign symbol " << *sign << " invalid.";
       };
       format_error(SyntaxErrorID::InvalidSignSymbol, formatter);
     }
@@ -55,9 +55,9 @@ public:
         err << "Missing integer value.";
       };
       format_error(SyntaxErrorID::MissingIntegerValue, formatter);
-    } else if (value->has_type(TokenType::Number)) {
-      auto formatter = [](std::ostream& err) {
-        err << "Invalid integer value.";
+    } else if (!value->has_type(TokenType::Number)) {
+      auto formatter = [value](std::ostream& err) {
+        err << "Invalid integer value " << *value << ".";
       };
       format_error(SyntaxErrorID::InvalidIntegerValue, formatter);
     }

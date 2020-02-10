@@ -16,8 +16,9 @@ class Api : public QObject {
 public:
   /// Constructs the API.
   /// @param parent A pointer to the parent object.
-  Api(QObject* parent = nullptr);
-  virtual ~Api();
+  Api(QObject* parent = nullptr) : QObject(parent) {}
+  /// Just a stub.
+  virtual ~Api() {}
   /// Builds a room from the game.
   /// @param scene The scene to put the menu data into.
   /// @returns True on success, false on failure.

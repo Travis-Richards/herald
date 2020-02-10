@@ -100,8 +100,10 @@ Token LexerImpl::scan() noexcept {
     return complete_space();
   } else if ((first == '\'') || (first == '"')) {
     return complete_string_literal(first);
-  } else if ((first == '-') && is_digit(peek(1))) {
+  } else if (is_digit(peek(0))) {
     return complete_number();
+  } else if (first == '-') {
+    return complete(TokenType::NegativeSign, 1);
   }
 
   if (is_letter(first) || (first == '_')) {

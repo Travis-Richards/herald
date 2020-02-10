@@ -83,9 +83,7 @@ public:
   /// @returns True on success, false on failure.
   bool to_unsigned_value(unsigned int& value) const noexcept;
   /// Indicates whether or not the integer is valid.
-  inline bool valid() const noexcept {
-    return value;
-  }
+  bool valid() const noexcept;
 };
 
 /// Specifies width and height.
@@ -115,6 +113,9 @@ public:
   inline const Integer& get_height() const noexcept {
     return height;
   }
+  /// Converts the width and height nodes to integers.
+  /// @returns True on success, false on failure.
+  bool to_values(int &w, int& h) const noexcept;
   /// Quickly determines wether
   /// or not the size is valid.
   inline bool valid() const noexcept {
