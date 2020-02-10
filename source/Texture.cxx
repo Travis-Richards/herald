@@ -20,7 +20,7 @@ public:
   /// @param tile_size The size of the tile that
   /// teh texture is for.
   QBrush as_brush(const QSize& tile_size) const override {
-    return QBrush(pixmap.scaled(tile_size));
+    return QBrush(pixmap.scaled(tile_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
   }
 };
 
