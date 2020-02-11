@@ -8,3 +8,8 @@ It is meant to be simple, and to work with any programming language.
 Games are run as standalone programs, communicating through standard
 IO descriptors. This way, games can be designed using simple print
 and read line statements.
+
+If you're going to build this from source, check out one of the tutorials:
+
+ - [Building on Windows](docs/BuildingOnWindows.md)
+ - [Building on Ubuntu](docs/BuildingOnUbuntu.md)
