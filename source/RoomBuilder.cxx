@@ -35,7 +35,7 @@ public:
 
     auto* room = scene->get_room();
     room->resize(tm->width(), tm->height());
-    room->map_texture_matrix(*tm);
+    room->map_animation_matrix(*tm);
 
     return true;
   }

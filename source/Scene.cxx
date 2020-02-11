@@ -94,12 +94,17 @@ public slots:
     background_view->resize_view(size);
     background_view->map(background, *textures);
 
+    room->set_mod_flags();
     room_view->resize_view(size);
+    room_view->map(room, textures);
   }
 protected slots:
   /// Synchronized tile changes with the graphics scene.
   void sync() {
     room_view->map(room, textures);
+    /// At this point, all tile modifications should
+    /// be accounted for and we don't need to handle them again.
+    room->clear_mod_flags();
   }
   /// Updates the frame for a particular texture ID.
   /// @param texture The ID of the texture being updated.

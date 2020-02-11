@@ -101,7 +101,6 @@ add_executable("herald" WIN32
   "source/TextureAnimationGroup.h"
   "source/TextureAnimationGroup.cxx"
   "source/Tile.h"
-  "source/Tile.cxx"
   "source/Writer.h"
   "source/Writer.cxx"
   "icons.qrc")

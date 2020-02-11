@@ -5,43 +5,56 @@ class Tile {
 public:
   /// Constructs the tile instance.
   /// @param parent A pointer to the parent object.
-  constexpr Tile() noexcept
-    : flags(0),
-      frame(0),
-      frame_offset(0),
-      texture(0) { }
-  /// Indicates whether or not the tile has a particular texture.
-  bool has_texture(int texture) const noexcept;
-  /// Accesses flags associated with the tile.
-  int get_flags() const noexcept;
+  constexpr Tile() noexcept : mod_flag(true), animation(0), frame(0) { }
+  /// Changes the animation used by the tile.
+  void change_animation(int index) noexcept {
+    mod_flag = true;
+    animation = index;
+  }
+  /// Updates the frame index of the animation.
+  void change_frame(int index) noexcept {
+    mod_flag = frame != index;
+    frame = index;
+  }
+  /// Clears the modification flag.
+  void clear_mod_flag() noexcept {
+    mod_flag = false;
+  }
   /// Gets the index of the frame that
   /// this tile is currently at.
-  int get_frame() const noexcept;
+  int get_frame() const noexcept {
+    return frame;
+  }
   /// Gets the index of the texture animation
   /// assigned to this tile.
-  int get_texture() const noexcept;
-  /// Assigns flags to the tile.
-  void set_flags(int flags) noexcept;
-  /// Assigns the frame index.
-  void set_frame(int index) noexcept;
-  /// Assigns the frame offset.
-  /// @param offset The frame offset to assign.
-  void set_frame_offset(int offset) noexcept;
-  /// Assigns the texture animation index.
-  void set_texture(int index) noexcept;
+  int get_animation() const noexcept {
+    return animation;
+  }
+  /// Indicates whether or not the tile has a particular texture.
+  bool has_animation(int a) const noexcept {
+    return animation == a;
+  }
+  /// Indicates whether or not the tile
+  /// was modified.
+  bool modified() const noexcept {
+    return mod_flag;
+  }
+  /// Manually assigns the mod flag.
+  /// This should only be done rarely to
+  /// force a cache miss. As of writing this,
+  /// the only use for this function is to
+  /// force a redraw operation.
+  void set_mod_flag() noexcept {
+    mod_flag = true;
+  }
 private:
-  /// The flags assigned to the tile.
-  int flags;
+  /// A modification flag, used to that
+  /// tiles are only drawn when modified.
+  bool mod_flag;
+  /// The index of the texture animation
+  /// assigned to this tile.
+  int animation;
   /// The frame that the texture animation
   /// for the tile is currently at.
   int frame;
-  /// The frame offset is a value added to
-  /// the current frame to offset the tile
-  /// animation time and make it appear to
-  /// be different from other tiles with
-  /// the same animation.
-  int frame_offset;
-  /// The index of the texture animation
-  /// assigned to this tile.
-  int texture;
 };

@@ -17,6 +17,8 @@ public:
   Room(QObject* parent) : QObject(parent) {}
   /// Just a stub.
   virtual ~Room() {}
+  /// Clears the modification flags for the tiles.
+  virtual void clear_mod_flags() = 0;
   /// Indicates whether or not the room is empty.
   /// @returns True if the room is empty, false otherwise.
   inline bool empty() const noexcept {
@@ -29,16 +31,15 @@ public:
   virtual const Tile* get_tile(int x, int y) const noexcept = 0;
   /// Accesses the height of the room.
   virtual int height() const noexcept  = 0;
-  /// Maps the texture matrix onto the room.
-  /// @param matrix The texture matrix to map onto the room.
-  virtual void map_texture_matrix(const Matrix& matrix) = 0;
-  /// Maps the frame matrix onto the room.
-  /// @param matrix The frame matrix to map.
-  virtual void map_frame_matrix(const Matrix& matrix) = 0;
+  /// Maps the animation matrix onto the room.
+  /// @param matrix The animation matrix to map onto the room.
+  virtual void map_animation_matrix(const Matrix& matrix) = 0;
   /// Resizes the room.
   /// @param width The width to assign the room.
   /// @param height The height to assign the room.
   virtual void resize(int width, int height) = 0;
+  /// Sets the modification flag for each tile.
+  virtual void set_mod_flags() noexcept = 0;
   /// Reassigns a frame index to all tiles containing a particular texture.
   /// @param texture The index of the texture being updated.
   /// @param frame The new frame index of the texture.

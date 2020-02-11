@@ -22,33 +22,34 @@ public:
     w = 0;
     h = 0;
   }
+  /// Clears the tile mod flags.
+  void clear_mod_flags() noexcept override {
+    for (auto& tile : tiles) {
+      tile.clear_mod_flag();
+    }
+  }
   /// Accesses a tile at specified coordinates.
   const Tile* get_tile(int x, int y) const noexcept override {
-    if ((x < w) && (y < h)) {
-      return &tiles[(y * w) + x];
-    } else {
+
+    if ((x < 0)
+     || (y < 0)
+     || (x >= w)
+     || (y >= h)) {
       return nullptr;
     }
+
+    return &tiles[(y * w) + x];
   }
   /// Accesses the height of the room.
   int height() const noexcept override {
     return h;
   }
-  /// Maps the texture matrix onto the tiles.
-  /// @param matrix The texture matrix to map onto the tiles.
-  void map_texture_matrix(const Matrix& matrix) override {
+  /// Maps the animation matrix onto the tiles.
+  /// @param matrix The animation matrix to map onto the tiles.
+  void map_animation_matrix(const Matrix& matrix) override {
     for (int y = 0; y < matrix.height(); y++) {
       for (int x = 0; x < matrix.width(); x++) {
-        set_texture_of(x, y, matrix.at(x, y));
-      }
-    }
-  }
-  /// Maps the frame matrix onto the tiles.
-  /// @param matrix The frame matrix to map onto the tiles.
-  void map_frame_matrix(const Matrix& matrix) override {
-    for (int y = 0; y < matrix.height(); y++) {
-      for (int x = 0; x < matrix.width(); x++) {
-        set_frame_of(x, y, matrix.at(x, y));
+        set_animation_of(x, y, matrix.at(x, y));
       }
     }
   }
@@ -60,11 +61,16 @@ public:
     h = height;
     tiles.resize(w * h);
   }
-  /// Updates the active frame of all tiles containing a particular texture.
-  void update_tile_frames(int texture, int frame) noexcept override {
+  void set_mod_flags() noexcept override {
     for (auto& tile : tiles) {
-      if (tile.has_texture(texture)) {
-        tile.set_frame(frame);
+      tile.set_mod_flag();
+    }
+  }
+  /// Updates the active frame of all tiles containing a particular texture.
+  void update_tile_frames(int animation, int frame) noexcept override {
+    for (auto& tile : tiles) {
+      if (tile.has_animation(animation)) {
+        tile.change_frame(frame);
       }
     }
   }
@@ -73,22 +79,13 @@ public:
     return w;
   }
 protected:
-  /// Sets the frame offset of a tile.
+  /// Sets the animation of a tile.
   /// @param x The X coordinate of the tile.
   /// @param y The Y coordinate of the tile.
-  /// @param frame The frame offset to assign.
-  void set_frame_of(int x, int y, int frame) {
-    modify(x, y, [frame](Tile& tile) {
-      tile.set_frame_offset(frame);
-    });
-  }
-  /// Sets the texture of a tile.
-  /// @param x The X coordinate of the tile.
-  /// @param y The Y coordinate of the tile.
-  /// @param texture The texture to assign.
-  void set_texture_of(int x, int y, int texture) {
-    modify(x, y, [texture](Tile& tile) {
-      tile.set_texture(texture);
+  /// @param animation The animation index to assign.
+  void set_animation_of(int x, int y, int animation) {
+    modify(x, y, [animation](Tile& tile) {
+      tile.change_animation(animation);
     });
   }
   /// Modifies a tile.

@@ -120,24 +120,27 @@ protected:
   /// @param tile The tile to map.
   /// This may be null in the case
   /// of an out of bounds condition.
-  /// @param textures The textures
-  /// to get the image data from.
-  bool map_tile(TileView* tile_view, const Tile* tile, const TextureAnimationGroup* textures) {
+  /// @param animation_group The animation group
+  /// to get the frame data from.
+  bool map_tile(TileView* tile_view, const Tile* tile, const TextureAnimationGroup* animation_group) {
 
     if (!tile) {
       return false;
+    } else if (!tile->modified()) {
+      // cache hit
+      return true;
     }
 
-    auto texture_id = tile->get_texture();
+    auto animation_id = tile->get_animation();
 
-    auto* texture = textures->at(texture_id);
-    if (!texture) {
+    auto* animation = animation_group->at(animation_id);
+    if (!animation) {
       return false;
     }
 
     auto frame_id = tile->get_frame();
 
-    auto* frame = texture->get_frame(frame_id);
+    auto* frame = animation->get_frame(frame_id);
     if (!frame) {
       return false;
     }
