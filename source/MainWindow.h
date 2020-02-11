@@ -6,6 +6,7 @@ class CentralWidget;
 class GameList;
 class QAction;
 class QMenu;
+class SettingsDialog;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -34,6 +35,8 @@ public slots:
 protected slots:
   /// Opens a game specified from a dialog window.
   void open_from_dialog();
+  /// Opens up the settings dialog.
+  void open_settings_dialog();
 protected:
   /// Overrides the close event for the main window.
   /// This is so that the engine can be notified that
@@ -45,6 +48,8 @@ private:
   /// back and forth from a graphics view to
   /// a game list view.
   CentralWidget* central_widget;
+  /// The settings dialog, hidden by default.
+  SettingsDialog* settings_dialog;
   /// Contains buttons for adding games.
   QMenu* file_menu;
   /// Opens a new game.

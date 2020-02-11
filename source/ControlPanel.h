@@ -29,6 +29,8 @@ signals:
   void pause_requested();
   /// Emitted when the "save" button is clicked.
   void save_requested();
+  /// Emitted when the "settings" button is clicked.
+  void settings_requested();
   /// Emitted when the "delete" button is clicked.
   void delete_requested();
   /// Emitted when a game is clicked in the game list view.
@@ -50,6 +52,8 @@ private:
   QPushButton* pause_button;
   /// Saves the game state.
   QPushButton* save_button;
+  /// Opens the game engine settings.
+  QPushButton* settings_button;
   /// Deletes a game from the game list.
   QPushButton* trash_button;
   /// A view of the available games to play.

@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include "CentralWidget.h"
+#include "SettingsDialog.h"
 
 #ifndef NO_CONFIG
 #include "Config.h"
@@ -10,6 +11,8 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow() {
+
+  settings_dialog = SettingsDialog::make(this);
 
   central_widget = new CentralWidget(this);
 
@@ -23,10 +26,11 @@ MainWindow::MainWindow() {
 
   setWindowTitle(title);
 
-  connect(central_widget, &CentralWidget::open_requested,   this, &MainWindow::open_from_dialog);
-  connect(central_widget, &CentralWidget::play_requested,   this, &MainWindow::play_requested);
-  connect(central_widget, &CentralWidget::delete_requested, this, &MainWindow::delete_requested);
-  connect(central_widget, &CentralWidget::game_selected,    this, &MainWindow::game_selected);
+  connect(central_widget, &CentralWidget::delete_requested,   this, &MainWindow::delete_requested);
+  connect(central_widget, &CentralWidget::game_selected,      this, &MainWindow::game_selected);
+  connect(central_widget, &CentralWidget::open_requested,     this, &MainWindow::open_from_dialog);
+  connect(central_widget, &CentralWidget::play_requested,     this, &MainWindow::play_requested);
+  connect(central_widget, &CentralWidget::settings_requested, this, &MainWindow::open_settings_dialog);
 }
 
 void MainWindow::update_game_list(const GameList& game_list) {
@@ -41,6 +45,10 @@ void MainWindow::open_from_dialog() {
   }
 
   emit open_requested(path);
+}
+
+void MainWindow::open_settings_dialog() {
+  settings_dialog->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent* close_event) {
