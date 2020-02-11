@@ -34,6 +34,8 @@ public:
   /// @param parent A pointer to the parent object.
   SceneImpl(QObject* parent) : Scene(parent), textures(nullptr) {
 
+    setBackgroundBrush(QBrush(Qt::black));
+
     background_view = BackgroundView::make(nullptr);
 
     object_map = ObjectMap::make(this);
