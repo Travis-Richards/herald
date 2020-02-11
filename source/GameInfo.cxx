@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 #include <QString>
 #include <QStringList>
 
@@ -55,10 +56,13 @@ QString executable_name(const QString& base) {
 /// Finds a java executable program.
 /// @returns A java executable path.
 QString find_java() {
-  // TODO : Search in:
-  //   PATH
-  //   JAVA_HOME
-  return executable_name("java");
+  QSettings settings;
+  auto java_setting = settings.value("Java").toString();
+  if (java_setting.isEmpty()) {
+    return executable_name("java");
+  } else {
+    return java_setting;
+  }
 }
 
 /// The implementation of the game info interface.

@@ -14,8 +14,6 @@
 #include <QStringList>
 #include <QWidget>
 
-#include <iostream>
-
 namespace {
 
 /// Implements the active game interface.
