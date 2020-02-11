@@ -56,11 +56,14 @@ signals:
   /// This signal is emitted when the background
   /// finished being assigned.
   void background_set();
+  /// This signal is emitted when a runtime
+  /// error occurs with the game. Typically
+  /// this signal should interrupt game execution.
+  void error_occurred(const QString& line);
   /// This signal is emitted when the game
-  /// sends an error message. It should not
-  /// be treated as a fatal error but should
-  /// be logged somewhere.
-  void error_log(const QString& line);
+  /// logs an error message. This signal should
+  /// not interrupt game execution.
+  void error_logged(const QString& line);
   /// This signal is emitted when a room
   /// is done being built.
   void room_built();

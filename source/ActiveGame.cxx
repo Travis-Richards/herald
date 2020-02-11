@@ -142,7 +142,8 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   error_log = new ErrorLog(nullptr);
 
-  connect(api, &Api::error_log, error_log, &ErrorLog::log);
+  connect(api, &Api::error_logged, error_log, &ErrorLog::log);
+  connect(api, &Api::error_occurred, error_log, &ErrorLog::log_fatal);
   connect(api, &Api::background_set, this, &ActiveGameImpl::handle_set_background);
   connect(api, &Api::room_built, this, &ActiveGameImpl::handle_built_room);
   connect(api, &Api::object_map_built, this, &ActiveGameImpl::handle_built_object_map);

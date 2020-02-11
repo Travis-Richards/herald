@@ -22,5 +22,23 @@ void ErrorLog::log(const QString& line) {
     show();
   }
 
-  text_edit->append(line);
+  text_edit->textCursor().insertText(line);
+}
+
+void ErrorLog::log_fatal(const QString& line) {
+
+  if (!line.isEmpty() && isHidden()) {
+    show();
+  }
+
+  QString header;
+  header += "<b>";
+  header += "<font color=\"red\">";
+  header += "fatal error:";
+  header += "</font>";
+  header += " ";
+
+  QString footer = "</b>";
+
+  text_edit->textCursor().insertHtml(header + line + footer);
 }

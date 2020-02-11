@@ -43,7 +43,9 @@ public:
     err_line_buffer = LineBuffer::from_process_stderr(process, this);
 
     connect(out_line_buffer, &LineBuffer::line, this, &ProcessApi::handle_line);
-    connect(err_line_buffer, &LineBuffer::line, this, &Api::error_log);
+    connect(err_line_buffer, &LineBuffer::line, this, &Api::error_logged);
+
+    connect(&process, &QProcess::errorOccurred, this, &ProcessApi::handle_process_error);
   }
   /// Builds a room.
   /// @returns True on success, false on failure.
@@ -153,7 +155,33 @@ protected slots:
   }
   /// Handles a syntax error from the response.
   void handle_syntax_error(const SyntaxError& error) {
-    emit error_log(QString(error.get_description()));
+    emit error_occurred(QString(error.get_description()));
+  }
+  /// Handles an error emitted by the process.
+  /// @param error A code describing the error.
+  void handle_process_error(QProcess::ProcessError error) {
+    QString desc;
+    switch (error) {
+      case QProcess::FailedToStart:
+        desc = "Failed to start process '" + process.program() + "'.";
+        break;
+      case QProcess::Crashed:
+        desc = "Game process crashed.";
+        break;
+      case QProcess::Timedout:
+        desc = "Game startup timed out.";
+        break;
+      case QProcess::WriteError:
+        desc = "Failed to write data to game.";
+        break;
+      case QProcess::ReadError:
+        desc = "Failed to read data from game.";
+        break;
+      case QProcess::UnknownError:
+        desc = "Unknown process error occurred.";
+        break;
+    }
+    emit error_occurred(desc);
   }
 };
 

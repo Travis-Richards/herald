@@ -16,6 +16,9 @@ public slots:
   /// Logs a message into the error log.
   /// @param message The message to put onto the log.
   void log(const QString& message);
+  /// Logs a fatal message to the error log.
+  /// @param message The message to put into the log.
+  void log_fatal(const QString& message);
 private:
   /// The text edit widget to put the messages into.
   QTextEdit* text_edit;
