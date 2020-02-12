@@ -13,3 +13,7 @@ If you're going to build this from source, check out one of the tutorials:
 
  - [Building on Windows](docs/BuildingOnWindows.md)
  - [Building on Ubuntu](docs/BuildingOnUbuntu.md)
+
+For tutorials on developing games for this game engine:
+
+ - [Hello World on Windows](https://tay10r.github.io/herald-tutorials/intro-windows.html)
