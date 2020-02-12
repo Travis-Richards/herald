@@ -22,3 +22,7 @@ deploy:
   on:
     repo: tay10r/herald
     tags: true
+    branches:
+      only:
+        - master
+  skip_cleanup: true
