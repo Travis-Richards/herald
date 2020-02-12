@@ -104,7 +104,7 @@ static int build_room() {
 }
 
 static int build_object_map() {
-  printf("\n");
+  printf("1 1 8 0\n");
   fflush(stdout);
   return 1;
 }
