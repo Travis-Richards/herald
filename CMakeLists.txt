@@ -83,6 +83,7 @@ add_executable("herald" WIN32
   "source/MenuBuilder.h"
   "source/MenuBuilder.cxx"
   "source/Object.h"
+  "source/Object.cxx"
   "source/ObjectMap.h"
   "source/ObjectMap.cxx"
   "source/ObjectMapBuilder.h"

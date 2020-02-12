@@ -8,9 +8,9 @@
 
 #include <QBrush>
 #include <QGraphicsRectItem>
-#include <QList>
 #include <QPen>
 #include <QSize>
+#include <QVector>
 
 namespace {
 
@@ -59,7 +59,7 @@ class ObjectMapViewImpl final : public ObjectMapView {
   /// The height of the map.
   int h;
   /// The object views of the map.
-  QList<ObjectView*> object_views;
+  QVector<ObjectView*> object_views;
   /// The size of the window that
   /// the objects are being viewed on.
   QSize window_size;
@@ -75,7 +75,11 @@ public:
   /// @param textures The textures to map onto the objects.
   void map(const ObjectMap& object_map, const TextureAnimationGroup& textures) override {
 
-    auto count = min(object_map.size(), object_views.size());
+    for (auto i = object_views.size(); i < object_map.size(); i++) {
+      object_views.push_back(new ObjectView(this));
+    }
+
+    auto count = object_views.size();
 
     for (int i = 0; i < count; i++) {
       map_object(object_views[i], object_map.at(i), textures);
@@ -92,23 +96,28 @@ public:
   /// @param size The window size to adjust the view to.
   void resize_view(const QSize& size) override {
 
-    auto object_w = w ? (size.width()  / w) : 0;
-    auto object_h = h ? (size.height() / h) : 0;
+    auto tile_size = calc_tile_size();
 
     for (auto* object_view : object_views) {
 
       auto x = object_view->get_x();
       auto y = object_view->get_y();
 
-      object_view->setRect(x * object_w,
-                           y * object_h,
-                           object_w,
-                           object_h);
+      object_view->setRect(x * tile_size.width(),
+                           y * tile_size.height(),
+                           tile_size.width(),
+                           tile_size.height());
     }
 
     window_size = size;
   }
 protected:
+  /// Calculates the size of a tile.
+  QSize calc_tile_size() const {
+    auto object_w = w ? (window_size.width()  / w) : 0;
+    auto object_h = h ? (window_size.height() / h) : 0;
+    return QSize(object_w, object_h);
+  }
   /// Maps a single object onto the view.
   /// @param object_view The object view to update.
   /// @param object The object to map.
@@ -129,14 +138,19 @@ protected:
       return false;
     }
 
-    auto object_rect = object_view->rect();
+    auto tile_size = calc_tile_size();
 
-    auto object_size = QSize(object_rect.width(),
-                             object_rect.height());
+    auto x = object->get_x();
+    auto y = object->get_y();
 
-    object_view->setBrush(texture->as_brush(object_size));
-    object_view->set_x(object->get_x());
-    object_view->set_y(object->get_y());
+    auto object_rect = QRectF(x * tile_size.width(),
+                              y * tile_size.height(),
+                              tile_size.width(),
+                              tile_size.height());
+
+    object_view->setBrush(texture->as_brush(tile_size));
+
+    object_view->setRect(object_rect);
 
     return true;
   }

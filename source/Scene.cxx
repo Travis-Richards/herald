@@ -92,6 +92,11 @@ public:
   /// Updates the view entities of the scene.
   void update_view() override {
 
+    object_map->map_actions(actions);
+
+    object_map_view->resize(room->width(), room->height());
+    object_map_view->map(*object_map, *textures);
+
     background_view->map(background, *textures);
 
     room_view->resize(room->width(), room->height());
@@ -104,6 +109,8 @@ public slots:
     background_view->resize_view(size);
     background_view->map(background, *textures);
 
+    object_map_view->resize_view(size);
+
     room->set_mod_flags();
     room_view->resize_view(size);
     room_view->map(room, textures);
@@ -111,7 +118,11 @@ public slots:
 protected slots:
   /// Synchronized tile changes with the graphics scene.
   void sync() {
+
+    object_map_view->map(*object_map, *textures);
+
     room_view->map(room, textures);
+
     /// At this point, all tile modifications should
     /// be accounted for and we don't need to handle them again.
     room->clear_mod_flags();
@@ -121,6 +132,7 @@ protected slots:
   /// @param frame The frame to assign the tile.
   void update_animation_frame(int texture, int frame) {
     room->update_tile_frames(texture, frame);
+    object_map->update_animations(texture, frame);
   }
 };
 

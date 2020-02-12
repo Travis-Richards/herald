@@ -1,5 +1,7 @@
 #pragma once
 
+class Action;
+
 /// Represents a single object within a room.
 /// This is not related, in any way, to the idea
 /// of an object in object oriented programming or
@@ -58,5 +60,27 @@ public:
   /// in terms of tile location.
   inline float get_y() const noexcept {
     return y;
+  }
+  /// Indicates whether or not an object owns an action.
+  /// @param a The action to check for.
+  /// @returns True if the actions match, false otherwise.
+  inline bool has_action(int a) const noexcept {
+    return action == a;
+  }
+  /// Indicates whether or not an object has a certain animation.
+  /// @param a The animation to check for.
+  /// @returns True if the object has the animation, false otherwise.
+  inline bool has_animation(int a) const noexcept {
+    return animation == a;
+  }
+  /// Maps an action onto this object.
+  /// @param index The index of this action.
+  /// @param action The action to map.
+  /// This may be a null pointer.
+  void map_action(int index, const Action* action) noexcept;
+  /// Sets the new frame of the object.
+  /// @param f The new frame to assign the object.
+  void update_frame(int f) noexcept {
+    frame = f;
   }
 };
