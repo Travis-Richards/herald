@@ -1,12 +1,10 @@
 #pragma once
 
-#include <QObject>
-
 /// Represents a single object within a room.
 /// This is not related, in any way, to the idea
 /// of an object in object oriented programming or
 /// in the Qt object model.
-class Object : public QObject {
+class Object final {
   /// The action the object
   /// is currently performing.
   int action;
@@ -26,11 +24,12 @@ class Object : public QObject {
   /// in terms of tile location.
   float y;
 public:
-  /// Constructs the base object.
-  /// @param parent A pointer to the parent Qt object.
-  Object(int a, int x_, int y_, QObject* parent)
-    : QObject(parent),
-      action(a),
+  /// Constructs the object.
+  /// @param a The index of the action to assign the object.
+  /// @param x_ The X coordinate of the object.
+  /// @param y_ The Y coordinate of the object.
+  Object(int a, int x_, int y_)
+    : action(a),
       animation(0),
       frame(0),
       frame_offset(0),

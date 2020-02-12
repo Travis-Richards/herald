@@ -6,7 +6,7 @@
 #include "Interpreter.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
-#include "ObjectFiller.h"
+#include "ObjectMapBuilder.h"
 #include "RoomBuilder.h"
 #include "Scene.h"
 #include "Writer.h"
@@ -97,7 +97,7 @@ public:
       delete interpreter;
     }
 
-    interpreter = make_object_filler(scene, this);
+    interpreter = make_object_map_builder(scene, this);
 
     connect(interpreter, &Interpreter::finished, this, &Api::object_map_built);
 

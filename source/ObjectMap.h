@@ -18,7 +18,7 @@ public:
   virtual ~ObjectMap() {}
   /// Adds an object to the object map.
   /// @param object The object to add.
-  virtual void add(Object* object) = 0;
+  virtual void add(const Object& object) = 0;
   /// Gets an object at a specified index.
   /// @param index The index of the object to get.
   /// @returns On success, a pointer to the object.

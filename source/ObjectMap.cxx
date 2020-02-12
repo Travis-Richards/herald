@@ -1,5 +1,7 @@
 #include "ObjectMap.h"
 
+#include "Object.h"
+
 #include <QList>
 
 namespace {
@@ -7,14 +9,14 @@ namespace {
 /// Implements the object map interface.
 class ObjectMapImpl final : public ObjectMap {
   /// The objects part of the map.
-  QList<Object*> objects;
+  QList<Object> objects;
 public:
   /// Constructs the object map implementation.
   /// @param parent A pointer to the parent Qt object.
   ObjectMapImpl(QObject* parent) : ObjectMap(parent) { }
   /// Adds an object to the map.
   /// @param object The object to add to the map.
-  void add(Object* object) override {
+  void add(const Object& object) override {
     objects.push_back(object);
   }
   /// Accesses an object at a specific index.
@@ -24,7 +26,7 @@ public:
     } else if (index >= objects.size()) {
       return nullptr;
     } else {
-      return objects[index];
+      return &objects[index];
     }
   }
   /// Accesses the number of objects in the map.
