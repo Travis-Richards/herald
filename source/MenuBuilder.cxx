@@ -10,14 +10,13 @@ namespace {
 
 /// Used for constructing the game menu.
 class MenuBuilder final : public Interpreter {
-  /// The scene to build the menu onto.
-  Scene* scene;
 public:
   /// Constructs an instance of the menu builder.
   /// @param s The scene to put the menu onto.
   /// @param parent A pointer to the parent object.
-  MenuBuilder(Scene* s, QObject* parent)
-    : Interpreter(parent), scene(s) {}
+  MenuBuilder(Scene* s, QObject* parent) : Interpreter(parent) {
+    (void)s;
+  }
   /// Interpreters the response to the command.
   /// @returns True on success, false on failure.
   bool interpret(Parser&) override {

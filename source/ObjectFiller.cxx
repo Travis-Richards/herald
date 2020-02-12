@@ -13,14 +13,12 @@ namespace {
 
 /// Used to insert objects into a scene.
 class ObjectFiller final : public Interpreter {
-  /// A pointer to the scene to put the objects into.
-  Scene* scene;
 public:
   /// Constructs an object filler.
   /// @param scene_ The scene to put the objects into.
   /// @param parent A pointer to the parent object.
-  ObjectFiller(Scene* scene_, QObject* parent) : Interpreter(parent), scene(scene_) {
-
+  ObjectFiller(Scene* s, QObject* parent) : Interpreter(parent) {
+    (void)s;
   }
   /// Interprets the response to the "add objects" command.
   /// @param parser The parser to parse the response with.

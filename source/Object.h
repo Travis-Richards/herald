@@ -36,6 +36,11 @@ public:
       frame_offset(0),
       x(x_),
       y(y_) {}
+  /// Accesses the index of the action
+  /// this object is currently performing.
+  inline int get_action() const noexcept {
+    return action;
+  }
   /// Accesses the index of the animation
   /// the object is currently performing.
   inline int get_animation() const noexcept {

@@ -4,9 +4,13 @@ project("herald" VERSION 0.2.0)
 
 # Detect compiler, adjust CXX flags
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set (cxxflags -Wall -Wextra -Werror -Wfatal-errors)
-endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+ OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+
+  set (cxxflags -Wall -Wextra -Werror -Wfatal-errors -std=c++11)
+
+endif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 
 # Configure the build time header
 # so that we know what APIs we can use.
