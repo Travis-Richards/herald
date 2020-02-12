@@ -15,8 +15,8 @@ QByteArray Writer::exit() {
   return QByteArray("exit\n");
 }
 
-QByteArray Writer::fill_objects() {
-  return QByteArray("fill_objects\n");
+QByteArray Writer::build_object_map() {
+  return QByteArray("build_object_map\n");
 }
 
 QByteArray Writer::set_background() {

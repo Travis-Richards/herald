@@ -188,7 +188,7 @@ void ActiveGameImpl::handle_set_background() {
 }
 
 void ActiveGameImpl::handle_built_room() {
-  api->fill_objects(scene);
+  api->build_object_map(scene);
 }
 
 void ActiveGameImpl::handle_built_object_map() {

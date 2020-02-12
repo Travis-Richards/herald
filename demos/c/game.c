@@ -24,7 +24,7 @@ static int build_room();
 /** Fills the room with objects.
  * @returns Always returns non-zero.
  * */
-static int fill_objects();
+static int build_object_map();
 
 /** Handles a command issued by the game engine.
  * @param command The command that was issued.
@@ -103,7 +103,7 @@ static int build_room() {
   return 1;
 }
 
-static int fill_objects() {
+static int build_object_map() {
   printf("\n");
   fflush(stdout);
   return 1;
@@ -115,8 +115,8 @@ static int handle_command(const char* command) {
     return 0;
   } else if (strcmp(command, "build_room") == 0) {
     return build_room();
-  } else if (strcmp(command, "fill_objects") == 0) {
-    return fill_objects();
+  } else if (strcmp(command, "build_object_map") == 0) {
+    return build_object_map();
   } else if (strcmp(command, "set_background") == 0) {
     printf("20 0\n");
     fflush(stdout);

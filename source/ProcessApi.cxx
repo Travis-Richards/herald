@@ -81,7 +81,7 @@ public:
   /// Fills the current room with objects.
   /// @param scene The scene to fill.
   /// @returns True on success, false on failure.
-  bool fill_objects(Scene* scene) override {
+  bool build_object_map(Scene* scene) override {
 
     if (interpreter) {
       delete interpreter;
@@ -93,7 +93,7 @@ public:
 
     connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
 
-    process.write(Writer::fill_objects());
+    process.write(Writer::build_object_map());
 
     return true;
   }

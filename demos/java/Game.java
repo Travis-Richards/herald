@@ -21,12 +21,12 @@ class Game {
     String command = scanner.nextLine();
 
     switch (command) {
+      case "build_object_map":
+        return buildObjectMap();
       case "build_room":
         return buildRoom();
       case "exit":
         return false;
-      case "fill_objects":
-        return fillObjects();
       case "set_background":
         return setBackground();
       case "update_axis":
@@ -94,6 +94,18 @@ class Game {
     System.err.println("updated button: " + controller + " " + button + " " + state);
     return true;
   }
+  /** Fills the room with objects.
+   * @return Always returns true.
+   * */
+  static boolean buildObjectMap() {
+
+    String response = "";
+
+    System.out.println(response);
+
+    return true;
+
+  }
   /** Builds the room.
    * @return Always returns true.
    * */
@@ -112,17 +124,5 @@ class Game {
     System.out.println(response);
 
     return true;
-  }
-  /** Fills the room with objects.
-   * @return Always returns true.
-   * */
-  static boolean fillObjects() {
-
-    String response = "";
-
-    System.out.println(response);
-
-    return true;
-
   }
 }

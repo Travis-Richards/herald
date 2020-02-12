@@ -19,16 +19,16 @@ public:
   Api(QObject* parent = nullptr) : QObject(parent) {}
   /// Just a stub.
   virtual ~Api() {}
+  /// Builds the object map.
+  /// @param scene the scene to put the objects into.
+  /// @returns True on success, false on failure.
+  virtual bool build_object_map(Scene* scene) = 0;
   /// Builds a room from the game.
   /// @param scene The scene to put the menu data into.
   /// @returns True on success, false on failure.
   virtual bool build_room(Scene* scene) = 0;
   /// Exits the game.
   virtual void exit() = 0;
-  /// Fills the scene with objects.
-  /// @param scene The scene to fill with objects.
-  /// @returns True on success, false on failure.
-  virtual bool fill_objects(Scene* scene) = 0;
   /// Assigns the background to the scene.
   /// @param scene The scene to assign the background of.
   /// @returns True on success, false on failure.

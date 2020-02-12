@@ -8,12 +8,12 @@ class Writer {
 public:
   /// Creates an "add player" request.
   static QByteArray add_player();
+  /// Creates a "build object map" command.
+  static QByteArray build_object_map();
   /// Creates a "build room" request.
   static QByteArray build_room();
   /// Creates an exit request.
   static QByteArray exit();
-  /// Creates a "fill objects" command.
-  static QByteArray fill_objects();
   /// Creates a "set background" command.
   static QByteArray set_background();
   /// Updates an axis value.
