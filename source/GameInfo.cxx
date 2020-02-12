@@ -22,6 +22,8 @@ enum class ApiType {
   Executable,
   /// The Java API was specified.
   Java,
+  /// The Python API was specified.
+  Python,
   /// An unknown API detected.
   Unknown
 };
@@ -35,6 +37,8 @@ ApiType parse_api_name(const QString& name) {
     return ApiType::Executable;
   } else if (name.compare("Java", Qt::CaseInsensitive) == 0) {
     return ApiType::Java;
+  } else if (name.compare("Python", Qt::CaseInsensitive) == 0) {
+    return ApiType::Python;
   } else {
     return ApiType::Unknown;
   }
@@ -62,6 +66,18 @@ QString find_java() {
     return executable_name("java");
   } else {
     return java_setting;
+  }
+}
+
+/// Finds a java executable program.
+/// @returns A java executable path.
+QString find_python() {
+  QSettings settings;
+  auto python_setting = settings.value("Python").toString();
+  if (python_setting.isEmpty()) {
+    return executable_name("python");
+  } else {
+    return python_setting;
   }
 }
 
@@ -113,11 +129,16 @@ public:
 protected:
   /// Creates a Java API.
   /// @param parent A pointer to the parent object.
-  /// @returns A new API instance on success, false on failure.
+  /// @returns A new API instance on success, a null pointer on failure.
   Api* make_java_api(const QString& path, QObject* parent) const;
+  /// Creates a Python API.
+  /// @param path The path of the game directory.
+  /// @param parent A pointer to the parent object.
+  /// @returns A new API instance on success, a null pointer on failure.
+  Api* make_python_api(const QString& path, QObject* parent) const;
   /// Creates an arbitrary executable API.
   /// @param parent A pointer to the parent object.
-  /// @returns A new API instance on success, false on failure.
+  /// @returns A new API instance on success, a null pointer on failure.
   Api* make_executable_api(const QString& path, QObject* parent) const;
 };
 
@@ -133,6 +154,8 @@ Api* GameInfoImpl::make_api(const QString& path, QObject* parent) const {
       return make_executable_api(path, parent);
     case ApiType::Java:
       return make_java_api(path, parent);
+    case ApiType::Python:
+      return make_python_api(path, parent);
   }
 
   return nullptr;
@@ -146,6 +169,10 @@ Api* GameInfoImpl::make_java_api(const QString& path, QObject* parent) const {
   }
 
   return make_process_api(find_java(), path, QStringList(init_class), parent);
+}
+
+Api* GameInfoImpl::make_python_api(const QString& path, QObject* parent) const {
+  return make_process_api(find_python(), path, QStringList(), parent);
 }
 
 Api* GameInfoImpl::make_executable_api(const QString& path, QObject* parent) const {
