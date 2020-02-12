@@ -30,6 +30,9 @@ class ProcessApi final : public Api {
   LineBuffer* err_line_buffer;
   /// A pointer to the response interpreter.
   Interpreter* interpreter;
+  /// Whether or not the command to exit
+  /// the game was requested.
+  bool exit_requested;
 public:
   /// Constructs an instance of the process API.
   /// @param parent A pointer to the parent object.
@@ -39,6 +42,8 @@ public:
       err_line_buffer(nullptr),
       interpreter(nullptr) {
 
+    exit_requested = false;
+
     out_line_buffer = LineBuffer::from_process_stdout(process, this);
     err_line_buffer = LineBuffer::from_process_stderr(process, this);
 
@@ -46,6 +51,9 @@ public:
     connect(err_line_buffer, &LineBuffer::line, this, &Api::error_logged);
 
     connect(&process, &QProcess::errorOccurred, this, &ProcessApi::handle_process_error);
+
+    connect(&process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+            this, &ProcessApi::handle_finished);
   }
   /// Builds a room.
   /// @returns True on success, false on failure.
@@ -68,6 +76,8 @@ public:
   /// Sends a message to the process that the engine is exiting
   /// and then waits for the process to exit.
   void exit() override {
+
+    exit_requested = true;
 
     process.write(Writer::exit());
 
@@ -151,6 +161,18 @@ protected slots:
   void handle_line(const QString& line) {
     if (interpreter) {
       interpreter->interpret_text(line);
+    }
+  }
+  /// Handles the finishing signal emitted from the process.
+  /// @param exit_code The exit code returned by the process.
+  /// @param status The exit status of the process.
+  void handle_finished(int exit_code, QProcess::ExitStatus status) {
+    if (status == QProcess::Crashed) {
+      emit error_occurred(QString("Game process crashed."));
+    } else if (!exit_requested) {
+      emit error_occurred(QString("Game process exited prematurely (exit code: ")
+                       + QString(exit_code)
+		       + QString(")"));
     }
   }
   /// Handles a syntax error from the response.
