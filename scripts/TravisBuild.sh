@@ -19,6 +19,8 @@ $qmake -config release ..
 
 make
 
+echo "Travis OS Name: $TRAVIS_OS_NAME"
+
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
   /usr/local/opt/qt/bin/macdeployqt herald.app -dmg
 fi
