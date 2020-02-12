@@ -19,9 +19,9 @@ $qmake -config release ..
 
 make
 
+if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  /usr/local/opt/qt/bin/macdeployqt herald.app -dmg
+fi
+
 # This is just for debugging
 ls -la
-
-if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  /usr/local/opt/qt/bin/macdeployqt herald.app -dmg -verbose=2
-fi
