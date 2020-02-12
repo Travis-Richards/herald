@@ -18,7 +18,7 @@ deploy:
   prerelease: true
   api_key:
     secure: uIKRWnnXucMfoeNK082PhQ8kCz943oA3lDwqFQtCJQqlWE18OiAWUmpvT3ZLwQFI5XSzfCiRxm5NMOskqGMcTPLX6rT+6NSuoU5bRBGGb718BZ6V2dd3F2SAR8uPNncuMg+mdVjUbRMMlDZwJPcsq1UABUyTyISrSzUj2LfX7hBFWK97c+7utbqVOqPybxp+lUxSbwjSV8s/czWc1v3rLHozbH9ppQvPzJM+EchfF5umqRkiiBL6UZZAHPy3ePFZBSjgUbeicj6mWlOvw5vCt+rO6Tn8nuyGf7vWD8wgorjKvB5NRdvnNKyjjf8fKOFAhe4UYArjbxQ17jBC7YgScDo2RNoTpD4k5NQ0gzWh+5kiKwtCgeNA5lPbKGoiPpNTUfxJ6W9XMZlff/D8SII9lPf1AtcgkljYpwgsFKInSnrjAx4w2pXmRUYgre9JJLm81wgwoCvbHb8kAd6ZJIUHpXnA/wHJ1HGdbk33ZjrOVMO3/c3r/74MDClZWv8RxCAHPIrSonRJPLDpeH107GoaFDqbOG0Tw3fidYZuusHvbpekCGFLNfmrcRnEydBqT44XbMMmmQ6fxHv69MiGlo1DiR1DNfNfCzj8CzIOE8rP3KiBBhCsRDb5y7/8Jn++WFV0jkHdF5WX2N+rz2jlAtJMo1wL9W0Gra9f3FCtIhxyMs4=
-  file: herald.dmg
+  file: build/herald.dmg
   on:
     repo: tay10r/herald
     tags: true
