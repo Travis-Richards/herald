@@ -167,7 +167,7 @@ protected slots:
   /// @param exit_code The exit code returned by the process.
   /// @param status The exit status of the process.
   void handle_finished(int exit_code, QProcess::ExitStatus status) {
-    if (status == QProcess::Crashed) {
+    if (status == QProcess::CrashExit) {
       emit error_occurred(QString("Game process crashed."));
     } else if (!exit_requested) {
       emit error_occurred(QString("Game process exited prematurely (exit code: ")
