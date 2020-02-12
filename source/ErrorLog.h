@@ -19,6 +19,11 @@ public slots:
   /// Logs a fatal message to the error log.
   /// @param message The message to put into the log.
   void log_fatal(const QString& message);
+  /// Warns about a file that failed to open.
+  /// @param filename The name of the file to open.
+  /// @param error A string describing the reason the file couldn't open.
+  /// This may be an empty string.
+  void warn_open_failure(const QString& filename, const QString& error);
 private:
   /// The text edit widget to put the messages into.
   QTextEdit* text_edit;

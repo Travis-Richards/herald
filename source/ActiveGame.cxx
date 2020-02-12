@@ -10,6 +10,8 @@
 
 #include <QDir>
 #include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMessageBox>
 #include <QStringList>
 #include <QWidget>
@@ -60,10 +62,14 @@ protected:
   /// @param path The path to the game to open.
   /// @param info Information regarding the game and how to open it.
   bool open(const QString& path, const GameInfo& info);
-  /// Opens the textures to be used in the game.
-  /// @param path The path to the game.
+  /// Opens the actions definition from the action file.
+  /// @param game_path The path to the game directory.
   /// @returns True on success, false on failure.
-  bool open_textures(const QString& path);
+  bool open_actions(const QString& game_path);
+  /// Opens the textures to be used in the game.
+  /// @param game_path The path to the game.
+  /// @returns True on success, false on failure.
+  bool open_textures(const QString& game_path);
   /// Opens a message box and prints a message indicating why
   /// the game failed to open.
   /// @returns Always returns false.
@@ -150,7 +156,27 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   open_textures(path);
 
+  open_actions(path);
+
   return api->set_background(scene);
+}
+
+bool ActiveGameImpl::open_actions(const QString& game_path) {
+
+  auto actions_path = QDir::cleanPath(game_path + QDir::separator() + "actions.json");
+
+  QFile json_file(actions_path);
+
+  if (!json_file.open(QIODevice::ReadOnly)) {
+    error_log->warn_open_failure(actions_path, json_file.errorString());
+    return false;
+  }
+
+  auto json_data = json_file.readAll();
+
+  auto json_doc = QJsonDocument::fromJson(json_data);
+
+  return scene->load_actions(json_doc.array());
 }
 
 bool ActiveGameImpl::open_textures(const QString& path) {

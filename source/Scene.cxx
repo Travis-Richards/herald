@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include "ActionList.h"
 #include "Background.h"
 #include "BackgroundView.h"
 #include "ObjectMap.h"
@@ -15,6 +16,8 @@ namespace {
 
 /// An implementation of the scene interface.
 class SceneImpl final : public Scene {
+  /// The list of actions that objects can do.
+  ActionList* actions;
   /// The textures to be used by the scene.
   TextureAnimationGroup* textures;
   /// The background of the scene.
@@ -32,11 +35,13 @@ class SceneImpl final : public Scene {
 public:
   /// Constructs an instance of the scene implementation.
   /// @param parent A pointer to the parent object.
-  SceneImpl(QObject* parent) : Scene(parent), textures(nullptr) {
+  SceneImpl(QObject* parent) : Scene(parent), actions(nullptr), textures(nullptr) {
 
     setBackgroundBrush(QBrush(Qt::black));
 
     background_view = BackgroundView::make(nullptr);
+
+    actions = ActionList::make(this);
 
     object_map = ObjectMap::make(this);
 
@@ -70,6 +75,11 @@ public:
   /// @param path The path of the texture to load.
   void load_texture(const QString& path) override {
     textures->open(path);
+  }
+  /// Loads actions from a JSON value.
+  /// @returns True on success, false on failure.
+  bool load_actions(const QJsonValue& json_actions) override {
+    return actions->read(json_actions);
   }
   /// Starts the animation sequence.
   void start() override {

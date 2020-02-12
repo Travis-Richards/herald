@@ -5,6 +5,7 @@
 class Background;
 class Room;
 class ObjectMap;
+class QJsonValue;
 class QSize;
 class QString;
 
@@ -31,6 +32,10 @@ public:
   /// Loads a texture to be used by the scene.
   /// @param path A path to the texture to open.
   virtual void load_texture(const QString& path) = 0;
+  /// Loads actions from a JSON value.
+  /// @param actions The JSON actions definition.
+  /// @returns True on success, false on failure.
+  virtual bool load_actions(const QJsonValue& actions) = 0;
   /// Updates the view of the scene.
   /// This includes the room view and
   /// the object map view.

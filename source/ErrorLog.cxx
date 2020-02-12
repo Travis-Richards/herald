@@ -3,6 +3,40 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
+namespace {
+
+/// Enumerates the severity
+/// of an error message.
+enum class Severity {
+  Warning,
+  FatalError
+};
+
+/// Formats a message as HTML.
+/// @param severity The severity of the message.
+/// @param message A message describing the error.
+QString format(Severity severity, const QString& message) {
+
+  QString header = "<b>";
+
+  switch (severity) {
+    case Severity::Warning:
+      header += "<font color=\"magenta\">";
+      header += "warning: ";
+      break;
+    case Severity::FatalError:
+      header += "<font color=\"red\">";
+      header += "fatal error: ";
+      break;
+  }
+
+  header += "</font>";
+
+  return header + message + "</b>";
+}
+
+} // namespace
+
 ErrorLog::ErrorLog(QWidget* parent) : QWidget(parent) {
 
   setWindowTitle("Error Log");
@@ -31,14 +65,15 @@ void ErrorLog::log_fatal(const QString& line) {
     show();
   }
 
-  QString header;
-  header += "<b>";
-  header += "<font color=\"red\">";
-  header += "fatal error:";
-  header += "</font>";
-  header += " ";
+  text_edit->textCursor().insertHtml(format(Severity::FatalError, line));
+}
 
-  QString footer = "</b>";
-
-  text_edit->textCursor().insertHtml(header + line + footer);
+void ErrorLog::warn_open_failure(const QString& filename, const QString& error) {
+  QString message;
+  message += "Failed to open '";
+  message += filename;
+  message += "' (";
+  message += error;
+  message += ')';
+  text_edit->textCursor().insertHtml(format(Severity::Warning, message));
 }

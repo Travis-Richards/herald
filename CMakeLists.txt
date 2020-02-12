@@ -41,6 +41,10 @@ add_subdirectory("source/lang")
 
 add_executable("herald" WIN32
   "source/main.cxx"
+  "source/Action.h"
+  "source/Action.cxx"
+  "source/ActionList.cxx"
+  "source/ActionList.h"
   "source/ActiveGame.h"
   "source/ActiveGame.cxx"
   "source/ActiveGameList.h"
