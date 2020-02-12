@@ -45,6 +45,12 @@ class Token final {
   /// helpful in displaying an error message.
   std::size_t offset;
 public:
+  /// Default constructor, makes an invalid token.
+  constexpr Token() noexcept
+    : type(TokenType::Invalid),
+      data(""),
+      size(0),
+      offset(0) {}
   /// Constructs a new token instance.
   /// @param t The type of this token.
   /// @param d The character data of the token.
@@ -59,6 +65,13 @@ public:
       data(d),
       size(s),
       offset(o) {}
+  /// Constructs a token via copy.
+  /// @param copy The token to copy.
+  constexpr Token(const Token& other) noexcept
+    : type(other.type),
+      data(other.data),
+      size(other.size),
+      offset(other.offset) {}
   /// Creates an invalid token instance.
   /// @returns An invalid token instance.
   static constexpr Token invalid() noexcept {
