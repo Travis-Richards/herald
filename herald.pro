@@ -8,6 +8,8 @@ RESOURCES += icons.qrc
 
 SOURCES += source/main.cxx
 
+SOURCES += source/Action.cxx
+SOURCES += source/ActionList.cxx
 SOURCES += source/ActiveGame.cxx
 SOURCES += source/ActiveGameList.cxx
 SOURCES += source/BackgroundModifier.cxx
@@ -25,8 +27,9 @@ SOURCES += source/LineBuffer.cxx
 SOURCES += source/MainWindow.cxx
 SOURCES += source/Matrix.cxx
 SOURCES += source/MenuBuilder.cxx
+SOURCES += source/Object.cxx
 SOURCES += source/ObjectMap.cxx
-SOURCES += source/ObjectBuilder.cxx
+SOURCES += source/ObjectMapBuilder.cxx
 SOURCES += source/ObjectMapView.cxx
 SOURCES += source/PathSetting.cxx
 SOURCES += source/ProcessApi.cxx
@@ -41,6 +44,8 @@ SOURCES += source/TextureAnimation.cxx
 SOURCES += source/TextureAnimationGroup.cxx
 SOURCES += source/Writer.cxx
 
+HEADERS += source/Action.h
+HEADERS += source/ActionList.h
 HEADERS += source/ActiveGame.h
 HEADERS += source/ActiveGameList.h
 HEADERS += source/Background.h
