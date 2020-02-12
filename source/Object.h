@@ -21,16 +21,24 @@ class Object final {
   int frame_offset;
   /// The X coordinate of the object's location,
   /// in terms of tile location.
-  float x;
+  int x;
   /// The Y coordinate of the object's location,
   /// in terms of tile location.
-  float y;
+  int y;
 public:
+  /// Constructs a default object.
+  constexpr Object() noexcept
+    : action(-1),
+      animation(-1),
+      frame(-1),
+      frame_offset(0),
+      x(0),
+      y(0) {}
   /// Constructs the object.
   /// @param a The index of the action to assign the object.
   /// @param x_ The X coordinate of the object.
   /// @param y_ The Y coordinate of the object.
-  Object(int a, int x_, int y_)
+  constexpr Object(int a, int x_, int y_) noexcept
     : action(a),
       animation(0),
       frame(0),
@@ -53,12 +61,12 @@ public:
   }
   /// Accesses the X position of the object,
   /// in terms of tile location.
-  inline float get_x() const noexcept {
+  inline int get_x() const noexcept {
     return x;
   }
   /// Accesses the Y position of the object,
   /// in terms of tile location.
-  inline float get_y() const noexcept {
+  inline int get_y() const noexcept {
     return y;
   }
   /// Indicates whether or not an object owns an action.
