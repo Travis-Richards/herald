@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+namespace herald {
+
 bool Token::has_data(const char* other_data) const noexcept {
 
   auto l = std::strlen(other_data);
@@ -30,3 +32,5 @@ std::ostream& operator << (std::ostream& output, const Token& t) {
 
   return output;
 }
+
+} // namespace herald

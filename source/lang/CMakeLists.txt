@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 add_library("herald-lang" STATIC
+  "Command.h"
+  "Command.cxx"
   "Lexer.h"
   "Lexer.cxx"
   "ParseTree.h"

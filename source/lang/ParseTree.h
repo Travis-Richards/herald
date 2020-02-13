@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace herald {
+
 template <typename T>
 class ScopedPtr;
 
@@ -158,3 +160,5 @@ public:
 };
 
 } // namespace parse_tree
+
+} // namespace herald

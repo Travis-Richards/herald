@@ -5,6 +5,8 @@
 #include "SyntaxChecker.h"
 #include "Token.h"
 
+using namespace herald;
+
 TEST(SyntaxChecker, MissingIntegerValue) {
 
   auto syntax_errors = SyntaxErrorList::make();

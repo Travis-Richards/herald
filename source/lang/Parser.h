@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace herald {
+
 template <typename T>
 class ScopedPtr;
 
@@ -38,3 +40,5 @@ public:
   /// Parses for a matrix.
   virtual ScopedPtr<parse_tree::Matrix> parse_matrix() = 0;
 };
+
+} // namespace herald

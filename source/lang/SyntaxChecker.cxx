@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 
+namespace herald {
+
 namespace {
 
 using namespace parse_tree;
@@ -147,3 +149,5 @@ ScopedPtr<SyntaxErrorList> SyntaxErrorList::make() {
 ScopedPtr<parse_tree::Visitor> make_syntax_checker(SyntaxErrorList* errors) {
   return new SyntaxChecker(errors);
 }
+
+} // namespace herald

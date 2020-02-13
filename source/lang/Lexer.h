@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace herald {
+
 template <typename T>
 class ScopedPtr;
 
@@ -23,3 +25,5 @@ public:
   /// @returns A new token instance.
   virtual Token scan() noexcept = 0;
 };
+
+} // namespace herald

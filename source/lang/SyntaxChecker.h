@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace herald {
+
 template <typename T>
 class ScopedPtr;
 
@@ -70,3 +72,5 @@ public:
 /// @param list A list to store syntax errors into.
 /// @returns A new instance of a syntax checker as a visitor interface.
 ScopedPtr<parse_tree::Visitor> make_syntax_checker(SyntaxErrorList* list);
+
+} // namespace herald

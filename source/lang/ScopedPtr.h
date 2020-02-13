@@ -1,5 +1,7 @@
 #pragma once
 
+namespace herald {
+
 /// Used to keep dynamically allocated
 /// objects or memory until they go out
 /// of scope.
@@ -89,3 +91,5 @@ public:
     return object;
   }
 };
+
+} // namespace herald

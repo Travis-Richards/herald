@@ -5,6 +5,8 @@
 #include "ScopedPtr.h"
 #include "Token.h"
 
+using namespace herald;
+
 TEST(Parser, ParseInteger) {
 
   std::vector<Token> tokens;

@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+using namespace herald;
+
 namespace {
 
 ScopedPtr<Lexer> make_lexer(const char* text) {

@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace herald {
+
 namespace parse_tree {
 
 namespace {
@@ -94,3 +96,5 @@ ScopedPtr<Matrix> Matrix::make(const Size& s) {
 }
 
 } // namespace parse_tree
+
+} // namespace herald

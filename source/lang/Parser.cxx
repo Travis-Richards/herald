@@ -4,6 +4,8 @@
 #include "ScopedPtr.h"
 #include "Token.h"
 
+namespace herald {
+
 namespace {
 
 /// Implements the parser interface.
@@ -136,3 +138,5 @@ ScopedPtr<parse_tree::Matrix> ParserImpl::parse_matrix() {
 ScopedPtr<Parser> Parser::make(const Token* tokens, std::size_t count) {
   return new ParserImpl(tokens, count);
 }
+
+} // namespace herald
