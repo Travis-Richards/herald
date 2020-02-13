@@ -2,8 +2,11 @@
 
 #include <QObject>
 
-class Parser;
 class QString;
+
+namespace herald {
+
+class Parser;
 class SyntaxError;
 
 namespace parse_tree {
@@ -11,6 +14,8 @@ namespace parse_tree {
 class Node;
 
 } // namespace parse_tree
+
+} // namespace herald
 
 /// Used for interpreting the response
 /// of a game instance.
@@ -29,7 +34,7 @@ public:
 signals:
   /// This signal is emitted when a syntax
   /// error is detected by the parser.
-  void error(const SyntaxError& error);
+  void error(const herald::SyntaxError& error);
   /// This signal is emitted when the interpreter
   /// is done handling the response.
   void finished();
@@ -38,9 +43,9 @@ protected:
   /// @param node The node to check.
   /// @returns True if there was no errors,
   /// false if there were errors.
-  bool check(const parse_tree::Node& node);
+  bool check(const herald::parse_tree::Node& node);
   /// Interprets the response using a parser.
   /// @param parser A parser instance to parse the response with.
   /// @returns True on success, false on failure.
-  virtual bool interpret(Parser& parser) = 0;
+  virtual bool interpret(herald::Parser& parser) = 0;
 };

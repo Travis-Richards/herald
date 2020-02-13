@@ -2,16 +2,6 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project("herald" VERSION 0.3.0)
 
-# Detect compiler, adjust CXX flags
-
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
- OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-
-  set (cxxflags -Wall -Wextra -Werror -Wfatal-errors -std=c++11)
-
-endif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-
 # Configure the build time header
 # so that we know what APIs we can use.
 
@@ -35,6 +25,7 @@ set(CMAKE_AUTORCC ON)
 
 # Add components
 
+add_subdirectory("source/common")
 add_subdirectory("source/lang")
 
 # Here we declare the main program.
@@ -118,7 +109,7 @@ add_executable("herald" WIN32
   "source/Writer.cxx"
   "icons.qrc")
 
-target_link_libraries("herald" PRIVATE ${LIBS} "herald-lang")
+target_link_libraries("herald" PRIVATE ${LIBS} "herald-common" "herald-lang")
 
 target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})
 

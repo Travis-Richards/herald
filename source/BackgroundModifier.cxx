@@ -3,10 +3,10 @@
 #include "Background.h"
 #include "Interpreter.h"
 #include "Scene.h"
+#include "ScopedPtr.h"
 
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/ScopedPtr.h"
 
 namespace {
 
@@ -23,7 +23,7 @@ public:
   /// Inteprets the response of
   /// the background modification command.
   /// @returns True on success, false on failure.
-  bool interpret(Parser& parser) override {
+  bool interpret(herald::Parser& parser) override {
 
     auto animation = parser.parse_integer();
     if (!check(animation)) {

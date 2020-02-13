@@ -4,11 +4,13 @@
 #include "Matrix.h"
 #include "Room.h"
 #include "Scene.h"
+#include "ScopedPtr.h"
 #include "Tile.h"
 
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/ScopedPtr.h"
+
+using namespace herald;
 
 namespace {
 

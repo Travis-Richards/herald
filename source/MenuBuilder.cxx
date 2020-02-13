@@ -6,6 +6,8 @@
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
 
+using namespace herald;
+
 namespace {
 
 /// Used for constructing the game menu.

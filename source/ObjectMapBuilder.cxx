@@ -4,10 +4,12 @@
 #include "Object.h"
 #include "ObjectMap.h"
 #include "Scene.h"
+#include "ScopedPtr.h"
 
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/ScopedPtr.h"
+
+using namespace herald;
 
 namespace {
 

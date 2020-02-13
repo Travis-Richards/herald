@@ -1,9 +1,13 @@
 #pragma once
 
+namespace herald {
+
 template <typename T>
 class ScopedPtr;
 
 namespace parse_tree { class Matrix; }
+
+} // namespace herald
 
 class QSize;
 
@@ -13,13 +17,13 @@ class Matrix {
 public:
   /// Creates a matrix from a parser tree
   /// representation of a matrix.
-  static ScopedPtr<Matrix> make(const parse_tree::Matrix& m);
+  static herald::ScopedPtr<Matrix> make(const herald::parse_tree::Matrix& m);
   /// Creates a new matrix instance.
   /// @param width The width of the matrix.
   /// @param height The height of the matrix.
-  static ScopedPtr<Matrix> make(int width, int height);
+  static herald::ScopedPtr<Matrix> make(int width, int height);
   /// Creates a new matrix.
-  static ScopedPtr<Matrix> make(const QSize& size);
+  static herald::ScopedPtr<Matrix> make(const QSize& size);
   /// Just a stub.
   virtual ~Matrix() {}
   /// Accesses a number within the matrix.

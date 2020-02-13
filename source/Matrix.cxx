@@ -1,10 +1,13 @@
 #include "Matrix.h"
 
+#include "ScopedPtr.h"
+
 #include "lang/ParseTree.h"
-#include "lang/ScopedPtr.h"
 
 #include <QList>
 #include <QSize>
+
+using namespace herald;
 
 namespace {
 

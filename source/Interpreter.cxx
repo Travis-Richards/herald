@@ -1,16 +1,19 @@
 #include "Interpreter.h"
 
+#include "ScopedPtr.h"
+
 #include "lang/Lexer.h"
 #include "lang/ParseTree.h"
 #include "lang/Parser.h"
-#include "lang/ScopedPtr.h"
 #include "lang/SyntaxChecker.h"
 #include "lang/Token.h"
 
 #include <QString>
 #include <QVector>
 
-bool Interpreter::check(const parse_tree::Node& node) {
+using namespace herald;
+
+bool Interpreter::check(const herald::parse_tree::Node& node) {
 
   auto errors = SyntaxErrorList::make();
 

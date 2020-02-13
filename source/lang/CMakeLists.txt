@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.0.2)
 
+if (NOT TARGET "herald-common")
+  add_subdirectory("../common" "common")
+endif (NOT TARGET "herald-common")
+
 add_library("herald-lang" STATIC
   "Command.h"
   "Command.cxx"
@@ -14,11 +18,7 @@ add_library("herald-lang" STATIC
   "Token.h"
   "Token.cxx")
 
-if (DEFINED cxxflags)
-  target_compile_options("herald-lang" PRIVATE ${cxxflags})
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  target_compile_options("herald-lang" PRIVATE -Wall -Wextra -Werror -Wfatal-errors -std=c++11)
-endif (DEFINED cxxflags)
+target_link_libraries("herald-lang" PRIVATE "herald-common")
 
 find_package(GTest)
 
@@ -30,6 +30,7 @@ if (GTest_FOUND)
     "SyntaxCheckerTest.cxx")
 
   target_link_libraries("herald-lang-test" PRIVATE
+    "herald-common"
     "herald-lang"
     GTest::GTest
     GTest::Main)

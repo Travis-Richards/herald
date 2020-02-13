@@ -17,6 +17,8 @@
 #include <QString>
 #include <QStringList>
 
+using namespace herald;
+
 namespace {
 
 /// An implementation of an API
