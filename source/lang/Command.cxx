@@ -84,7 +84,23 @@ public:
   }
 };
 
+/// A null command, used mostly
+/// as a placeholder.
+class NullCommand final : public Command {
+public:
+  const char* get_data() const noexcept override {
+    return "";
+  }
+  std::size_t get_size() const noexcept override {
+    return 0;
+  }
+};
+
 } // namespace
+
+ScopedPtr<Command> Command::make_null() {
+  return new NullCommand();
+}
 
 ScopedPtr<Command> Command::make_nullary(const char* name) {
   return new NullaryCommand(name);

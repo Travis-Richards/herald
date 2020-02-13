@@ -22,6 +22,11 @@ class Node;
 class Interpreter : public QObject {
   Q_OBJECT
 public:
+  /// Creates a null interpreter.
+  /// This interpreter does nothing
+  /// and mostly acts as a placeholder.
+  /// @param parent A pointer to the parent object.
+  static Interpreter* make_null(QObject* parent);
   /// Constructs the base interpreter instance.
   /// @param parent A pointer to the parent object.
   Interpreter(QObject* parent) : QObject(parent) {}

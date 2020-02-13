@@ -13,6 +13,26 @@
 
 using namespace herald;
 
+namespace herald {
+
+namespace {
+
+class NullInterpreter final : public Interpreter {
+public:
+  NullInterpreter(QObject* parent) : Interpreter(parent) {}
+  bool interpret(Parser&) override {
+    return true;
+  }
+};
+
+} // namespace
+
+} // namespace herald
+
+Interpreter* Interpreter::make_null(QObject* parent) {
+  return new NullInterpreter(parent);
+}
+
 bool Interpreter::check(const herald::parse_tree::Node& node) {
 
   auto errors = SyntaxErrorList::make();

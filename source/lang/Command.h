@@ -22,6 +22,10 @@ public:
   /// @param state The new state of the button.
   /// @returns A new command instance.
   static ScopedPtr<Command> make_button_update(std::size_t controller, std::size_t button, bool state);
+  /// Creates a null command.
+  /// This kind of command has no data
+  /// and is mostly used as a placeholder.
+  static ScopedPtr<Command> make_null();
   /// Creates a command with no operands.
   /// @param data The command data to assign.
   /// @returns A new command instance.
