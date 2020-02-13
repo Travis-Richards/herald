@@ -4,7 +4,7 @@ if (NOT TARGET "herald-common")
   add_subdirectory("../common" "common")
 endif (NOT TARGET "herald-common")
 
-add_library("herald-lang" STATIC
+add_library("herald-protocol" STATIC
   "Command.h"
   "Command.cxx"
   "Lexer.h"
@@ -18,25 +18,25 @@ add_library("herald-lang" STATIC
   "Token.h"
   "Token.cxx")
 
-target_link_libraries("herald-lang" PRIVATE "herald-common")
+target_link_libraries("herald-protocol" PRIVATE "herald-common")
 
 find_package(GTest)
 
 if (GTest_FOUND)
 
-  add_executable("herald-lang-test"
+  add_executable("herald-protocol-test"
     "LexerTest.cxx"
     "ParserTest.cxx"
     "SyntaxCheckerTest.cxx")
 
-  target_link_libraries("herald-lang-test" PRIVATE
+  target_link_libraries("herald-protocol-test" PRIVATE
     "herald-common"
-    "herald-lang"
+    "herald-protocol"
     GTest::GTest
     GTest::Main)
 
-  add_test(NAME "herald-lang-test"
-    COMMAND $<TARGET_FILE:herald-lang-test>)
+  add_test(NAME "herald-protocol-test"
+    COMMAND $<TARGET_FILE:herald-protocol-test>)
 
 endif (GTest_FOUND)
 

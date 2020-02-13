@@ -7,8 +7,8 @@
 #include "ScopedPtr.h"
 #include "Tile.h"
 
-#include "lang/ParseTree.h"
-#include "lang/Parser.h"
+#include "protocol/ParseTree.h"
+#include "protocol/Parser.h"
 
 using namespace herald;
 

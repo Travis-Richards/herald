@@ -26,7 +26,7 @@ set(CMAKE_AUTORCC ON)
 # Add components
 
 add_subdirectory("source/common")
-add_subdirectory("source/lang")
+add_subdirectory("source/protocol")
 
 # Here we declare the main program.
 
@@ -111,7 +111,10 @@ add_executable("herald" WIN32
   "source/Writer.cxx"
   "icons.qrc")
 
-target_link_libraries("herald" PRIVATE ${LIBS} "herald-common" "herald-lang")
+target_link_libraries("herald" PRIVATE
+  ${LIBS}
+  "herald-common"
+  "herald-protocol")
 
 target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})
 

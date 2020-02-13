@@ -13,8 +13,8 @@
 #include "WorkQueue.h"
 #include "Writer.h"
 
-#include "lang/Command.h"
-#include "lang/SyntaxChecker.h"
+#include "protocol/Command.h"
+#include "protocol/SyntaxChecker.h"
 
 #include <QProcess>
 #include <QString>

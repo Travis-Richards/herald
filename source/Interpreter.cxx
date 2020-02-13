@@ -2,11 +2,11 @@
 
 #include "ScopedPtr.h"
 
-#include "lang/Lexer.h"
-#include "lang/ParseTree.h"
-#include "lang/Parser.h"
-#include "lang/SyntaxChecker.h"
-#include "lang/Token.h"
+#include "protocol/Lexer.h"
+#include "protocol/ParseTree.h"
+#include "protocol/Parser.h"
+#include "protocol/SyntaxChecker.h"
+#include "protocol/Token.h"
 
 #include <QString>
 #include <QVector>

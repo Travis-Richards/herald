@@ -3,7 +3,7 @@
 #include "Interpreter.h"
 #include "ScopedPtr.h"
 
-#include "lang/Command.h"
+#include "protocol/Command.h"
 
 #include <utility>
 #include <vector>

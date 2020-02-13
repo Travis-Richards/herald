@@ -5,8 +5,8 @@
 #include "Scene.h"
 #include "ScopedPtr.h"
 
-#include "lang/ParseTree.h"
-#include "lang/Parser.h"
+#include "protocol/ParseTree.h"
+#include "protocol/Parser.h"
 
 namespace {
 

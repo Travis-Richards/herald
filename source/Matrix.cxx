@@ -2,7 +2,7 @@
 
 #include "ScopedPtr.h"
 
-#include "lang/ParseTree.h"
+#include "protocol/ParseTree.h"
 
 #include <QList>
 #include <QSize>
