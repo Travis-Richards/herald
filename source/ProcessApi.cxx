@@ -9,8 +9,11 @@
 #include "ObjectMapBuilder.h"
 #include "RoomBuilder.h"
 #include "Scene.h"
+#include "ScopedPtr.h"
+#include "WorkQueue.h"
 #include "Writer.h"
 
+#include "lang/Command.h"
 #include "lang/SyntaxChecker.h"
 
 #include <QProcess>
@@ -30,8 +33,8 @@ class ProcessApi final : public Api {
   LineBuffer* out_line_buffer;
   /// The line buffer for standard error output.
   LineBuffer* err_line_buffer;
-  /// A pointer to the response interpreter.
-  Interpreter* interpreter;
+  /// The queue of work items.
+  ScopedPtr<WorkQueue> work_queue;
   /// Whether or not the command to exit
   /// the game was requested.
   bool exit_requested;
@@ -42,9 +45,11 @@ public:
     : Api(parent),
       out_line_buffer(nullptr),
       err_line_buffer(nullptr),
-      interpreter(nullptr) {
+      work_queue(nullptr) {
 
     exit_requested = false;
+
+    work_queue = WorkQueue::make();
 
     out_line_buffer = LineBuffer::from_process_stdout(process, this);
     err_line_buffer = LineBuffer::from_process_stderr(process, this);
@@ -56,24 +61,6 @@ public:
 
     connect(&process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
             this, &ProcessApi::handle_finished);
-  }
-  /// Builds a room.
-  /// @returns True on success, false on failure.
-  bool build_room(Scene* scene) override {
-
-    if (interpreter) {
-      delete interpreter;
-    }
-
-    interpreter = make_room_builder(scene, this);
-
-    connect(interpreter, &Interpreter::finished, this, &Api::room_built);
-
-    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
-
-    process.write(Writer::build_room());
-
-    return true;
   }
   /// Sends a message to the process that the engine is exiting
   /// and then waits for the process to exit.
@@ -90,45 +77,15 @@ public:
       process.waitForFinished(timeout_ms);
     }
   }
-  /// Fills the current room with objects.
-  /// @param scene The scene to fill.
+  /// Starts up the game.
+  /// @param scene The scene to add the game data into.
   /// @returns True on success, false on failure.
-  bool build_object_map(Scene* scene) override {
-
-    if (interpreter) {
-      delete interpreter;
-    }
-
-    interpreter = make_object_map_builder(scene, this);
-
-    connect(interpreter, &Interpreter::finished, this, &Api::object_map_built);
-
-    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
-
-    process.write(Writer::build_object_map());
-
-    return true;
+  bool start(Scene* scene) override {
+    add_work_item(Command::make_nullary("set_background"), make_background_modifier(scene, this));
+    add_work_item(Command::make_nullary("build_room"), make_room_builder(scene, this));
+    add_work_item(Command::make_nullary("build_object_map"), make_object_map_builder(scene, this));
+    return handle_work_item();
   }
-  /// Assigns the background of the scene.
-  /// @param scene The scene to assign the background of.
-  /// @returns True on success, false on failure.
-  bool set_background(Scene* scene) override {
-
-    if (interpreter) {
-      delete interpreter;
-    }
-
-    interpreter = make_background_modifier(scene, this);
-
-    connect(interpreter, &Interpreter::finished, this, &Api::background_set);
-
-    connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
-
-    process.write(Writer::set_background());
-
-    return true;
-  }
-  /// Assigns the working directory of the process.
   /// This should only be called before the process is started.
   /// @param pwd The path to place the process into.
   void set_working_directory(const QString& pwd) {
@@ -147,24 +104,16 @@ public:
   /// @param x The X value of the axis.
   /// @param y The Y value of the axis.
   void update_axis(int controller, double x, double y) override {
-    process.write(Writer::update_axis(controller, x, y));
+    add_work_item(Command::make_axis_update(controller, x, y), nullptr);
   }
   /// Notifies the process of a change in button state.
   /// @param controller The index of the controller.
   /// @param button The button that changed state.
   /// @param state The new state of the button.
   void update_button(int controller, Button button, bool state) override {
-    process.write(Writer::update_button(controller, button_id(button), state));
+    add_work_item(Command::make_button_update(controller, button_id(button), state), nullptr);
   }
 protected slots:
-  /// Handles a line from the games standard output.
-  /// If no interpreter is active, then the line is ignored.
-  /// @param line The line emitted from the process.
-  void handle_line(const QString& line) {
-    if (interpreter) {
-      interpreter->interpret_text(line);
-    }
-  }
   /// Handles the finishing signal emitted from the process.
   /// @param exit_code The exit code returned by the process.
   /// @param status The exit status of the process.
@@ -173,9 +122,24 @@ protected slots:
       emit error_occurred(QString("Game process crashed."));
     } else if (!exit_requested) {
       emit error_occurred(QString("Game process exited prematurely (exit code: ")
-                       + QString(exit_code)
-		       + QString(")"));
+                        + QString(exit_code)
+                        + QString(")"));
     }
+  }
+  /// Handles a line from the games standard output.
+  /// If no interpreter is active, then the line is ignored.
+  /// @param line The line emitted from the process.
+  void handle_line(const QString& line) {
+
+    if (work_queue->empty()) {
+      return;
+    }
+
+    work_queue->get_current_interpreter().interpret_text(line);
+
+    work_queue->pop();
+
+    handle_work_item();
   }
   /// Handles a syntax error from the response.
   void handle_syntax_error(const SyntaxError& error) {
@@ -206,6 +170,39 @@ protected slots:
         break;
     }
     emit error_occurred(desc);
+  }
+protected:
+  /// Adds an item to the work queue.
+  /// @param cmd The command to add.
+  /// @param interpreter The interpreter to handle the response.
+  void add_work_item(ScopedPtr<Command>&& cmd, Interpreter* interpreter) {
+
+    if (interpreter) {
+      connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
+    }
+
+    work_queue->add(std::move(cmd), interpreter);
+  }
+  /// Sends a command to the process.
+  /// @param command The command to send.
+  /// @returns True on success, false on failure.
+  bool send_command(const Command& command) {
+    auto write_count = process.write(command.get_data(), command.get_size());
+    if (write_count < 0) {
+      return false;
+    } else {
+      return ((std::size_t) write_count) == command.get_size();
+    }
+  }
+  /// Handles the current item in the work queue.
+  /// @returns True on success, false on failure.
+  bool handle_work_item() {
+
+    if (work_queue->empty()) {
+      return true;
+    }
+
+    return send_command(work_queue->get_current_command());
   }
 };
 

@@ -72,7 +72,5 @@ bool Interpreter::interpret_text(const QString& text) {
 
   auto success = interpret(*parser);
 
-  emit finished();
-
   return success;
 }

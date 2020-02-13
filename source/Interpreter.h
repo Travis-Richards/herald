@@ -40,9 +40,6 @@ signals:
   /// This signal is emitted when a syntax
   /// error is detected by the parser.
   void error(const herald::SyntaxError& error);
-  /// This signal is emitted when the interpreter
-  /// is done handling the response.
-  void finished();
 protected:
   /// Checks an arbitrary syntax node.
   /// @param node The node to check.

@@ -89,19 +89,6 @@ public:
   void pause() override {
     textures->stop();
   }
-  /// Updates the view entities of the scene.
-  void update_view() override {
-
-    object_map->map_actions(actions);
-
-    object_map_view->resize(room->width(), room->height());
-    object_map_view->map(*object_map, *textures);
-
-    background_view->map(background, *textures);
-
-    room_view->resize(room->width(), room->height());
-    room_view->map(room, textures);
-  }
 public slots:
   /// Handles resizing of the scene.
   void resize(const QSize& size) override {
@@ -119,9 +106,14 @@ protected slots:
   /// Synchronized tile changes with the graphics scene.
   void sync() {
 
-    object_map_view->map(*object_map, *textures);
+    background_view->map(background, *textures);
 
+    room_view->resize(room->width(), room->height());
     room_view->map(room, textures);
+
+    object_map_view->resize(room->width(), room->height());
+    object_map->map_actions(actions);
+    object_map_view->map(*object_map, *textures);
 
     /// At this point, all tile modifications should
     /// be accounted for and we don't need to handle them again.

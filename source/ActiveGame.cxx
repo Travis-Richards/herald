@@ -77,13 +77,6 @@ protected:
 protected slots:
   /// Handles closing of the scene view.
   void handle_scene_view_closing();
-  /// Handles completion of the background modification.
-  void handle_set_background();
-  /// Handles the completion of a room construction.
-  void handle_built_room();
-  /// Handles the case where the objects
-  /// are done being added to the scene.
-  void handle_built_object_map();
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
@@ -148,9 +141,6 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   connect(api, &Api::error_logged, error_log, &ErrorLog::log);
   connect(api, &Api::error_occurred, error_log, &ErrorLog::log_fatal);
-  connect(api, &Api::background_set, this, &ActiveGameImpl::handle_set_background);
-  connect(api, &Api::room_built, this, &ActiveGameImpl::handle_built_room);
-  connect(api, &Api::object_map_built, this, &ActiveGameImpl::handle_built_object_map);
 
   scene_view->show();
 
@@ -158,7 +148,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   open_actions(path);
 
-  return api->set_background(scene);
+  return api->start(scene);
 }
 
 bool ActiveGameImpl::open_actions(const QString& game_path) {
@@ -207,18 +197,6 @@ bool ActiveGameImpl::fail(const QString& message) {
 
 void ActiveGameImpl::handle_scene_view_closing() {
   emit closing(this);
-}
-
-void ActiveGameImpl::handle_set_background() {
-  api->build_room(scene);
-}
-
-void ActiveGameImpl::handle_built_room() {
-  api->build_object_map(scene);
-}
-
-void ActiveGameImpl::handle_built_object_map() {
-  scene->update_view();
 }
 
 } // namespace

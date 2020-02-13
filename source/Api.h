@@ -19,20 +19,12 @@ public:
   Api(QObject* parent = nullptr) : QObject(parent) {}
   /// Just a stub.
   virtual ~Api() {}
-  /// Builds the object map.
-  /// @param scene the scene to put the objects into.
+  /// Starts the game.
+  /// @param scene The scene to put the game data into.
   /// @returns True on success, false on failure.
-  virtual bool build_object_map(Scene* scene) = 0;
-  /// Builds a room from the game.
-  /// @param scene The scene to put the menu data into.
-  /// @returns True on success, false on failure.
-  virtual bool build_room(Scene* scene) = 0;
+  virtual bool start(Scene* scene) = 0;
   /// Exits the game.
   virtual void exit() = 0;
-  /// Assigns the background to the scene.
-  /// @param scene The scene to assign the background of.
-  /// @returns True on success, false on failure.
-  virtual bool set_background(Scene* scene) = 0;
 public slots:
   /// Updates the axis for the default player.
   void update_def_axis(double x, double y) {

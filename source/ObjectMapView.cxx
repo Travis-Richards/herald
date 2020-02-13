@@ -96,6 +96,12 @@ public:
   /// @param size The window size to adjust the view to.
   void resize_view(const QSize& size) override {
 
+    if (size == window_size) {
+      return;
+    }
+
+    window_size = size;
+
     auto tile_size = calc_tile_size();
 
     for (auto* object_view : object_views) {
@@ -108,8 +114,6 @@ public:
                            tile_size.width(),
                            tile_size.height());
     }
-
-    window_size = size;
   }
 protected:
   /// Calculates the size of a tile.

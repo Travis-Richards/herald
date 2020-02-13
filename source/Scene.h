@@ -36,11 +36,6 @@ public:
   /// @param actions The JSON actions definition.
   /// @returns True on success, false on failure.
   virtual bool load_actions(const QJsonValue& actions) = 0;
-  /// Updates the view of the scene.
-  /// This includes the room view and
-  /// the object map view.
-  /// Not to be confused with Qt's QGraphicsView.
-  virtual void update_view() = 0;
   /// Starts the scene's animation sequence.
   virtual void start() = 0;
   /// Pauses the scenes animation sequence.

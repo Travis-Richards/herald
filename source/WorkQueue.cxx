@@ -32,31 +32,34 @@ public:
   }
   /// Adds an item to the work queue.
   /// @param command
-  void add(Command* command, Interpreter* interpreter) override {
-    return items.emplace_back(command, interpreter);
+  void add(ScopedPtr<Command>&& cmd, Interpreter* interpreter) override {
+    return items.emplace_back(std::move(cmd), interpreter);
   }
   /// Indicates whether or not the queue is empty.
   bool empty() const noexcept override {
     return items.empty();
   }
   /// Gets the current command pointer.
-  const Command* get_current_command() const noexcept override {
+  const Command& get_current_command() const noexcept override {
     if (items.empty()) {
-      return nullptr;
+      return *null_command;
     } else {
-      return items[0].first.get();
+      return *items[0].first;
     }
   }
   /// Gets the current interpreter pointer.
-  Interpreter* get_current_interpreter() noexcept override {
+  Interpreter& get_current_interpreter() noexcept override {
     if (items.empty()) {
-      return nullptr;
+      return *null_interpreter;
+    } else if (!items[0].second) {
+      return *null_interpreter;
     } else {
-      return items[0].second.get();
+      return *items[0].second;
     }
   }
   /// Removes the current work item.
   void pop() override {
+    items.erase(items.begin());
   }
 };
 

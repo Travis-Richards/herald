@@ -57,6 +57,7 @@ public:
   /// @param name The name of the command.
   NullaryCommand(const char* name) {
     append(name);
+    append('\n');
   }
 };
 
@@ -69,6 +70,7 @@ public:
     append(x);
     append(' ');
     append(y);
+    append('\n');
   }
 };
 
@@ -81,6 +83,7 @@ public:
     append(b);
     append(' ');
     append(state);
+    append('\n');
   }
 };
 
