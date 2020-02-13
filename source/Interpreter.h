@@ -43,5 +43,4 @@ protected:
   /// @param parser A parser instance to parse the response with.
   /// @returns True on success, false on failure.
   virtual bool interpret(Parser& parser) = 0;
-private:
 };
