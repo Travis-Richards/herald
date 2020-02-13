@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "Manager.h"
 
 #include "ActiveGame.h"
 #include "ActiveGameList.h"
@@ -11,8 +11,8 @@
 
 namespace {
 
-/// Implements the engine interface.
-class EngineImpl final : public Engine {
+/// Implements the manager interface.
+class ManagerImpl final : public Manager {
   /// The actively running games.
   ActiveGameList* active_games;
   /// The list of available games.
@@ -20,9 +20,9 @@ class EngineImpl final : public Engine {
   /// The last selected game.
   SelectionIndex last_selected;
 public:
-  /// Constructs an instance of the engine implementation.
+  /// Constructs an instance of the manager implementation.
   /// @param parent A pointer to the parent object.
-  EngineImpl(QObject* parent) : Engine(parent) {
+  ManagerImpl(QObject* parent) : Manager(parent) {
     active_games = ActiveGameList::make(1, this);
     game_list = new GameList(this);
   }
@@ -81,14 +81,13 @@ public:
   /// @param path The path of the game to play.
   /// @returns True on success, false on failure.
   bool play_game(const QString& path);
-  /// Handles the case of the game
-  /// engine exiting.
+  /// Handles the case of the application exiting.
   void handle_exit() override {
     save_settings();
   }
 };
 
-bool EngineImpl::play_selected_game() {
+bool ManagerImpl::play_selected_game() {
 
   if (last_selected.invalid()) {
     return false;
@@ -102,7 +101,7 @@ bool EngineImpl::play_selected_game() {
   return play_game(game_path);
 }
 
-bool EngineImpl::play_game(const QString& path) {
+bool ManagerImpl::play_game(const QString& path) {
 
   if (active_games->maxed_out()) {
     return false;
@@ -121,6 +120,6 @@ bool EngineImpl::play_game(const QString& path) {
 
 } // namespace
 
-Engine* Engine::make(QObject* parent) {
-  return new EngineImpl(parent);
+Manager* Manager::make(QObject* parent) {
+  return new ManagerImpl(parent);
 }

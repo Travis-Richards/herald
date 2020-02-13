@@ -8,24 +8,23 @@ class QString;
 
 enum class SymbolType : int;
 
-/// This is the top level controller of the application
-/// and (therefore) the game engine.
-class Engine : public QObject {
+/// This is the top level controller of the application.
+class Manager : public QObject {
   Q_OBJECT
 public:
-  /// Creates a new engine instance.
+  /// Creates a new manager instance.
   /// @param parent A pointer to the parent object.
-  /// @returns A new engine instance.
-  static Engine* make(QObject* parent);
-  /// Constructs the engine instance.
+  /// @returns A new manager instance.
+  static Manager* make(QObject* parent);
+  /// Constructs the manager instance.
   /// @param parent A pointer to the parent object.
-  Engine(QObject* parent) : QObject(parent) {}
-  /// Releases resources allocated by the engine.
-  virtual ~Engine() {}
-  /// Loads the engine settings.
+  Manager(QObject* parent) : QObject(parent) {}
+  /// Just a stub.
+  virtual ~Manager() {}
+  /// Loads the user settings.
   /// @returns True on success, false on failure.
   virtual bool load_settings() = 0;
-  /// Saves the engine settings.
+  /// Saves the user settings.
   /// @returns True on success, false on failure.
   virtual bool save_settings() const = 0;
 public slots:
