@@ -10,8 +10,6 @@
 #include <QPen>
 #include <QPixmap>
 
-#include <iostream>
-
 namespace herald {
 
 namespace {

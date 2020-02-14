@@ -1,9 +1,11 @@
 #include "QtModel.h"
 
+#include "ActionTable.h"
 #include "AnimationTable.h"
 #include "Index.h"
 #include "ScopedPtr.h"
 #include "QtBackground.h"
+#include "QtObjectTable.h"
 #include "QtRoom.h"
 #include "QtTextureTable.h"
 
@@ -17,6 +19,8 @@ namespace {
 
 /// Implements the Qt model interface.
 class QtModelImpl final : public QtModel {
+  /// The action table for the model.
+  ScopedPtr<ActionTable> actions;
   /// The animation table for the model.
   ScopedPtr<AnimationTable> animations;
   /// The textures for the model.
@@ -28,20 +32,25 @@ class QtModelImpl final : public QtModel {
   ScopedPtr<QtBackground> background;
   /// The room for the model.
   ScopedPtr<QtRoom> room;
+  /// The objects within the model.
+  ScopedPtr<QtObjectTable> object_table;
   /// The total number of ellapsed milliseconds.
   std::size_t ellapsed_ms;
 public:
   /// Constructs a new Qt model instance.
   QtModelImpl()
-    : animations(AnimationTable::make()),
+    : actions(ActionTable::make()),
+      animations(AnimationTable::make()),
       textures(QtTextureTable::make()),
       scene(new QGraphicsScene()),
       background(QtBackground::make(nullptr)),
       room(QtRoom::make(nullptr)),
+      object_table(QtObjectTable::make(nullptr)),
       ellapsed_ms(0) {
 
     scene->addItem(background->get_graphics_item());
     scene->addItem(room->get_graphics_item());
+    scene->addItem(object_table->get_graphics_item());
   }
   /// Moves the scene forward in time.
   /// @param delta_ms The value to increase the timeline by.
@@ -49,8 +58,18 @@ public:
 
     ellapsed_ms += delta_ms;
 
-    room->update_frame_indices(ellapsed_ms, *animations);
+    room->update_texture_indices(ellapsed_ms, *animations);
     room->update_textures(*textures);
+
+    object_table->resize_standard(room->get_tile_size());
+    object_table->update_positions(room->get_tile_size());
+    object_table->update_animation_indices(*actions);
+    object_table->update_texture_indices(ellapsed_ms, *animations);
+    object_table->update_textures(*textures);
+  }
+  /// Accesses a pointer to the action table.
+  ActionTable* get_action_table() override {
+    return actions.get();
   }
   /// Accesses a pointer to the animation table.
   AnimationTable* get_animation_table() override {
@@ -59,6 +78,10 @@ public:
   /// Accesses a pointer to the background.
   Background* get_background() override {
     return background.get();
+  }
+  /// Accesses a pointer to the object map.
+  ObjectTable* get_object_table() override {
+    return object_table.get();
   }
   /// Accesses the room.
   /// @returns A pointer to the model's room.

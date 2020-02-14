@@ -37,6 +37,16 @@ public:
       return Tile::get_null_tile();
     }
   }
+  /// Gets the tile size of the room.
+  /// @returns The tile size of the room.
+  QSize get_tile_size() const noexcept override {
+    if (!width() || !height()) {
+      return QSize(0, 0);
+    } else {
+      return QSize(display_size.width()  / width(),
+                   display_size.height() / height());
+    }
+  }
   /// Handles a window resize event.
   /// @param size The window size to scale to.
   void handle_resize(const QSize& size) override {
@@ -65,10 +75,10 @@ public:
 
     adjust_tile_size();
   }
-  /// Updates the frame indices for the tiles.
+  /// Updates the texture indices for the tiles.
   /// @param ellapsed_ms The updated timeline value.
-  /// @param animation A reference to the animation table to get the frame indices from.
-  void update_frame_indices(std::size_t ellapsed_ms, const AnimationTable& animations) override {
+  /// @param animation A reference to the animation table to get the texture indices from.
+  void update_texture_indices(std::size_t ellapsed_ms, const AnimationTable& animations) override {
     for (auto& tile : tiles) {
       tile->update_texture_index(ellapsed_ms, animations);
     }

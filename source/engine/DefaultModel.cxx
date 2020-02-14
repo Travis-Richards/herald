@@ -29,6 +29,11 @@ public:
                        animations(AnimationTable::make()),
                        background(DefaultBackground::make()),
                        room(DefaultRoom::make()) {}
+  /// Currently does nothing.
+  /// @returns A null pointer.
+  ActionTable* get_action_table() override {
+    return nullptr;
+  }
   /// Accesses a pointer to the animation table.
   AnimationTable* get_animation_table() override {
     return animations.get();
@@ -37,6 +42,11 @@ public:
   /// @returns A pointer to the background.
   Background* get_background() override {
     return background.get();
+  }
+  /// Currently does nothing.
+  /// @returns A null pointer.
+  ObjectTable* get_object_table() override {
+    return nullptr;
   }
   /// Accesses a pointer to the room.
   /// @returns A pointer to the room.
