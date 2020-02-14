@@ -30,8 +30,6 @@ if(Qt5Widgets_FOUND)
 
   set(Qt_LIBS Qt5::Widgets)
 
-  set(Qt_DEMO ON)
-
 endif(Qt5Widgets_FOUND)
 
 add_library("herald-engine"
@@ -66,11 +64,3 @@ add_library("herald-engine"
 target_link_libraries("herald-engine" PRIVATE "herald-common")
 
 target_link_libraries("herald-engine" PUBLIC ${Qt_LIBS})
-
-if(Qt_DEMO)
-
-  add_executable("herald-engine-qt-demo" "QtDemo.cxx")
-
-  target_link_libraries("herald-engine-qt-demo" PRIVATE "herald-engine" "herald-common")
-
-endif(Qt_DEMO)
