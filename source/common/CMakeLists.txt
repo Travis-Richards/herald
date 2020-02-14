@@ -14,9 +14,8 @@ endif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 # All libraries will link to
 # this.
 
-add_library("herald-common"
-  "ScopedPtr.h")
+add_library("herald-common" INTERFACE)
 
-target_include_directories("herald-common" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories("herald-common" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_compile_options("herald-common" PUBLIC ${cxxflags})
+target_compile_options("herald-common" INTERFACE ${cxxflags})
