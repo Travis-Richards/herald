@@ -8,6 +8,8 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
@@ -46,16 +48,31 @@ public:
 
     if (title.isEmpty() || location.isEmpty()) {
       return false;
+    } else if (title.contains('\\') || title.contains('/')) {
+      return false;
     }
 
-    QFileInfo file_info(location);
+    QFileInfo location_info(location);
 
-    return file_info.exists();
+    if (!location_info.exists()) {
+      return false;
+    } else if (!location_info.isDir()) {
+      return false;
+    }
+
+    QFileInfo dir_info(QDir::cleanPath(location + QDir::separator() + title));
+
+    // Make sure the game directory
+    // doesn't already exist so we
+    // don't accidently overwrite something.
+    return !dir_info.exists();
   }
 public slots:
   /// Creates the project.
   void create(bool) {
+
     add_to_game_list();
+
     make_info_file();
   }
   /// Chooses the API to make the project in.
@@ -86,9 +103,53 @@ protected:
     auto game_list = settings.value("gamelist").toStringList();
 
     game_list << location;
+
+    settings.setValue("gamelist", game_list);
   }
   /// Creates the information file used to open the game.
-  void make_info_file() {
+  /// @returns True on success, false on failure.
+  bool make_info_file() {
+
+    QDir game_dir(location);
+
+    if (!game_dir.mkdir(title)) {
+      return false;
+    } else if (!game_dir.cd(title)) {
+      return false;
+    }
+
+    QJsonObject json_root;
+
+    json_root.insert("title", title);
+    json_root.insert("author", author);
+    json_root.insert("api", api);
+
+    QJsonDocument json_doc(json_root);
+
+    QFile file(game_dir.absoluteFilePath("info.json"));
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      return false;
+    }
+
+    file.write(json_doc.toJson());
+
+    return true;
+  }
+  /// Converts the game title into a
+  /// name that can be put onto a directory.
+  /// @returns The translated filename, with
+  /// every '/' or '\' character replaced with
+  /// a space character.
+  QString title_to_dirname() const {
+    QString out;
+    for (auto c : title) {
+      if ((c == '\\') || (c == '/')) {
+        out += ' ';
+      } else {
+        out += c;
+      }
+    }
+    return out;
   }
 };
 
@@ -289,6 +350,8 @@ protected:
     new_button->setEnabled(false);
 
     QObject::connect(new_button, &QPushButton::clicked, project_creator.get(), &ProjectCreator::create);
+
+    QObject::connect(new_button, &QPushButton::clicked, root_widget.get(), &QWidget::hide);
 
     return new_button;
   }
