@@ -12,6 +12,8 @@ endif (NOT TARGET "herald-engine")
 
 add_executable("herald-toolkit" WIN32
   "main.cxx"
+  "ProjectView.h"
+  "ProjectView.cxx"
   "StartupDialog.h"
   "StartupDialog.cxx")
 
