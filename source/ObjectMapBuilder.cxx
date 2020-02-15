@@ -1,10 +1,12 @@
 #include "ObjectMapBuilder.h"
 
 #include "Interpreter.h"
-#include "Object.h"
-#include "ObjectMap.h"
-#include "Scene.h"
 #include "ScopedPtr.h"
+#include "Vec2f.h"
+
+#include "engine/Model.h"
+#include "engine/Object.h"
+#include "engine/ObjectTable.h"
 
 #include "protocol/ParseTree.h"
 #include "protocol/Parser.h"
@@ -13,15 +15,15 @@ using namespace herald;
 
 namespace {
 
-/// Used to insert objects into a scene.
-class ObjectMapBuilder final : public Interpreter {
-  /// The scene to add the objects to.
-  Scene* scene;
+/// Used to insert objects into the model.
+class ObjectTableBuilder final : public Interpreter {
+  /// The model to add the objects to.
+  Model* model;
 public:
-  /// Constructs an object filler.
-  /// @param scene_ The scene to put the objects into.
+  /// Constructs an object table builder.
+  /// @param m The model to put the objects into.
   /// @param parent A pointer to the parent object.
-  ObjectMapBuilder(Scene* s, QObject* parent) : Interpreter(parent), scene(s) { }
+  ObjectTableBuilder(Model* m, QObject* parent) : Interpreter(parent), model(m) { }
   /// Interprets the response to the "add objects" command.
   /// @param parser The parser to parse the response with.
   /// @returns True on success, false on failure.
@@ -32,24 +34,26 @@ public:
       return false;
     }
 
-    int count = 0;
+    int signed_count = 0;
 
-    if (!count_node.to_signed_value(count)) {
+    if (!count_node.to_signed_value(signed_count)) {
       return false;
-    } else if (count <= 0) {
+    } else if (signed_count <= 0) {
       return true;
     }
 
-    auto* object_map = scene->get_object_map();
+    std::size_t count = (std::size_t) signed_count;
 
-    for (int i = 0; i < count; i++) {
+    auto* object_table = model->get_object_table();
 
-      Object object(-1, -1, -1);
+    object_table->resize(count);
+
+    for (std::size_t i = 0; i < count; i++) {
+
+      auto* object = object_table->at(i);
 
       if (!parse_object(parser, object)) {
         break;
-      } else {
-        object_map->add(object);
       }
     }
 
@@ -58,7 +62,7 @@ public:
 protected:
   /// Parses a single object.
   /// @param parser The parser to parse the object with.
-  bool parse_object(Parser& parser, Object& object) {
+  bool parse_object(Parser& parser, Object* object) {
 
     auto x_node = parser.parse_integer();
     auto y_node = parser.parse_integer();
@@ -80,7 +84,8 @@ protected:
       return false;
     }
 
-    object = Object(action, x, y);
+    object->translate(Vec2f(x, y));
+    object->set_action_index((std::size_t) action);
 
     return true;
   }
@@ -88,6 +93,6 @@ protected:
 
 } // namespace
 
-Interpreter* make_object_map_builder(Scene* scene, QObject* parent) {
-  return new ObjectMapBuilder(scene, parent);
+Interpreter* make_object_table_builder(Model* model, QObject* parent) {
+  return new ObjectTableBuilder(model, parent);
 }

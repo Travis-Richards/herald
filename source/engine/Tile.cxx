@@ -10,7 +10,6 @@ namespace {
 /// a tile in an out of bounds condition.
 class NullTile final : public Tile {
 public:
-  void queue_animation(Index) override {}
 };
 
 /// An instance of the null tile class.

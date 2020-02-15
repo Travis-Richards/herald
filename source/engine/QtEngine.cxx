@@ -14,14 +14,14 @@ namespace {
 
 /// An implementation of the Qt engine.
 class QtEngineImpl final : public QtEngine {
-  /// The taregt to render to.
-  ScopedPtr<QtTarget> target;
   /// The Qt data model.
   ScopedPtr<QtModel> model;
+  /// The taregt to render to.
+  ScopedPtr<QtTarget> target;
 public:
   /// Constructs an instance of the Qt engine.
   /// @param t The target to render to.
-  QtEngineImpl(ScopedPtr<QtTarget>&& t) : target(std::move(t)), model(QtModel::make()) {
+  QtEngineImpl(ScopedPtr<QtTarget>&& t) : model(QtModel::make()), target(std::move(t)) {
 
     target->get_graphics_view()->setScene(model->get_scene());
 

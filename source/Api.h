@@ -2,6 +2,12 @@
 
 #include <QObject>
 
+namespace herald {
+
+class Model;
+
+} // namespace herald
+
 enum class Button : int;
 
 class QString;
@@ -20,9 +26,9 @@ public:
   /// Just a stub.
   virtual ~Api() {}
   /// Starts the game.
-  /// @param scene The scene to put the game data into.
+  /// @param model The game model to be modified.
   /// @returns True on success, false on failure.
-  virtual bool start(Scene* scene) = 0;
+  virtual bool start(herald::Model* model) = 0;
   /// Exits the game.
   virtual void exit() = 0;
 public slots:

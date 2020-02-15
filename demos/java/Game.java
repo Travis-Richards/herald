@@ -99,12 +99,11 @@ class Game {
    * */
   static boolean buildObjectMap() {
 
-    String response = "";
+    String response = "0";
 
     System.out.println(response);
 
     return true;
-
   }
   /** Builds the room.
    * @return Always returns true.

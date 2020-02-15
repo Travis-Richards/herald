@@ -1,25 +1,28 @@
 #include "BackgroundModifier.h"
 
-#include "Background.h"
 #include "Interpreter.h"
-#include "Scene.h"
 #include "ScopedPtr.h"
+
+#include "engine/Background.h"
+#include "engine/Model.h"
 
 #include "protocol/ParseTree.h"
 #include "protocol/Parser.h"
 
 namespace {
 
+using namespace herald;
+
 /// Implements background modification.
 class BackgroundModifier final : public Interpreter {
-  /// The scene whose background
+  /// The model whose background
   /// is getting modified.
-  Scene* scene;
+  Model* model;
 public:
   /// Constructs a background modifier instance.
-  /// @param s The scene to modify the background of.
+  /// @param m The model to modify the background of.
   /// @param parent A pointer to the parent object.
-  BackgroundModifier(Scene* s, QObject* parent) : Interpreter(parent), scene(s) { }
+  BackgroundModifier(Model* m, QObject* parent) : Interpreter(parent), model(m) { }
   /// Inteprets the response of
   /// the background modification command.
   /// @returns True on success, false on failure.
@@ -30,26 +33,13 @@ public:
       return false;
     }
 
-    auto frame_offset = parser.parse_integer();
-    if (!check(frame_offset)) {
-      return false;
-    }
-
     int animation_value = 0;
 
     if (!animation.to_signed_value(animation_value)) {
       return false;
     }
 
-    int frame_offset_value = 0;
-
-    if (!frame_offset.to_signed_value(frame_offset_value)) {
-      return false;
-    }
-
-    auto* background = scene->get_background();
-    background->set_animation(animation_value);
-    background->set_frame_offset(frame_offset_value);
+    model->get_background()->set_animation_index((std::size_t) animation_value);
 
     return true;
   }
@@ -57,6 +47,6 @@ public:
 
 } // namespace
 
-Interpreter* make_background_modifier(Scene* scene, QObject* parent) {
-  return new BackgroundModifier(scene, parent);
+Interpreter* make_background_modifier(herald::Model* model, QObject* parent) {
+  return new BackgroundModifier(model, parent);
 }

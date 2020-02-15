@@ -26,24 +26,18 @@ set(CMAKE_AUTORCC ON)
 # Add components
 
 add_subdirectory("source/common")
+add_subdirectory("source/engine")
 add_subdirectory("source/protocol")
 
 # Here we declare the main program.
 
 add_executable("herald" WIN32
   "source/main.cxx"
-  "source/Action.h"
-  "source/Action.cxx"
-  "source/ActionList.cxx"
-  "source/ActionList.h"
   "source/ActiveGame.h"
   "source/ActiveGame.cxx"
   "source/ActiveGameList.h"
   "source/ActiveGameList.cxx"
   "source/Api.h"
-  "source/Background.h"
-  "source/BackgroundView.h"
-  "source/BackgroundView.cxx"
   "source/BackgroundModifier.h"
   "source/BackgroundModifier.cxx"
   "source/CentralWidget.h"
@@ -73,38 +67,19 @@ add_executable("herald" WIN32
   "source/Matrix.cxx"
   "source/MenuBuilder.h"
   "source/MenuBuilder.cxx"
-  "source/Object.h"
-  "source/Object.cxx"
-  "source/ObjectMap.h"
-  "source/ObjectMap.cxx"
+  "source/ModelLoader.h"
+  "source/ModelLoader.cxx"
   "source/ObjectMapBuilder.h"
   "source/ObjectMapBuilder.cxx"
-  "source/ObjectMapView.h"
-  "source/ObjectMapView.cxx"
   "source/PathSetting.h"
   "source/PathSetting.cxx"
   "source/ProcessApi.h"
   "source/ProcessApi.cxx"
-  "source/Room.h"
-  "source/Room.cxx"
   "source/RoomBuilder.h"
   "source/RoomBuilder.cxx"
-  "source/RoomView.h"
-  "source/RoomView.cxx"
-  "source/Scene.h"
-  "source/Scene.cxx"
-  "source/SceneView.h"
-  "source/SceneView.cxx"
   "source/SelectionIndex.h"
   "source/SettingsDialog.h"
   "source/SettingsDialog.cxx"
-  "source/Texture.h"
-  "source/Texture.cxx"
-  "source/TextureAnimation.h"
-  "source/TextureAnimation.cxx"
-  "source/TextureAnimationGroup.h"
-  "source/TextureAnimationGroup.cxx"
-  "source/Tile.h"
   "source/WorkQueue.h"
   "source/WorkQueue.cxx"
   "source/Writer.h"
@@ -114,6 +89,7 @@ add_executable("herald" WIN32
 target_link_libraries("herald" PRIVATE
   ${LIBS}
   "herald-common"
+  "herald-engine"
   "herald-protocol")
 
 target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})

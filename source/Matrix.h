@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 namespace herald {
 
 template <typename T>
@@ -21,7 +23,7 @@ public:
   /// Creates a new matrix instance.
   /// @param width The width of the matrix.
   /// @param height The height of the matrix.
-  static herald::ScopedPtr<Matrix> make(int width, int height);
+  static herald::ScopedPtr<Matrix> make(std::size_t width, std::size_t height);
   /// Creates a new matrix.
   static herald::ScopedPtr<Matrix> make(const QSize& size);
   /// Just a stub.
@@ -30,12 +32,12 @@ public:
   /// @returns The number at the specified coordinates.
   /// If the coordinates are out of bounds, then zero
   /// is returned instead.
-  virtual int at(int x, int y) const noexcept = 0;
+  virtual int at(std::size_t x, std::size_t y) const noexcept = 0;
   /// Sets a number within the matrix.
   /// @param n The number to assign at the specified coordinates.
-  virtual void set(int x, int y, int n) noexcept = 0;
+  virtual void set(std::size_t x, std::size_t y, int n) noexcept = 0;
   /// Indicates the width of the matrix.
-  virtual int width() const noexcept = 0;
+  virtual std::size_t width() const noexcept = 0;
   /// Indicates the height of the matrix.
-  virtual int height() const noexcept = 0;
+  virtual std::size_t height() const noexcept = 0;
 };

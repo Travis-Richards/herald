@@ -1,0 +1,31 @@
+{
+  "actions" : [ ],
+  "animations" : [
+    [
+      {
+        "texture" : 0
+      }
+    ],
+    [
+      {
+        "texture" : 1
+      }
+    ],
+    [
+      {
+        "texture" : 2
+      }
+    ],
+    [
+      {
+        "texture" : 3
+      }
+    ]
+  ],
+  "textures" : [
+    "textures/grass.png",
+    "textures/castle-wall.png",
+    "textures/castle-entrance.png",
+    "textures/river.gif"
+  ]
+}

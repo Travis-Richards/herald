@@ -8,7 +8,6 @@
 #include "MenuBuilder.h"
 #include "ObjectMapBuilder.h"
 #include "RoomBuilder.h"
-#include "Scene.h"
 #include "ScopedPtr.h"
 #include "WorkQueue.h"
 #include "Writer.h"
@@ -78,12 +77,12 @@ public:
     }
   }
   /// Starts up the game.
-  /// @param scene The scene to add the game data into.
+  /// @param model The model to add the game data into.
   /// @returns True on success, false on failure.
-  bool start(Scene* scene) override {
-    add_work_item(Command::make_nullary("set_background"), make_background_modifier(scene, this));
-    add_work_item(Command::make_nullary("build_room"), make_room_builder(scene, this));
-    add_work_item(Command::make_nullary("build_object_map"), make_object_map_builder(scene, this));
+  bool start(Model* model) override {
+    add_work_item(Command::make_nullary("set_background"), make_background_modifier(model, this));
+    add_work_item(Command::make_nullary("build_room"), make_room_builder(model, this));
+    add_work_item(Command::make_nullary("build_object_map"), make_object_table_builder(model, this));
     return handle_work_item();
   }
   /// This should only be called before the process is started.

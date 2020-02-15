@@ -4,39 +4,50 @@
 #include "Controller.h"
 #include "ErrorLog.h"
 #include "GameInfo.h"
+#include "ModelLoader.h"
 #include "ProcessApi.h"
-#include "Scene.h"
-#include "SceneView.h"
+#include "ScopedPtr.h"
+
+#include "engine/QtEngine.h"
+#include "engine/QtTarget.h"
 
 #include <QDir>
 #include <QDirIterator>
-#include <QJsonArray>
+#include <QGraphicsView>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QMessageBox>
 #include <QStringList>
+#include <QTimer>
 #include <QWidget>
 
 namespace {
 
+using namespace herald;
+
 /// Implements the active game interface.
 class ActiveGameImpl final : public ActiveGame {
+  /// The engine instance that's running the game.
+  ScopedPtr<Engine> engine;
   /// The widget responsible for logging errors.
   ErrorLog* error_log;
-  /// A view of the game scene.
-  SceneView* scene_view;
-  /// The game scene being rendered.
-  Scene* scene;
   /// The API controlling the game play.
   Api* api;
+  /// The timer for frame iteration.
+  QTimer timer;
 public:
   /// Constructs an instance of the active game.
   /// @param parent A pointer to the parent object.
   ActiveGameImpl(QObject* parent)
     : ActiveGame(parent),
+      engine(nullptr),
       error_log(nullptr),
-      scene_view(nullptr),
-      scene(nullptr),
-      api(nullptr) {}
+      api(nullptr) {
+
+    timer.setInterval(1000 / 30);
+
+    connect(&timer, &QTimer::timeout, this, &ActiveGameImpl::next_frame);
+  }
   /// Releases memory allocated by the game.
   ~ActiveGameImpl();
   /// Closes the game, if it's running.
@@ -47,36 +58,28 @@ public:
   bool open(const QString& path) override;
   /// Starts the scene animation.
   void start() override {
-    if (scene) {
-      scene->start();
-    }
+    timer.start();
   }
   /// Pauses the scene animation.
   void pause() override {
-    if (scene) {
-      scene->pause();
-    }
+    timer.stop();
   }
 protected:
   /// Opesn a game at a specific path with supplemental info.
   /// @param path The path to the game to open.
   /// @param info Information regarding the game and how to open it.
   bool open(const QString& path, const GameInfo& info);
-  /// Opens the actions definition from the action file.
+  /// Opens the game model.
   /// @param game_path The path to the game directory.
+  /// The name of the model file is append to this directory path.
   /// @returns True on success, false on failure.
-  bool open_actions(const QString& game_path);
-  /// Opens the textures to be used in the game.
-  /// @param game_path The path to the game.
-  /// @returns True on success, false on failure.
-  bool open_textures(const QString& game_path);
+  bool open_model(const QString& game_path);
   /// Opens a message box and prints a message indicating why
   /// the game failed to open.
   /// @returns Always returns false.
   bool fail(const QString& message);
-protected slots:
-  /// Handles closing of the scene view.
-  void handle_scene_view_closing();
+  /// Goes to the next frame in the game play.
+  void next_frame();
 };
 
 ActiveGameImpl::~ActiveGameImpl() {
@@ -111,11 +114,6 @@ void ActiveGameImpl::close() {
     delete error_log;
     error_log = nullptr;
   }
-
-  if (scene) {
-    delete scene;
-    scene = nullptr;
-  }
 }
 
 bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
@@ -125,35 +123,37 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
     return fail("Failed to create API instance");
   }
 
-  scene = Scene::make(this);
+  auto target = QtTarget::make(nullptr);
 
-  scene_view = SceneView::make(scene);
-  scene_view->setWindowTitle(info.get_title());
+  auto* graphics_view = target->get_graphics_view();
 
-  connect(scene_view, &SceneView::closing, this, &ActiveGameImpl::handle_scene_view_closing);
-  connect(scene_view, &SceneView::resized, scene, &Scene::resize);
+  graphics_view->setWindowTitle(info.get_title());
 
+  engine = QtEngine::make(std::move(target));
+
+#if 0
   auto* controller = scene_view->get_controller();
   connect(controller, &Controller::update_axis,   api, &Api::update_def_axis);
   connect(controller, &Controller::update_button, api, &Api::update_def_button);
+#endif
 
   error_log = new ErrorLog(nullptr);
 
-  connect(api, &Api::error_logged, error_log, &ErrorLog::log);
+  connect(api, &Api::error_logged,   error_log, &ErrorLog::log);
   connect(api, &Api::error_occurred, error_log, &ErrorLog::log_fatal);
 
-  scene_view->show();
+  open_model(path);
 
-  open_textures(path);
+  graphics_view->show();
 
-  open_actions(path);
+  auto success = api->start(engine->get_model());
 
-  return api->start(scene);
+  return success;
 }
 
-bool ActiveGameImpl::open_actions(const QString& game_path) {
+bool ActiveGameImpl::open_model(const QString& game_path) {
 
-  auto actions_path = QDir::cleanPath(game_path + QDir::separator() + "actions.json");
+  auto actions_path = QDir::cleanPath(game_path + QDir::separator() + "model.json");
 
   QFile json_file(actions_path);
 
@@ -166,26 +166,7 @@ bool ActiveGameImpl::open_actions(const QString& game_path) {
 
   auto json_doc = QJsonDocument::fromJson(json_data);
 
-  return scene->load_actions(json_doc.array());
-}
-
-bool ActiveGameImpl::open_textures(const QString& path) {
-
-  auto textures_path = QDir::cleanPath(path + QDir::separator() + "textures"); 
-
-  QDirIterator it(textures_path, QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Files | QDir::Dirs);
-
-  QStringList texture_list;
-
-  while (it.hasNext()) {
-    texture_list << it.next();
-  }
-
-  texture_list.sort();
-
-  for (auto texture_path : texture_list) {
-    scene->load_texture(texture_path);
-  }
+  ModelLoader::load(engine->get_model(), json_doc.object(), game_path);
 
   return true;
 }
@@ -195,8 +176,8 @@ bool ActiveGameImpl::fail(const QString& message) {
   return false;
 }
 
-void ActiveGameImpl::handle_scene_view_closing() {
-  emit closing(this);
+void ActiveGameImpl::next_frame() {
+  engine->advance((std::size_t) timer.interval());
 }
 
 } // namespace

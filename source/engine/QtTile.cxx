@@ -18,8 +18,6 @@ namespace {
 class QtTileImpl final : public QtTile {
   /// The graphics rectangle item.
   ScopedPtr<QGraphicsRectItem> item;
-  /// The animation queue.
-  std::vector<Index> animation_queue;
   /// The index of the current texture that the tile is displaying.
   Index texture_index;
   /// The currently displayed texture.
@@ -31,22 +29,9 @@ public:
     item->setPen(Qt::NoPen);
     item->setBrush(QBrush(QColor(0, 0, 0, 0)));
   }
-  /// Gets the index of the current animation.
-  /// @returns The index of the current animation.
-  Index get_current_animation() const noexcept {
-    if (animation_queue.empty()) {
-      return Index();
-    } else {
-      return animation_queue[0];
-    }
-  }
   /// Accesses a pointer to the graphics item.
   QGraphicsItem* get_graphics_item() override {
     return item.get();
-  }
-  /// Queues a change in animation.
-  void queue_animation(Index animation) override {
-    animation_queue.push_back(animation);
   }
   /// Assigns the rectangle shape to the tile.
   void set_rect(const QRectF& rect) override {
@@ -59,7 +44,7 @@ public:
   /// to get the texture index from.
   void update_texture_index(std::size_t ellapsed_ms, const AnimationTable& animations) override {
 
-    auto* animation = animations.at(get_current_animation());
+    auto* animation = animations.at(get_animation_index());
 
     texture_index = animation->calculate_texture_index(ellapsed_ms);
   }

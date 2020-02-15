@@ -34,6 +34,11 @@ public:
       delete object;
     }
   }
+  /// Manually destroys the object.
+  void destroy() {
+    delete object;
+    object = nullptr;
+  }
   /// Accesses a normal object pointer.
   Object* get() noexcept {
     return object;
