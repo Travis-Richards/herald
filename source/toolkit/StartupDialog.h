@@ -7,11 +7,14 @@ class ScopedPtr;
 
 namespace tk {
 
+class Manager;
+
 /// The dialog used to startup the program.
 class StartupDialog {
 public:
   /// Creates a new instance of the startup dialog.
-  static ScopedPtr<StartupDialog> make();
+  /// @param manager A pointer to the application manager.
+  static ScopedPtr<StartupDialog> make(Manager* manager);
   /// Just a stub.
   virtual ~StartupDialog() {}
   /// Shows the dialog window.

@@ -1,5 +1,8 @@
 #include "StartupDialog.h"
 
+#include "GameInfo.h"
+#include "GameList.h"
+#include "Manager.h"
 #include "ScopedPtr.h"
 
 #include <QComboBox>
@@ -35,10 +38,17 @@ class ProjectCreator final : public QObject {
   QString location;
   /// The title of the game.
   QString title;
+  /// A pointer to the application manager.
+  Manager* manager;
 public:
   /// Constructs a new instance of the project creator.
+  /// @param m A pointer to the application manager.
   /// @param parent A pointer to the parent object.
-  ProjectCreator(QObject* parent) : QObject(parent) {}
+  ProjectCreator(Manager* m, QObject* parent) : QObject(parent), manager(m) {}
+  /// Gets the path to the game.
+  QString get_game_path() {
+    return QDir::cleanPath(location + QDir::separator() + title);
+  }
   /// Indicates whether or not the creator
   /// is ready to make a project. Internally,
   /// it checks to make sure that a title is
@@ -69,11 +79,12 @@ public:
   }
 public slots:
   /// Creates the project.
-  void create(bool) {
+  /// @returns True on success, false on failure.
+  bool create() {
 
     add_to_game_list();
 
-    make_info_file();
+    return make_info_file();
   }
   /// Chooses the API to make the project in.
   /// @param api_ The choosen API name.
@@ -102,7 +113,7 @@ protected:
 
     auto game_list = settings.value("gamelist").toStringList();
 
-    game_list << location;
+    game_list << QDir::cleanPath(location + QDir::separator() + title);
 
     settings.setValue("gamelist", game_list);
   }
@@ -155,17 +166,27 @@ protected:
 
 /// An implementation of the startup dialog interface.
 class StartupDialogImpl final : public StartupDialog {
+  /// A pointer to the application manager.
+  Manager* manager;
   /// The root widget displaying the dialog.
   ScopedPtr<QWidget> root_widget;
   /// Used for creating projects.
   ScopedPtr<ProjectCreator> project_creator;
+  /// The list of existing game projects.
+  ScopedPtr<GameList> game_list;
   /// The button to make a new project.
   QPushButton* new_button;
   /// The button to open an existing project.
   QPushButton* open_button;
+  /// The last selected game.
+  QString selected_game;
 public:
   /// Constructs a new instance of the dialog.
-  StartupDialogImpl() : root_widget(new QWidget()), project_creator(new ProjectCreator(root_widget.get())) {
+  StartupDialogImpl(Manager* m)
+    : manager(m),
+      root_widget(new QWidget()),
+      project_creator(new ProjectCreator(m, root_widget.get())),
+      game_list(GameList::open(QSettings())) {
 
     setup_root_widget();
   }
@@ -212,16 +233,26 @@ protected:
     table->setColumnCount(2);
     table->setHorizontalHeaderLabels(headers);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->verticalHeader()->hide();
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    QSettings settings;
+    auto game_selector = [this](int row, int) {
+      select_game(game_list->at((std::size_t) row)->path());
+    };
 
-    auto game_list = settings.value("gamelist").toStringList();
+    auto game_opener = [this](int row, int) {
 
-    table->setRowCount(game_list.size());
+      root_widget->hide();
 
-    for (int i = 0; i < game_list.size(); i++) {
-      table->setItem(i, 0, new QTableWidgetItem(game_list[i]));
-    }
+      manager->open_project(game_list->at((std::size_t) row)->path());
+    };
+
+    QObject::connect(table, &QTableWidget::cellClicked, game_selector);
+
+    QObject::connect(table, &QTableWidget::cellDoubleClicked, game_opener);
+
+    game_list->fill_table(table);
 
     return table;
   }
@@ -233,6 +264,15 @@ protected:
     open_button = new QPushButton(QObject::tr("Open Existing"), parent);
 
     open_button->setEnabled(false);
+
+    auto open_functor = [this](bool) {
+
+      root_widget->hide();
+
+      manager->open_project(selected_game);
+    };
+
+    QObject::connect(open_button, &QPushButton::clicked, open_functor);
 
     return open_button;
   }
@@ -349,9 +389,16 @@ protected:
 
     new_button->setEnabled(false);
 
-    QObject::connect(new_button, &QPushButton::clicked, project_creator.get(), &ProjectCreator::create);
+    auto open_functor = [this](bool) {
 
-    QObject::connect(new_button, &QPushButton::clicked, root_widget.get(), &QWidget::hide);
+      root_widget->hide();
+
+      project_creator->create();
+
+      manager->open_project(project_creator->get_game_path());
+    };
+
+    QObject::connect(new_button, &QPushButton::clicked, open_functor);
 
     return new_button;
   }
@@ -391,12 +438,19 @@ protected slots:
   void browse(bool) {
     QFileDialog::getExistingDirectory(root_widget.get(), QObject::tr("Choose Game Location"));
   }
+  /// Selects a game from the table.
+  void select_game(const QString& path) {
+
+    selected_game = path;
+
+    open_button->setEnabled(!selected_game.isEmpty());
+  }
 };
 
 } // namespace
 
-ScopedPtr<StartupDialog> StartupDialog::make() {
-  return new StartupDialogImpl;
+ScopedPtr<StartupDialog> StartupDialog::make(Manager* manager) {
+  return new StartupDialogImpl(manager);
 }
 
 } // namespace tk

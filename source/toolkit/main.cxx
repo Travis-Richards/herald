@@ -1,5 +1,6 @@
 #include <QApplication>
 
+#include "Manager.h"
 #include "ScopedPtr.h"
 #include "StartupDialog.h"
 
@@ -10,7 +11,9 @@ int main(int argc, char** argv) {
   QCoreApplication::setOrganizationName("Taylor Holberton");
   QCoreApplication::setApplicationName("Herald Toolkit");
 
-  auto startup_dialog = herald::tk::StartupDialog::make();
+  auto manager = herald::tk::Manager::make();
+
+  auto startup_dialog = herald::tk::StartupDialog::make(manager.get());
 
   startup_dialog->show();
 

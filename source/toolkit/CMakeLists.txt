@@ -12,10 +12,22 @@ endif (NOT TARGET "herald-engine")
 
 add_executable("herald-toolkit" WIN32
   "main.cxx"
+  "GameInfo.h"
+  "GameList.h"
+  "GameList.cxx"
+  "Manager.h"
+  "Manager.cxx"
+  "ProjectManager.h"
+  "ProjectManager.cxx"
   "ProjectView.h"
   "ProjectView.cxx"
   "StartupDialog.h"
-  "StartupDialog.cxx")
+  "StartupDialog.cxx"
+  "TableEditor.h"
+  "TableEditor.cxx"
+  "TableItemEditor.h"
+  "TextureEditor.h"
+  "TextureEditor.cxx")
 
 target_link_libraries("herald-toolkit" PRIVATE
   Qt5::Widgets
