@@ -8,8 +8,6 @@
 #include <QPushButton>
 #include <QWidget>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {
@@ -99,8 +97,6 @@ protected:
   void fill_table() {
 
     auto items = item_editor->list();
-
-    qDebug() << "here: " << items;
 
     list_widget->clear();
 
