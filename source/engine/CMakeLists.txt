@@ -61,6 +61,8 @@ add_library("herald-engine"
   "Tile.cxx"
   ${Qt_SOURCES})
 
+target_include_directories("herald-engine" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
 target_link_libraries("herald-engine" PRIVATE "herald-common")
 
 target_link_libraries("herald-engine" PUBLIC ${Qt_LIBS})
