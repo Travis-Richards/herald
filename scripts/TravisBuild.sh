@@ -6,11 +6,14 @@ if [ "$TRAVIS" == "" ]; then
 fi
 
 set -e
-set -u
 
 mkdir build && cd build
 
-cmake .. -DCMAKE_BUILD_TYPE=Release
+if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  Qt5_DIR_OPT="-DQt5_DIR=/usr/local/opt/qt"
+fi
+
+cmake .. "-DCMAKE_BUILD_TYPE=Release" $Qt5_DIR_OPT
 
 make
 
