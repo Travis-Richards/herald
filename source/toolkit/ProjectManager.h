@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 class QString;
 class QStringList;
 
@@ -9,6 +11,8 @@ template <typename T>
 class ScopedPtr;
 
 namespace tk {
+
+class GameInfo;
 
 /// Used to manage the data of a project.
 class ProjectManager {
@@ -22,6 +26,9 @@ public:
   /// @param path The path of the texture to add.
   /// @returns The name used to identify the texture.
   virtual QString add_texture(const QString& path) = 0;
+  /// Deletes a texture from the project.
+  /// @param name The name of the texture to delete.
+  virtual void delete_texture(const QString& name) = 0;
   /// Lists the textures in the project.
   /// @returns A list of texture names that exist in the project.
   virtual QStringList list_textures() const = 0;
@@ -29,6 +36,17 @@ public:
   /// @param game_path The path to the game project.
   /// @returns True on success, false on failure.
   virtual bool open(const QString& path) = 0;
+  /// Opens the game information for the project.
+  /// @returns The game info for the project.
+  virtual ScopedPtr<GameInfo> open_info() const = 0;
+  /// Renames a texture.
+  /// @param index The index of the texture to rename.
+  /// @param name The name to give the texture.
+  virtual void rename_texture(std::size_t index, const QString& name) = 0;
+  /// Gets the path of a texture.
+  /// @param name The name of the texture to get the path of.
+  /// @returns The path of the specified texture.
+  virtual QString texture_path(const QString& name) = 0;
 };
 
 } // namespace tk

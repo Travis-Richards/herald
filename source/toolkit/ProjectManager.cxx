@@ -1,5 +1,6 @@
 #include "ProjectManager.h"
 
+#include "GameInfo.h"
 #include "ScopedPtr.h"
 
 #include <QDir>
@@ -39,6 +40,43 @@ public:
 
     return file_info.baseName();
   }
+  /// Removes a texture from the model.
+  /// @param name The name of the texture to delete.
+  void delete_texture(const QString& name) {
+
+    auto textures = root_object["textures"].toArray();
+
+    QJsonArray next_textures;
+
+    for (auto texture : textures) {
+
+      auto texture_obj = texture.toObject();
+
+      if (texture_obj["name"].toString() != name) {
+        next_textures.append(texture);
+      }
+    }
+
+    root_object["textures"] = next_textures;
+  }
+  /// Locates a texture by its name.
+  /// @param name The name of the texture to find.
+  /// @returns The value for the specified texture.
+  QJsonValue find_texture(const QString& name) const {
+
+    auto textures = root_object["textures"].toArray();
+
+    for (auto texture_value : textures) {
+
+      auto texture_obj = texture_value.toObject();
+
+      if (texture_obj["name"].toString() == name) {
+        return texture_value;
+      }
+    }
+
+    return QJsonValue();
+  }
   /// Lists the textures in the model.
   QStringList list_textures() const {
 
@@ -72,6 +110,21 @@ public:
 
     return true;
   }
+  /// Renames a texture.
+  /// @param index The index of the texture to rename.
+  /// @param name The name to give the texture.
+  void rename_texture(std::size_t index, const QString& name) {
+
+    auto textures = root_object["textures"].toArray();
+
+    auto texture_object = textures[index].toObject();
+
+    texture_object["name"] = name;
+
+    textures[index] = texture_object;
+
+    root_object["textures"] = textures;
+  }
   /// Saves the model to a JSON file.
   /// @param filename The name of the file to save the data at.
   /// @returns True on success, false on failure.
@@ -86,6 +139,12 @@ public:
     file.write(QJsonDocument(root_object).toJson());
 
     return true;
+  }
+  /// Gets the full path of a texture.
+  /// @param name The name of the texture to get the path of.
+  /// @returns The path of the specified texture.
+  QString texture_path(const QString& name) const {
+    return find_texture(name).toObject()["path"].toString();
   }
 };
 
@@ -104,6 +163,16 @@ public:
     };
 
     return add_model_item(mutator);
+  }
+  /// Removes a texture from the project.
+  /// @param name The name of the texture to remove.
+  void delete_texture(const QString& name) override {
+
+    auto texture_deleter = [name](JsonModel& model) {
+      model.delete_texture(name);
+    };
+
+    modify_model(texture_deleter);
   }
   /// Lists the textures in the project.
   QStringList list_textures() const override {
@@ -126,30 +195,47 @@ public:
 
     return true;
   }
-protected:
-  /// Lists items from a model.
-  /// @param accessor The model accessor function.
-  /// @returns A list of items from the model.
-  template <typename Accessor>
-  QStringList list_model_items(Accessor& accessor) const {
+  /// Opens the game information.
+  ScopedPtr<GameInfo> open_info() const override {
+    return GameInfo::open(game_dir.filePath("info.json").toStdString().c_str());
+  }
+  /// Renames a texture.
+  /// @param index The index of the texture to rename.
+  /// @param name The name to give to the texture.
+  void rename_texture(std::size_t index, const QString& name) override {
 
-    auto model_path = game_dir.filePath("model.json");
+    auto mutator = [index, name](JsonModel& model) {
+      model.rename_texture(index, name);
+    };
+
+    modify_model(mutator);
+  }
+  /// Gets the path to a texture file.
+  /// @param name The name of the texture to get the path of.
+  /// @returns The path to the specified texture.
+  QString texture_path(const QString& name) override {
 
     JsonModel model;
 
-    if (!model.open(model_path)) {
-      return QStringList();
-    } else {
-      return accessor(model);
+    if (!model.open(get_model_path())) {
+      return "";
     }
-  };
+
+    return model.texture_path(name);
+  }
+protected:
+  /// Gets the path to the model.
+  /// @returns The path to the model.
+  QString get_model_path() const {
+    return game_dir.filePath("model.json");
+  }
   /// Adds an item to the model.
   /// @param mutator The function used to add the item.
   /// @returns The name assigned to the model.
   template <typename Mutator>
   QString add_model_item(Mutator mutator) {
 
-    auto model_path = game_dir.filePath("model.json");
+    auto model_path = get_model_path();
 
     QFileInfo model_info(model_path);
 
@@ -166,6 +252,44 @@ protected:
     model.save(model_path);
 
     return name;
+  }
+  /// Lists items from a model.
+  /// @param accessor The model accessor function.
+  /// @returns A list of items from the model.
+  template <typename Accessor>
+  QStringList list_model_items(Accessor& accessor) const {
+
+    JsonModel model;
+
+    if (!model.open(get_model_path())) {
+      return QStringList();
+    } else {
+      return accessor(model);
+    }
+  };
+  /// Modifies the model.
+  /// @param mutator The function used to modify the model.
+  /// @returns True on success, false on failure.
+  template <typename Mutator>
+  bool modify_model(Mutator mutator) {
+
+    auto model_path = get_model_path();
+
+    QFileInfo model_info(model_path);
+
+    JsonModel model;
+
+    if (model_info.exists()) {
+      if (!model.open(model_path)) {
+        return false;
+      }
+    }
+
+    mutator(model);
+
+    model.save(model_path);
+
+    return true;
   }
 };
 

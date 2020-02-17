@@ -49,6 +49,19 @@ protected:
 
     list_widget = ScopedPtr<QListWidget>(new QListWidget(left_widget));
 
+    list_widget->setEditTriggers(QAbstractItemView::DoubleClicked);
+
+    auto select_functor = [this](const QString& text) {
+      item_editor->select(text);
+    };
+
+    auto rename_functor = [this](QListWidgetItem* item) {
+      item_editor->rename(list_widget->row(item), item->text());
+    };
+
+    QObject::connect(list_widget.get(), &QListWidget::currentTextChanged, select_functor);
+    QObject::connect(list_widget.get(), &QListWidget::itemChanged, rename_functor);
+
     left_layout->addWidget(list_widget.get());
     left_layout->addWidget(make_buttons_widget(left_widget));
 
@@ -66,13 +79,26 @@ protected:
     auto* add_button = new QPushButton(QObject::tr("Add"),    buttons_widget);
     auto* del_button = new QPushButton(QObject::tr("Delete"), buttons_widget);
 
+    auto del_functor = [this](bool) {
+      auto* current_item = list_widget->currentItem();
+      if (current_item) {
+        item_editor->del(current_item->text());
+        list_widget->takeItem(list_widget->row(current_item));
+      }
+    };
+
     auto add_functor = [this](bool) {
 
       auto item_name = item_editor->add();
 
-      list_widget->addItem(item_name);
+      auto* item_widget = new QListWidgetItem(list_widget.get());
+      item_widget->setText(item_name);
+      item_widget->setFlags(item_widget->flags() | Qt::ItemIsEditable);
+
+      list_widget->addItem(item_widget);
     };
 
+    QObject::connect(del_button, &QPushButton::clicked, del_functor);
     QObject::connect(add_button, &QPushButton::clicked, add_functor);
 
     buttons_layout->addWidget(add_button);
@@ -101,7 +127,12 @@ protected:
     list_widget->clear();
 
     for (const auto& item : items) {
-      list_widget->addItem(item);
+
+      auto* item_widget = new QListWidgetItem(list_widget.get());
+      item_widget->setText(item);
+      item_widget->setFlags(item_widget->flags() | Qt::ItemIsEditable);
+
+      list_widget->addItem(item_widget);
     }
   }
 };

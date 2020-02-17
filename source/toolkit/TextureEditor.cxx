@@ -3,9 +3,9 @@
 #include "ProjectManager.h"
 #include "ScopedPtr.h"
 #include "TableItemEditor.h"
+#include "TextureWidget.h"
 
 #include <QFileDialog>
-#include <QLabel>
 #include <QLayout>
 
 namespace herald {
@@ -20,6 +20,8 @@ namespace {
 class TextureEditor final : public TableItemEditor {
   /// A pointer to the project manager to get and put textures to.
   ProjectManager* manager;
+  /// The widget displaying the texture.
+  ScopedPtr<TextureWidget> texture_widget;
 public:
   /// Constructs a new instance of the texture editor.
   /// @param m A pointer to the project manager.
@@ -35,25 +37,31 @@ public:
     return manager->add_texture(filename);
   }
   /// Deletes a texture from the table.
-  void del(std::size_t) override {
+  void del(const QString& name) override {
+    manager->delete_texture(name);
   }
   /// Lists the existing textures in the model.
   QStringList list() override {
     return manager->list_textures();
   }
+  /// Renames an item from the table.
+  /// @param index The index of the item being renamed.
+  /// @param name The name given to the item.
+  void rename(std::size_t index, const QString& name) override {
+    manager->rename_texture(index, name);
+  }
+  /// Selects the texture to edit.
+  /// @param name The name of the selected texture.
+  void select(const QString& name) override {
+    texture_widget->open_texture(manager->texture_path(name));
+  }
   /// Sets up the widget used to view the textures.
   /// @param widget A pointer to the widget to setup.
-  void setup_widget(QWidget* widget) override {
+  void setup_widget(QWidget* parent) override {
 
-    auto* layout = widget->layout();
+    texture_widget = TextureWidget::make(parent);
 
-    auto* label = new QLabel(widget);
-    label->setBackgroundRole(QPalette::Base);
-    label->setSizePolicy(QSizePolicy::Expanding,
-                         QSizePolicy::Expanding);
-    label->setScaledContents(true);
-
-    layout->addWidget(label);
+    parent->layout()->addWidget(texture_widget->get_widget());
   }
 };
 

@@ -1,5 +1,7 @@
 #include "ProjectView.h"
 
+#include "GameInfo.h"
+#include "ProjectManager.h"
 #include "ScopedPtr.h"
 #include "TableEditor.h"
 #include "TableItemEditor.h"
@@ -43,13 +45,13 @@ public:
     main_window->setCentralWidget(tab_widget.get());
     main_window->setMinimumSize(640, 480);
   }
-  /// Shows the window.
-  void show() override {
-    main_window->show();
-  }
   /// Hides the window.
   void hide() override {
     main_window->hide();
+  }
+  /// Shows the window.
+  void show() override {
+    main_window->show();
   }
 protected:
   /// Creates the rooms tab.
