@@ -1,7 +1,10 @@
 #include "ProjectView.h"
 
+#include "ActionEditor.h"
+#include "AnimationEditor.h"
 #include "GameInfo.h"
 #include "ProjectManager.h"
+#include "RoomEditor.h"
 #include "ScopedPtr.h"
 #include "TableEditor.h"
 #include "TableItemEditor.h"
@@ -26,6 +29,12 @@ class ProjectViewImpl final : public ProjectView {
   ScopedPtr<QMainWindow> main_window;
   /// A pointer to the widget containing the tabs.
   ScopedPtr<QTabWidget> tab_widget;
+  /// A pointer to the room editor.
+  ScopedPtr<TableEditor> room_editor;
+  /// A pointer to the action editor.
+  ScopedPtr<TableEditor> action_editor;
+  /// A pointer to the animation editor.
+  ScopedPtr<TableEditor> animation_editor;
   /// A pointer to the texture editor.
   ScopedPtr<TableEditor> texture_editor;
 public:
@@ -36,10 +45,10 @@ public:
     main_window = ScopedPtr<QMainWindow>(new QMainWindow());
 
     tab_widget = ScopedPtr<QTabWidget>(new QTabWidget(main_window.get()));
-    tab_widget->addTab(make_rooms_tab(tab_widget.get()),      QObject::tr("Rooms"));
-    tab_widget->addTab(make_actions_tab(tab_widget.get()),    QObject::tr("Actions"));
-    tab_widget->addTab(make_animations_tab(tab_widget.get()), QObject::tr("Animations"));
 
+    tab_widget->addTab(make_rooms_tab(manager, tab_widget.get()),      QObject::tr("Rooms"));
+    tab_widget->addTab(make_actions_tab(manager, tab_widget.get()),    QObject::tr("Actions"));
+    tab_widget->addTab(make_animations_tab(manager, tab_widget.get()), QObject::tr("Animations"));
     tab_widget->addTab(make_textures_tab(manager, tab_widget.get()),   QObject::tr("Textures"));
 
     main_window->setCentralWidget(tab_widget.get());
@@ -55,19 +64,24 @@ public:
   }
 protected:
   /// Creates the rooms tab.
+  /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
-  QWidget* make_rooms_tab(QWidget* parent) {
-    return new QWidget(parent);
+  QWidget* make_rooms_tab(ProjectManager* manager, QWidget* parent) {
+    room_editor = TableEditor::make(make_room_editor(manager), parent);
+    return room_editor->get_widget();
   }
   /// Creates the actions tab.
+  /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
-  QWidget* make_actions_tab(QWidget* parent) {
-    return new QWidget(parent);
+  QWidget* make_actions_tab(ProjectManager* manager, QWidget* parent) {
+    action_editor = TableEditor::make(make_action_editor(manager), parent);
+    return action_editor->get_widget();
   }
   /// Creates the animations tab.
   /// @param parent A pointer to the parent widget.
-  QWidget* make_animations_tab(QWidget* parent) {
-    return new QWidget(parent);
+  QWidget* make_animations_tab(ProjectManager* manager, QWidget* parent) {
+    animation_editor = TableEditor::make(make_animation_editor(manager), parent);
+    return animation_editor->get_widget();
   }
   /// Creates the textures tab.
   /// @param manager A pointer to the project manager

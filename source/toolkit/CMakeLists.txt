@@ -14,6 +14,10 @@ set(CMAKE_AUTOMOC ON)
 
 add_executable("herald-toolkit" WIN32
   "main.cxx"
+  "ActionEditor.h"
+  "ActionEditor.cxx"
+  "AnimationEditor.h"
+  "AnimationEditor.cxx"
   "GameInfo.h"
   "GameList.h"
   "GameList.cxx"
@@ -25,6 +29,8 @@ add_executable("herald-toolkit" WIN32
   "ProjectManager.cxx"
   "ProjectView.h"
   "ProjectView.cxx"
+  "RoomEditor.h"
+  "RoomEditor.cxx"
   "StartupDialog.h"
   "StartupDialog.cxx"
   "TableEditor.h"
