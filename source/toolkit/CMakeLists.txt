@@ -31,6 +31,8 @@ add_executable("herald-toolkit" WIN32
   "ProjectView.cxx"
   "RoomEditor.h"
   "RoomEditor.cxx"
+  "RoomView.h"
+  "RoomView.cxx"
   "StartupDialog.h"
   "StartupDialog.cxx"
   "TableEditor.h"

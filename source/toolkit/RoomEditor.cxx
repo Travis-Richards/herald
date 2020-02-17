@@ -1,11 +1,14 @@
 #include "TextureEditor.h"
 
 #include "ProjectManager.h"
+#include "RoomView.h"
 #include "ScopedPtr.h"
 #include "TableItemEditor.h"
 
+#include <QLayout>
 #include <QString>
 #include <QStringList>
+#include <QWidget>
 
 namespace herald {
 
@@ -15,6 +18,8 @@ namespace {
 
 class RoomEditor final : public TableItemEditor {
   ProjectManager* manager;
+  /// A view of the room being edited.
+  ScopedPtr<RoomView> room_view;
 public:
   RoomEditor(ProjectManager* m) : manager(m) {}
   QString add() override {
@@ -34,7 +39,10 @@ public:
     (void)name;
   }
   void setup_widget(QWidget* parent) override {
-    (void)parent;
+
+    room_view = RoomView::make(parent);
+
+    parent->layout()->addWidget(room_view->get_widget());
   }
 };
 
