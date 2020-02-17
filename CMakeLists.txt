@@ -39,7 +39,7 @@ elseif(WIN32)
   set(pkg_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64")
   set(zip_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64.zip")
 
-  add_custom_command(TARGET herald POST_BUILD
+  add_custom_command(TARGET herald-hub POST_BUILD
       COMMAND set PATH=%PATH%$<SEMICOLON>${qt_binary_dir}
       COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald-hub>" --dir "${pkg_path}"
       COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald-hub>" "${pkg_path}/$<TARGET_FILE_NAME:herald-hub>"
