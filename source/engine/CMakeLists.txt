@@ -32,7 +32,7 @@ if(Qt5Widgets_FOUND)
 
 endif(Qt5Widgets_FOUND)
 
-set(JSON_DST "${CMAKE_CURRENT_BINARY_DIR}/Json.hpp")
+set(JSON_DST "${CMAKE_CURRENT_BINARY_DIR}/Json.h")
 set(JSON_URL "https://github.com/nlohmann/json/releases/download/v3.7.3/json.hpp")
 
 if(NOT EXISTS "${JSON_DST}")
