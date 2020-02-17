@@ -10,17 +10,12 @@ set -u
 
 mkdir build && cd build
 
-qmake=qmake
-if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  qmake=/usr/local/opt/qt/bin/qmake
-fi
-
-$qmake -config release ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 
 make
 
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  /usr/local/opt/qt/bin/macdeployqt herald.app -dmg
+  /usr/local/opt/qt/bin/macdeployqt herald-hub.app -dmg
 fi
 
 # This is just for debugging

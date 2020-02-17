@@ -25,7 +25,7 @@ if(APPLE)
   find_program(mac_deploy_qt macdeployqt HINTS "${qt_binary_dir}")
 
   add_custom_command(TARGET herald-hub POST_BUILD
-      COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite
+      COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite -dmg
       COMMENT "Running macdeployqt...")
 
 elseif(WIN32)
