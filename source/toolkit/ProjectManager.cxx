@@ -1,7 +1,8 @@
 #include "ProjectManager.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "GameInfo.h"
-#include "ScopedPtr.h"
 
 #include <QDir>
 #include <QFile>

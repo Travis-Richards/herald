@@ -1,7 +1,8 @@
 #include <QApplication>
 
+#include <herald/ScopedPtr.h>
+
 #include "Manager.h"
-#include "ScopedPtr.h"
 #include "StartupDialog.h"
 
 int main(int argc, char** argv) {

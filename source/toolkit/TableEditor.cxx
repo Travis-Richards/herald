@@ -1,6 +1,7 @@
 #include "TableEditor.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
+
 #include "TableItemEditor.h"
 
 #include <QHBoxLayout>

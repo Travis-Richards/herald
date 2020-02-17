@@ -1,8 +1,8 @@
 #include "GameList.h"
 
-#include "GameInfo.h"
+#include <herald/ScopedPtr.h>
 
-#include "ScopedPtr.h"
+#include "GameInfo.h"
 
 #include <QDir>
 #include <QFile>

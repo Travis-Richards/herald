@@ -1,11 +1,12 @@
 #include "ProjectView.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "ActionEditor.h"
 #include "AnimationEditor.h"
 #include "GameInfo.h"
 #include "ProjectManager.h"
 #include "RoomEditor.h"
-#include "ScopedPtr.h"
 #include "TableEditor.h"
 #include "TableItemEditor.h"
 #include "TextureEditor.h"

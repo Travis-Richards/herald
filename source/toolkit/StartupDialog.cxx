@@ -1,9 +1,10 @@
 #include "StartupDialog.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "GameInfo.h"
 #include "GameList.h"
 #include "Manager.h"
-#include "ScopedPtr.h"
 
 #include <QComboBox>
 #include <QDir>

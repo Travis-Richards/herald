@@ -1,7 +1,8 @@
 #include "TextureView.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "GraphicsView.h"
-#include "ScopedPtr.h"
 
 #include <QGraphicsRectItem>
 #include <QGraphicsScene>

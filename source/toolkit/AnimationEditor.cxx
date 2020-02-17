@@ -1,7 +1,8 @@
 #include "TextureEditor.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "ProjectManager.h"
-#include "ScopedPtr.h"
 #include "TableItemEditor.h"
 
 #include <QString>

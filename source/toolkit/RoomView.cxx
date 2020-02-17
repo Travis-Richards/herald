@@ -1,7 +1,8 @@
 #include "RoomView.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "GraphicsView.h"
-#include "ScopedPtr.h"
 
 #include <QGraphicsScene>
 

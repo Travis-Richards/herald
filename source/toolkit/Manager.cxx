@@ -1,8 +1,9 @@
 #include "Manager.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "ProjectManager.h"
 #include "ProjectView.h"
-#include "ScopedPtr.h"
 
 namespace herald {
 
