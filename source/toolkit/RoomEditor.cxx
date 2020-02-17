@@ -6,7 +6,10 @@
 #include "RoomView.h"
 #include "TableItemEditor.h"
 
-#include <QLayout>
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QSpinBox>
 #include <QString>
 #include <QStringList>
 #include <QWidget>
@@ -16,6 +19,22 @@ namespace herald {
 namespace tk {
 
 namespace {
+
+class RoomEditor;
+
+/// Used for editing the size of the room.
+class SizeEditor final : public QWidget {
+public:
+  SizeEditor(RoomEditor* room_editor, QWidget* parent) : QWidget(parent) {
+    (void)room_editor;
+    auto* layout = new QGridLayout(this);
+    layout->addWidget(new QLabel(tr("Width"), this), 0, 0, Qt::AlignRight);
+    layout->addWidget(new QLabel(tr("Height"), this), 1, 0, Qt::AlignRight);
+    layout->addWidget(new QSpinBox(this), 0, 1);
+    layout->addWidget(new QSpinBox(this), 1, 1);
+    layout->addWidget(new QCheckBox(tr("Lock Size"), this), 0, 2, 2, 1);
+  }
+};
 
 class RoomEditor final : public TableItemEditor {
   ProjectManager* manager;
@@ -44,6 +63,7 @@ public:
     room_view = RoomView::make(parent);
 
     parent->layout()->addWidget(room_view->get_widget());
+    parent->layout()->addWidget(new SizeEditor(this, parent));
   }
 };
 
