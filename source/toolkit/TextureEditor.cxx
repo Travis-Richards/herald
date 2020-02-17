@@ -3,7 +3,7 @@
 #include "ProjectManager.h"
 #include "ScopedPtr.h"
 #include "TableItemEditor.h"
-#include "TextureWidget.h"
+#include "TextureView.h"
 
 #include <QFileDialog>
 #include <QLayout>
@@ -21,7 +21,7 @@ class TextureEditor final : public TableItemEditor {
   /// A pointer to the project manager to get and put textures to.
   ProjectManager* manager;
   /// The widget displaying the texture.
-  ScopedPtr<TextureWidget> texture_widget;
+  ScopedPtr<TextureView> texture_widget;
 public:
   /// Constructs a new instance of the texture editor.
   /// @param m A pointer to the project manager.
@@ -59,7 +59,7 @@ public:
   /// @param widget A pointer to the widget to setup.
   void setup_widget(QWidget* parent) override {
 
-    texture_widget = TextureWidget::make(parent);
+    texture_widget = TextureView::make(parent);
 
     parent->layout()->addWidget(texture_widget->get_widget());
   }

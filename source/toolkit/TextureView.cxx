@@ -1,4 +1,4 @@
-#include "TextureWidget.h"
+#include "TextureView.h"
 
 #include "GraphicsView.h"
 #include "ScopedPtr.h"
@@ -13,7 +13,7 @@ namespace tk {
 namespace {
 
 /// The implementation of the texture widget interface.
-class TextureWidgetImpl final : public TextureWidget {
+class TextureViewImpl final : public TextureView {
   /// The texture is inserted here,
   /// as a rectangle.
   ScopedPtr<QGraphicsScene> scene;
@@ -28,7 +28,7 @@ class TextureWidgetImpl final : public TextureWidget {
 public:
   /// Constructs a new texture widget implementation.
   /// @param parent A pointer to the parent widget.
-  TextureWidgetImpl(QWidget* parent) {
+  TextureViewImpl(QWidget* parent) {
 
     scene = ScopedPtr<QGraphicsScene>(new QGraphicsScene);
     scene->setBackgroundBrush(QBrush(QColor(128, 128, 128, 32)));
@@ -104,8 +104,8 @@ protected:
 
 } // namespace
 
-ScopedPtr<TextureWidget> TextureWidget::make(QWidget* parent) {
-  return new TextureWidgetImpl(parent);
+ScopedPtr<TextureView> TextureView::make(QWidget* parent) {
+  return new TextureViewImpl(parent);
 }
 
 } // namespace tk

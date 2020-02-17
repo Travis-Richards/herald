@@ -11,14 +11,14 @@ class ScopedPtr;
 namespace tk {
 
 /// Used for displaying a texture.
-class TextureWidget {
+class TextureView {
 public:
   /// Creates a new texture widget instance.
   /// @param parent A pointer to the parent widget.
   /// @returns A new texture widget instance.
-  static ScopedPtr<TextureWidget> make(QWidget* parent);
+  static ScopedPtr<TextureView> make(QWidget* parent);
   /// Just a stub.
-  virtual ~TextureWidget() {}
+  virtual ~TextureView() {}
   /// Accesses a pointer to the widget
   /// being used to display the texture.
   virtual QWidget* get_widget() noexcept = 0;
