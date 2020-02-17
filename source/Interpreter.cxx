@@ -1,6 +1,6 @@
 #include "Interpreter.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
 
 #include "protocol/Lexer.h"
 #include "protocol/ParseTree.h"

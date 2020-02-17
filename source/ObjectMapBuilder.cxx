@@ -1,12 +1,12 @@
 #include "ObjectMapBuilder.h"
 
-#include "Interpreter.h"
-#include "ScopedPtr.h"
-#include "Vec2f.h"
+#include <herald/Model.h>
+#include <herald/Object.h>
+#include <herald/ObjectTable.h>
+#include <herald/ScopedPtr.h>
+#include <herald/Vec2f.h>
 
-#include "engine/Model.h"
-#include "engine/Object.h"
-#include "engine/ObjectTable.h"
+#include "Interpreter.h"
 
 #include "protocol/ParseTree.h"
 #include "protocol/Parser.h"

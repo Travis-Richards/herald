@@ -1,13 +1,12 @@
 #include "ModelLoader.h"
 
-#include "ScopedPtr.h"
-
-#include "engine/Action.h"
-#include "engine/ActionTable.h"
-#include "engine/Animation.h"
-#include "engine/AnimationTable.h"
-#include "engine/TextureTable.h"
-#include "engine/Model.h"
+#include <herald/Action.h>
+#include <herald/ActionTable.h>
+#include <herald/Animation.h>
+#include <herald/AnimationTable.h>
+#include <herald/TextureTable.h>
+#include <herald/Model.h>
+#include <herald/ScopedPtr.h>
 
 #include <QDir>
 #include <QJsonArray>

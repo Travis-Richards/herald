@@ -1,7 +1,8 @@
 #include "Parser.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "ParseTree.h"
-#include "ScopedPtr.h"
 #include "Token.h"
 
 namespace herald {

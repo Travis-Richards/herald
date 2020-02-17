@@ -1,7 +1,8 @@
 #include "Lexer.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "Token.h"
-#include "ScopedPtr.h"
 
 namespace herald {
 

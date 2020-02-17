@@ -1,10 +1,10 @@
 #include "BackgroundModifier.h"
 
-#include "Interpreter.h"
-#include "ScopedPtr.h"
+#include <herald/Background.h>
+#include <herald/Model.h>
+#include <herald/ScopedPtr.h>
 
-#include "engine/Background.h"
-#include "engine/Model.h"
+#include "Interpreter.h"
 
 #include "protocol/ParseTree.h"
 #include "protocol/Parser.h"

@@ -1,6 +1,6 @@
 #include "Command.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
 
 #include <string>
 

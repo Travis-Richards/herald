@@ -1,5 +1,7 @@
 #include "ProcessApi.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "Api.h"
 #include "BackgroundModifier.h"
 #include "Controller.h"
@@ -8,7 +10,6 @@
 #include "MenuBuilder.h"
 #include "ObjectMapBuilder.h"
 #include "RoomBuilder.h"
-#include "ScopedPtr.h"
 #include "WorkQueue.h"
 #include "Writer.h"
 

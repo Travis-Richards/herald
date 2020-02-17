@@ -1,6 +1,6 @@
 #include "Matrix.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
 
 #include "protocol/ParseTree.h"
 

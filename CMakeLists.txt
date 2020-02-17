@@ -2,101 +2,13 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project("herald" VERSION 0.3.0)
 
-# Configure the build time header
-# so that we know what APIs we can use.
-
-configure_file("source/Config.h.in" "Config.h")
-
-list(APPEND INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}")
-
-# Make sure we have Qt on the system.
-
-find_package(Qt5 REQUIRED
-  COMPONENTS
-    Core
-    Widgets)
-
-list(APPEND LIBS
-  Qt5::Core
-  Qt5::Widgets)
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 # Add components
 
 add_subdirectory("source/common")
 add_subdirectory("source/engine")
 add_subdirectory("source/protocol")
-
-# Here we declare the main program.
-
-add_executable("herald" WIN32
-  "source/main.cxx"
-  "source/ActiveGame.h"
-  "source/ActiveGame.cxx"
-  "source/ActiveGameList.h"
-  "source/ActiveGameList.cxx"
-  "source/Api.h"
-  "source/BackgroundModifier.h"
-  "source/BackgroundModifier.cxx"
-  "source/CentralWidget.h"
-  "source/CentralWidget.cxx"
-  "source/ControlPanel.h"
-  "source/ControlPanel.cxx"
-  "source/Controller.h"
-  "source/ErrorLog.h"
-  "source/ErrorLog.cxx"
-  "source/GameInfo.h"
-  "source/GameInfo.cxx"
-  "source/GameList.h"
-  "source/GameList.cxx"
-  "source/GameListView.h"
-  "source/GameListView.cxx"
-  "source/Interpreter.h"
-  "source/Interpreter.cxx"
-  "source/KeyController.h"
-  "source/KeyController.cxx"
-  "source/LineBuffer.h"
-  "source/LineBuffer.cxx"
-  "source/MainWindow.h"
-  "source/MainWindow.cxx"
-  "source/Manager.h"
-  "source/Manager.cxx"
-  "source/Matrix.h"
-  "source/Matrix.cxx"
-  "source/MenuBuilder.h"
-  "source/MenuBuilder.cxx"
-  "source/ModelLoader.h"
-  "source/ModelLoader.cxx"
-  "source/ObjectMapBuilder.h"
-  "source/ObjectMapBuilder.cxx"
-  "source/PathSetting.h"
-  "source/PathSetting.cxx"
-  "source/ProcessApi.h"
-  "source/ProcessApi.cxx"
-  "source/RoomBuilder.h"
-  "source/RoomBuilder.cxx"
-  "source/SelectionIndex.h"
-  "source/SettingsDialog.h"
-  "source/SettingsDialog.cxx"
-  "source/WorkQueue.h"
-  "source/WorkQueue.cxx"
-  "source/Writer.h"
-  "source/Writer.cxx"
-  "icons.qrc")
-
-target_link_libraries("herald" PRIVATE
-  ${LIBS}
-  "herald-common"
-  "herald-engine"
-  "herald-protocol")
-
-target_include_directories("herald" PRIVATE ${INCLUDE_DIRS})
-
-target_compile_options("herald" PRIVATE ${cxxflags})
-
-install(TARGETS "herald" DESTINATION "bin")
+add_subdirectory("source/toolkit")
+add_subdirectory("source")
 
 if(APPLE)
 
@@ -112,8 +24,8 @@ if(APPLE)
 
   find_program(mac_deploy_qt macdeployqt HINTS "${qt_binary_dir}")
 
-  add_custom_command(TARGET herald POST_BUILD
-      COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald>/../.." -always-overwrite
+  add_custom_command(TARGET herald-hub POST_BUILD
+      COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite
       COMMENT "Running macdeployqt...")
 
 elseif(WIN32)
@@ -129,8 +41,8 @@ elseif(WIN32)
 
   add_custom_command(TARGET herald POST_BUILD
       COMMAND set PATH=%PATH%$<SEMICOLON>${qt_binary_dir}
-      COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald>" --dir "${pkg_path}"
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald>" "${pkg_path}/$<TARGET_FILE_NAME:herald>"
+      COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald-hub>" --dir "${pkg_path}"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald-hub>" "${pkg_path}/$<TARGET_FILE_NAME:herald-hub>"
       COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
       COMMENT "Running windeployqt...")
 

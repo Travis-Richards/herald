@@ -1,15 +1,16 @@
 #include "ActiveGame.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "Api.h"
 #include "Controller.h"
 #include "ErrorLog.h"
 #include "GameInfo.h"
 #include "ModelLoader.h"
 #include "ProcessApi.h"
-#include "ScopedPtr.h"
 
-#include "engine/QtEngine.h"
-#include "engine/QtTarget.h"
+#include <herald/QtEngine.h>
+#include <herald/QtTarget.h>
 
 #include <QDir>
 #include <QDirIterator>

@@ -1,7 +1,8 @@
 #include "WorkQueue.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "Interpreter.h"
-#include "ScopedPtr.h"
 
 #include "protocol/Command.h"
 

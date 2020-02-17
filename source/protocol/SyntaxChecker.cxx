@@ -1,7 +1,8 @@
 #include "SyntaxChecker.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "ParseTree.h"
-#include "ScopedPtr.h"
 #include "Token.h"
 
 #include <sstream>

@@ -1,6 +1,7 @@
 #include "ParseTree.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
+
 #include "Token.h"
 
 #include <vector>

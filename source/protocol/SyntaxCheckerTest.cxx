@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <herald/ScopedPtr.h>
+
 #include "ParseTree.h"
-#include "ScopedPtr.h"
 #include "SyntaxChecker.h"
 #include "Token.h"
 

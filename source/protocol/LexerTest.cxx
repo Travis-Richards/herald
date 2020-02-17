@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <herald/ScopedPtr.h>
+
 #include "Lexer.h"
 #include "Token.h"
-#include "ScopedPtr.h"
 
 #include <cstring>
 

@@ -1,12 +1,12 @@
 #include "RoomBuilder.h"
 
+#include <herald/Model.h>
+#include <herald/Room.h>
+#include <herald/ScopedPtr.h>
+#include <herald/Tile.h>
+
 #include "Interpreter.h"
 #include "Matrix.h"
-#include "ScopedPtr.h"
-
-#include "engine/Model.h"
-#include "engine/Room.h"
-#include "engine/Tile.h"
 
 #include "protocol/ParseTree.h"
 #include "protocol/Parser.h"

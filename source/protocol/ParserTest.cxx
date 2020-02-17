@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <herald/ScopedPtr.h>
+
 #include "Parser.h"
 #include "ParseTree.h"
-#include "ScopedPtr.h"
 #include "Token.h"
 
 using namespace herald;
