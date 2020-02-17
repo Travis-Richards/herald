@@ -19,10 +19,6 @@ class Object {
   /// The index of the texture that the
   /// item is currently displaying.
   Index texture_index;
-  /// The horizontal scale factor.
-  float h_scale;
-  /// The verical scale factor.
-  float v_scale;
   /// The position of the object.
   Vec2f position;
 public:
@@ -31,7 +27,7 @@ public:
   /// out of bounds access situation.
   static Object* get_null_object() noexcept;
   /// Constructs a new object instance.
-  constexpr Object() noexcept : h_scale(1), v_scale(1) {}
+  constexpr Object() noexcept {}
   /// Just a stub.
   virtual ~Object() {}
   /// Updates the animation index.
