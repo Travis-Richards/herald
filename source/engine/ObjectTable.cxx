@@ -1,6 +1,6 @@
-#include "ObjectTable.h"
+#include <herald/ObjectTable.h>
 
-#include "Object.h"
+#include <herald/Object.h>
 
 namespace herald {
 

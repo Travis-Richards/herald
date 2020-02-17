@@ -9,9 +9,10 @@ find_package(Qt5 COMPONENTS Widgets)
 if(Qt5Widgets_FOUND)
 
   set(Qt_SOURCES
+    "include/herald/QtEngine.h"
+    "include/herald/QtTarget.h"
     "QtBackground.h"
     "QtBackground.cxx"
-    "QtEngine.h"
     "QtEngine.cxx"
     "QtModel.h"
     "QtModel.cxx"
@@ -21,7 +22,6 @@ if(Qt5Widgets_FOUND)
     "QtObjectTable.cxx"
     "QtRoom.h"
     "QtRoom.cxx"
-    "QtTarget.h"
     "QtTarget.cxx"
     "QtTextureTable.h"
     "QtTextureTable.cxx"
@@ -33,35 +33,28 @@ if(Qt5Widgets_FOUND)
 endif(Qt5Widgets_FOUND)
 
 add_library("herald-engine"
-  "Action.h"
-  "ActionTable.h"
+  "include/herald/Action.h"
+  "include/herald/ActionTable.h"
+  "include/herald/Animation.h"
+  "include/herald/AnimationTable.h"
+  "include/herald/Background.h"
+  "include/herald/Engine.h"
+  "include/herald/Index.h"
+  "include/herald/Model.h"
+  "include/herald/Object.h"
+  "include/herald/ObjectTable.h"
+  "include/herald/Room.h"
+  "include/herald/TextureTable.h"
+  "include/herald/Tile.h"
   "ActionTable.cxx"
-  "Animation.h"
   "Animation.cxx"
-  "AnimationTable.h"
   "AnimationTable.cxx"
-  "Background.h"
-  "DefaultEngine.h"
-  "DefaultEngine.cxx"
-  "DefaultModel.h"
-  "DefaultModel.cxx"
-  "DefaultRoom.h"
-  "DefaultRoom.cxx"
-  "Engine.h"
-  "Index.h"
-  "Model.h"
-  "Object.h"
   "Object.cxx"
-  "ObjectTable.h"
   "ObjectTable.cxx"
-  "Room.h"
-  "Target.h"
-  "TextureTable.h"
-  "Tile.h"
   "Tile.cxx"
   ${Qt_SOURCES})
 
-target_include_directories("herald-engine" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories("herald-engine" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries("herald-engine" PRIVATE "herald-common")
 

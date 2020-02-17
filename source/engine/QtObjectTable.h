@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ObjectTable.h"
+#include <herald/ObjectTable.h>
 
 #include <cstddef>
 

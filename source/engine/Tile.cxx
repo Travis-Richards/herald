@@ -1,6 +1,6 @@
-#include "Tile.h"
+#include <herald/Tile.h>
 
-#include "Index.h"
+#include <herald/Index.h>
 
 namespace herald {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TextureTable.h"
+#include <herald/TextureTable.h>
 
 class QPixmap;
 

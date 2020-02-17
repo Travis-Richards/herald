@@ -1,7 +1,7 @@
-#include "ActionTable.h"
+#include <herald/ActionTable.h>
 
-#include "Action.h"
-#include "ScopedPtr.h"
+#include <herald/Action.h>
+#include <herald/ScopedPtr.h>
 
 #include <vector>
 

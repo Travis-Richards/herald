@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Index.h"
-#include "Vec2f.h"
+#include <herald/Index.h>
+#include <herald/Vec2f.h>
 
 namespace herald {
 

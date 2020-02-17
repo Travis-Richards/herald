@@ -1,8 +1,9 @@
 #include "QtRoom.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "QtModel.h"
 #include "QtTile.h"
-#include "ScopedPtr.h"
 
 #include <QGraphicsItemGroup>
 

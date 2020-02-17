@@ -1,8 +1,9 @@
-#include "QtEngine.h"
+#include <herald/QtEngine.h>
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
+#include <herald/QtTarget.h>
+
 #include "QtModel.h"
-#include "QtTarget.h"
 
 #include <QGraphicsView>
 

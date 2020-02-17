@@ -1,9 +1,10 @@
 #include "QtModel.h"
 
-#include "ActionTable.h"
-#include "AnimationTable.h"
-#include "Index.h"
-#include "ScopedPtr.h"
+#include <herald/ActionTable.h>
+#include <herald/AnimationTable.h>
+#include <herald/Index.h>
+#include <herald/ScopedPtr.h>
+
 #include "QtBackground.h"
 #include "QtObjectTable.h"
 #include "QtRoom.h"

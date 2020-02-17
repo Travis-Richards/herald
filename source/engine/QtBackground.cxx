@@ -1,6 +1,6 @@
 #include "QtBackground.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
 
 #include <QGraphicsRectItem>
 #include <QPen>

@@ -1,9 +1,9 @@
-#include "Object.h"
+#include <herald/Object.h>
 
-#include "Action.h"
-#include "ActionTable.h"
-#include "Animation.h"
-#include "AnimationTable.h"
+#include <herald/Action.h>
+#include <herald/ActionTable.h>
+#include <herald/Animation.h>
+#include <herald/AnimationTable.h>
 
 namespace herald {
 

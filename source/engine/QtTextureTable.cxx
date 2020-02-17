@@ -1,7 +1,7 @@
 #include "QtTextureTable.h"
 
-#include "Index.h"
-#include "ScopedPtr.h"
+#include <herald/Index.h>
+#include <herald/ScopedPtr.h>
 
 #include <QPixmap>
 

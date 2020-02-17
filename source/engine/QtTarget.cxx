@@ -1,6 +1,7 @@
-#include "QtTarget.h"
+#include <herald/QtTarget.h>
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
+
 #include "QtModel.h"
 
 #include <QGraphicsView>

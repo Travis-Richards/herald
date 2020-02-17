@@ -1,8 +1,8 @@
-#include "AnimationTable.h"
+#include <herald/AnimationTable.h>
 
-#include "Animation.h"
-#include "Index.h"
-#include "ScopedPtr.h"
+#include <herald/Animation.h>
+#include <herald/Index.h>
+#include <herald/ScopedPtr.h>
 
 #include <vector>
 

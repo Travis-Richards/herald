@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.h"
+#include <herald/Object.h>
 
 class QGraphicsItem;
 class QSize;

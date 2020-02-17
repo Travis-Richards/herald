@@ -1,7 +1,8 @@
 #include "QtObjectTable.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "QtObject.h"
-#include "ScopedPtr.h"
 
 #include <QGraphicsItemGroup>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model.h"
+#include <herald/Model.h>
 
 #include <cstddef>
 

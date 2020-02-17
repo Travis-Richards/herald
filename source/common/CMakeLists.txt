@@ -16,6 +16,6 @@ endif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 add_library("herald-common" INTERFACE)
 
-target_include_directories("herald-common" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories("herald-common" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_compile_options("herald-common" INTERFACE ${cxxflags})

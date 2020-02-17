@@ -1,8 +1,9 @@
 #include "QtObject.h"
 
-#include "ScopedPtr.h"
+#include <herald/ScopedPtr.h>
+#include <herald/Vec2f.h>
+
 #include "QtTextureTable.h"
-#include "Vec2f.h"
 
 #include <QGraphicsRectItem>
 #include <QPen>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Background.h"
+#include <herald/Background.h>
 
 class QGraphicsItem;
 class QSize;
