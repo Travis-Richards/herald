@@ -6,8 +6,8 @@
 
 #include "Interpreter.h"
 
-#include "protocol/ParseTree.h"
-#include "protocol/Parser.h"
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Parser.h>
 
 namespace {
 
@@ -26,7 +26,7 @@ public:
   /// Inteprets the response of
   /// the background modification command.
   /// @returns True on success, false on failure.
-  bool interpret(herald::Parser& parser) override {
+  bool interpret(protocol::Parser& parser) override {
 
     auto animation = parser.parse_integer();
     if (!check(animation)) {

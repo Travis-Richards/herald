@@ -1,4 +1,4 @@
-#include "Token.h"
+#include <herald/protocol/Token.h>
 
 #include <ostream>
 

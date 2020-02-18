@@ -6,14 +6,13 @@ class QString;
 
 namespace herald {
 
+namespace protocol {
+
+class Node;
 class Parser;
 class SyntaxError;
 
-namespace parse_tree {
-
-class Node;
-
-} // namespace parse_tree
+} // namespace protocol
 
 } // namespace herald
 
@@ -39,15 +38,15 @@ public:
 signals:
   /// This signal is emitted when a syntax
   /// error is detected by the parser.
-  void error(const herald::SyntaxError& error);
+  void error(const herald::protocol::SyntaxError& error);
 protected:
   /// Checks an arbitrary syntax node.
   /// @param node The node to check.
   /// @returns True if there was no errors,
   /// false if there were errors.
-  bool check(const herald::parse_tree::Node& node);
+  bool check(const herald::protocol::Node& node);
   /// Interprets the response using a parser.
   /// @param parser A parser instance to parse the response with.
   /// @returns True on success, false on failure.
-  virtual bool interpret(herald::Parser& parser) = 0;
+  virtual bool interpret(herald::protocol::Parser& parser) = 0;
 };

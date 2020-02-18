@@ -2,7 +2,7 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "protocol/ParseTree.h"
+#include <herald/protocol/ParseTree.h>
 
 #include <QSize>
 
@@ -54,7 +54,7 @@ public:
 
 } // namespace
 
-ScopedPtr<Matrix> Matrix::make(const parse_tree::Matrix& m) {
+ScopedPtr<Matrix> Matrix::make(const protocol::Matrix& m) {
 
   auto size = m.get_size();
   if (!size.valid()) {

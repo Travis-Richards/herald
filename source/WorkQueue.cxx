@@ -2,9 +2,9 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "Interpreter.h"
+#include <herald/protocol/Command.h>
 
-#include "protocol/Command.h"
+#include "Interpreter.h"
 
 #include <utility>
 #include <vector>
@@ -15,25 +15,25 @@ namespace {
 
 /// A type definition for an
 /// entry within the work queue.
-using WorkItem = std::pair<ScopedPtr<Command>, ScopedPtr<Interpreter>>;
+using WorkItem = std::pair<ScopedPtr<protocol::Command>, ScopedPtr<Interpreter>>;
 
 /// The implementation of the work queue interface.
 class WorkQueueImpl final : public WorkQueue {
   /// The items in the work queue.
   std::vector<WorkItem> items;
   /// A "null" command instance.
-  ScopedPtr<Command> null_command;
+  ScopedPtr<protocol::Command> null_command;
   /// A "null" interpreter instance.
   ScopedPtr<Interpreter> null_interpreter;
 public:
   /// Constructs a new work queue implementation instance.
-  WorkQueueImpl() : null_command(Command::make_null()),
+  WorkQueueImpl() : null_command(protocol::Command::make_null()),
                     null_interpreter(Interpreter::make_null(nullptr)) {
 
   }
   /// Adds an item to the work queue.
   /// @param command
-  void add(ScopedPtr<Command>&& cmd, Interpreter* interpreter) override {
+  void add(ScopedPtr<protocol::Command>&& cmd, Interpreter* interpreter) override {
     return items.emplace_back(std::move(cmd), interpreter);
   }
   /// Indicates whether or not the queue is empty.
@@ -41,7 +41,7 @@ public:
     return items.empty();
   }
   /// Gets the current command pointer.
-  const Command& get_current_command() const noexcept override {
+  const protocol::Command& get_current_command() const noexcept override {
     if (items.empty()) {
       return *null_command;
     } else {

@@ -13,8 +13,8 @@
 #include "WorkQueue.h"
 #include "Writer.h"
 
-#include "protocol/Command.h"
-#include "protocol/SyntaxChecker.h"
+#include <herald/protocol/Command.h>
+#include <herald/protocol/SyntaxChecker.h>
 
 #include <QProcess>
 #include <QString>
@@ -81,9 +81,9 @@ public:
   /// @param model The model to add the game data into.
   /// @returns True on success, false on failure.
   bool start(Model* model) override {
-    add_work_item(Command::make_nullary("set_background"), make_background_modifier(model, this));
-    add_work_item(Command::make_nullary("build_room"), make_room_builder(model, this));
-    add_work_item(Command::make_nullary("build_object_map"), make_object_table_builder(model, this));
+    add_work_item(protocol::Command::make_nullary("set_background"), make_background_modifier(model, this));
+    add_work_item(protocol::Command::make_nullary("build_room"), make_room_builder(model, this));
+    add_work_item(protocol::Command::make_nullary("build_object_map"), make_object_table_builder(model, this));
     return handle_work_item();
   }
   /// This should only be called before the process is started.
@@ -104,14 +104,14 @@ public:
   /// @param x The X value of the axis.
   /// @param y The Y value of the axis.
   void update_axis(int controller, double x, double y) override {
-    add_work_item(Command::make_axis_update(controller, x, y), nullptr);
+    add_work_item(protocol::Command::make_axis_update(controller, x, y), nullptr);
   }
   /// Notifies the process of a change in button state.
   /// @param controller The index of the controller.
   /// @param button The button that changed state.
   /// @param state The new state of the button.
   void update_button(int controller, Button button, bool state) override {
-    add_work_item(Command::make_button_update(controller, button_id(button), state), nullptr);
+    add_work_item(protocol::Command::make_button_update(controller, button_id(button), state), nullptr);
   }
 protected slots:
   /// Handles the finishing signal emitted from the process.
@@ -142,7 +142,7 @@ protected slots:
     handle_work_item();
   }
   /// Handles a syntax error from the response.
-  void handle_syntax_error(const SyntaxError& error) {
+  void handle_syntax_error(const protocol::SyntaxError& error) {
     emit error_occurred(QString(error.get_description()));
   }
   /// Handles an error emitted by the process.
@@ -175,7 +175,7 @@ protected:
   /// Adds an item to the work queue.
   /// @param cmd The command to add.
   /// @param interpreter The interpreter to handle the response.
-  void add_work_item(ScopedPtr<Command>&& cmd, Interpreter* interpreter) {
+  void add_work_item(ScopedPtr<protocol::Command>&& cmd, Interpreter* interpreter) {
 
     if (interpreter) {
       connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
@@ -186,7 +186,7 @@ protected:
   /// Sends a command to the process.
   /// @param command The command to send.
   /// @returns True on success, false on failure.
-  bool send_command(const Command& command) {
+  bool send_command(const protocol::Command& command) {
     auto write_count = process.write(command.get_data(), command.get_size());
     if (write_count < 0) {
       return false;

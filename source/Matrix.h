@@ -7,7 +7,7 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
-namespace parse_tree { class Matrix; }
+namespace protocol { class Matrix; }
 
 } // namespace herald
 
@@ -19,7 +19,7 @@ class Matrix {
 public:
   /// Creates a matrix from a parser tree
   /// representation of a matrix.
-  static herald::ScopedPtr<Matrix> make(const herald::parse_tree::Matrix& m);
+  static herald::ScopedPtr<Matrix> make(const herald::protocol::Matrix& m);
   /// Creates a new matrix instance.
   /// @param width The width of the matrix.
   /// @param height The height of the matrix.

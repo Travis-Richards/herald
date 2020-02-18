@@ -2,8 +2,8 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "Lexer.h"
-#include "Token.h"
+#include <herald/protocol/Lexer.h>
+#include <herald/protocol/Token.h>
 
 #include <cstring>
 

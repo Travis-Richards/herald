@@ -2,8 +2,8 @@
 
 #include "Interpreter.h"
 
-#include "protocol/ParseTree.h"
-#include "protocol/Parser.h"
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Parser.h>
 
 namespace {
 
@@ -20,7 +20,7 @@ public:
   }
   /// Interpreters the response to the command.
   /// @returns True on success, false on failure.
-  bool interpret(Parser&) override {
+  bool interpret(protocol::Parser&) override {
     return true;
   }
 };

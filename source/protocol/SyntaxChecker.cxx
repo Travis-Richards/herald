@@ -1,10 +1,9 @@
 #include <herald/protocol/SyntaxChecker.h>
 
 #include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Token.h>
 
 #include <herald/ScopedPtr.h>
-
-#include "Token.h"
 
 #include <sstream>
 #include <vector>

@@ -8,8 +8,8 @@
 
 #include "Interpreter.h"
 
-#include "protocol/ParseTree.h"
-#include "protocol/Parser.h"
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Parser.h>
 
 using namespace herald;
 
@@ -27,7 +27,7 @@ public:
   /// Interprets the response to the "add objects" command.
   /// @param parser The parser to parse the response with.
   /// @returns True on success, false on failure.
-  bool interpret(Parser& parser) override {
+  bool interpret(protocol::Parser& parser) override {
 
     auto count_node = parser.parse_integer();
     if (!check(count_node)) {
@@ -62,7 +62,7 @@ public:
 protected:
   /// Parses a single object.
   /// @param parser The parser to parse the object with.
-  bool parse_object(Parser& parser, Object* object) {
+  bool parse_object(protocol::Parser& parser, Object* object) {
 
     auto x_node = parser.parse_integer();
     auto y_node = parser.parse_integer();

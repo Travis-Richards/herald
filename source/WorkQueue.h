@@ -7,7 +7,7 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
-class Command;
+namespace protocol { class Command; }
 
 /// Used for queing work items
 /// to be handled by the game and game engine.
@@ -20,14 +20,14 @@ public:
   /// Adds a command and an interpreter to the work queue.
   /// @param command The command to add.
   /// @param interpreter The interpreter instance to add.
-  virtual void add(ScopedPtr<Command>&& command, Interpreter* interpreter) = 0;
+  virtual void add(ScopedPtr<protocol::Command>&& command, Interpreter* interpreter) = 0;
   /// Indicates whether or not the work queue is empty.
   /// @returns True if the work queue is empty, false if it's not.
   virtual bool empty() const noexcept = 0;
   /// Gets the current command in the work queue.
   /// If the work queue is empty, then a command
   /// is returned which as a data size of zero.
-  virtual const Command& get_current_command() const noexcept = 0;
+  virtual const protocol::Command& get_current_command() const noexcept = 0;
   /// Gets the current interpreter in the work queue.
   /// If the work queue is empty, then an interpreter
   /// is returned that does nothing.

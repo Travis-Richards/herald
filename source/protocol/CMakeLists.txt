@@ -6,16 +6,16 @@ endif (NOT TARGET "herald-common")
 
 add_library("herald-protocol" STATIC
   "include/herald/protocol/Command.h"
+  "include/herald/protocol/Lexer.h"
   "include/herald/protocol/ParseTree.h"
   "include/herald/protocol/Parser.h"
   "include/herald/protocol/SyntaxChecker.h"
+  "include/herald/protocol/Token.h"
   "Command.cxx"
-  "Lexer.h"
   "Lexer.cxx"
   "ParseTree.cxx"
   "Parser.cxx"
   "SyntaxChecker.cxx"
-  "Token.h"
   "Token.cxx")
 
 target_link_libraries("herald-protocol" PRIVATE "herald-common")

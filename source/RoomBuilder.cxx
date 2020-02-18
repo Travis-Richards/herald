@@ -8,8 +8,8 @@
 #include "Interpreter.h"
 #include "Matrix.h"
 
-#include "protocol/ParseTree.h"
-#include "protocol/Parser.h"
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Parser.h>
 
 using namespace herald;
 
@@ -27,7 +27,7 @@ public:
   /// Interprets the response from the game
   /// after issuing a "build room" command.
   /// @returns True on success, false on failure.
-  bool interpret(Parser& parser) override {
+  bool interpret(protocol::Parser& parser) override {
 
     auto matrix_node = parser.parse_matrix();
     if (!check(*matrix_node)) {

@@ -2,16 +2,14 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "protocol/Lexer.h"
-#include "protocol/ParseTree.h"
-#include "protocol/Parser.h"
-#include "protocol/SyntaxChecker.h"
-#include "protocol/Token.h"
+#include <herald/protocol/Lexer.h>
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/Parser.h>
+#include <herald/protocol/SyntaxChecker.h>
+#include <herald/protocol/Token.h>
 
 #include <QString>
 #include <QVector>
-
-using namespace herald;
 
 namespace herald {
 
@@ -20,7 +18,7 @@ namespace {
 class NullInterpreter final : public Interpreter {
 public:
   NullInterpreter(QObject* parent) : Interpreter(parent) {}
-  bool interpret(Parser&) override {
+  bool interpret(protocol::Parser&) override {
     return true;
   }
 };
@@ -30,12 +28,12 @@ public:
 } // namespace herald
 
 Interpreter* Interpreter::make_null(QObject* parent) {
-  return new NullInterpreter(parent);
+  return new herald::NullInterpreter(parent);
 }
 
-bool Interpreter::check(const herald::parse_tree::Node& node) {
+bool Interpreter::check(const herald::protocol::Node& node) {
 
-  auto errors = SyntaxErrorList::make();
+  auto errors = herald::protocol::SyntaxErrorList::make();
 
   auto checker = make_syntax_checker(errors.get());
 
@@ -56,19 +54,19 @@ bool Interpreter::interpret_text(const QString& text) {
 
   auto text_std = text.toStdString();
 
-  auto lexer = Lexer::make(text_std.c_str(), text_std.size());
+  auto lexer = herald::protocol::Lexer::make(text_std.c_str(), text_std.size());
 
-  QVector<Token> tokens;
+  QVector<herald::protocol::Token> tokens;
 
   while (!lexer->done()) {
     auto token = lexer->scan();
-    if (!token.has_type(TokenType::Newline)
-     && !token.has_type(TokenType::Space)) {
+    if (!token.has_type(herald::protocol::TokenType::Newline)
+     && !token.has_type(herald::protocol::TokenType::Space)) {
       tokens.push_back(token);
     }
   }
 
-  auto parser = Parser::make(tokens.data(), tokens.size());
+  auto parser = herald::protocol::Parser::make(tokens.data(), tokens.size());
 
   auto success = interpret(*parser);
 

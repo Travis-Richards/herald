@@ -4,8 +4,7 @@
 
 #include <herald/protocol/ParseTree.h>
 #include <herald/protocol/SyntaxChecker.h>
-
-#include "Token.h"
+#include <herald/protocol/Token.h>
 
 using namespace herald;
 using namespace herald::protocol;
