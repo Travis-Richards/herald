@@ -23,9 +23,21 @@
     ]
   ],
   "textures" : [
-    "textures/grass.png",
-    "textures/castle-wall.png",
-    "textures/castle-entrance.png",
-    "textures/river.gif"
+    {
+      "path" : "textures/grass.png",
+      "name" : "Grass"
+    },
+    {
+      "path" : "textures/castle-wall.png",
+      "name" : "Castle Wall"
+    },
+    {
+      "path" : "textures/castle-entrance.png",
+      "name" : "Castle Entrance"
+    },
+    {
+      "path" : "textures/river.gif",
+      "name" : "River"
+    }
   ]
 }
