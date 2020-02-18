@@ -1,10 +1,12 @@
-#include "Command.h"
+#include <herald/protocol/Command.h>
 
 #include <herald/ScopedPtr.h>
 
 #include <string>
 
 namespace herald {
+
+namespace protocol {
 
 namespace {
 
@@ -116,5 +118,7 @@ ScopedPtr<Command> Command::make_axis_update(std::size_t controller, double x, d
 ScopedPtr<Command> Command::make_button_update(std::size_t controller, std::size_t button, bool state) {
   return new ButtonUpdateCommand(controller, button, state);
 }
+
+} // namespace protocol
 
 } // namespace herald

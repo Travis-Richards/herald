@@ -6,6 +6,8 @@
 
 namespace herald {
 
+namespace protocol {
+
 namespace {
 
 /// An implementation of the lexer interface.
@@ -196,5 +198,7 @@ Token LexerImpl::complete(TokenType type, int size) noexcept {
 ScopedPtr<Lexer> Lexer::make(const char* data, std::size_t size) {
   return new LexerImpl(data, size);
 }
+
+} // namespace protocol
 
 } // namespace herald

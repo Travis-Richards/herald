@@ -7,9 +7,9 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
-class Token;
+namespace protocol {
 
-namespace parse_tree {
+class Token;
 
 class Integer;
 class Size;
@@ -159,6 +159,6 @@ public:
   virtual std::size_t get_integer_count() const noexcept = 0;
 };
 
-} // namespace parse_tree
+} // namespace protocol
 
 } // namespace herald

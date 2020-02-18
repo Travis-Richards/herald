@@ -1,8 +1,9 @@
-#include "SyntaxChecker.h"
+#include <herald/protocol/SyntaxChecker.h>
+
+#include <herald/protocol/ParseTree.h>
 
 #include <herald/ScopedPtr.h>
 
-#include "ParseTree.h"
 #include "Token.h"
 
 #include <sstream>
@@ -10,9 +11,9 @@
 
 namespace herald {
 
-namespace {
+namespace protocol {
 
-using namespace parse_tree;
+namespace {
 
 /// An implementation of the syntax error interface.
 class SyntaxErrorImpl final : public SyntaxError {
@@ -32,7 +33,7 @@ public:
 
 /// Used for verifying the correctness
 /// of a syntax node.
-class SyntaxChecker final : public parse_tree::Visitor {
+class SyntaxChecker final : public Visitor {
   /// The list of syntax errors to add to.
   SyntaxErrorList* errors;
 public:
@@ -40,7 +41,7 @@ public:
   /// @param e The error list to add to.
   SyntaxChecker(SyntaxErrorList* e) : errors(e) {}
   /// Checks an integer instance.
-  void visit(const parse_tree::Integer& integer) override {
+  void visit(const Integer& integer) override {
 
     const auto* sign = integer.get_sign_token();
 
@@ -66,12 +67,12 @@ public:
     }
   }
   /// Checks a size instance.
-  void visit(const parse_tree::Size& size) override {
+  void visit(const Size& size) override {
     check_size_integer("width", size.get_width());
     check_size_integer("height", size.get_height());
   }
   /// Checks a matrix instance.
-  void visit(const parse_tree::Matrix& matrix) override {
+  void visit(const Matrix& matrix) override {
 
     auto size = matrix.get_size();
 
@@ -147,8 +148,10 @@ ScopedPtr<SyntaxErrorList> SyntaxErrorList::make() {
   return new SyntaxErrorListImpl;
 }
 
-ScopedPtr<parse_tree::Visitor> make_syntax_checker(SyntaxErrorList* errors) {
+ScopedPtr<Visitor> make_syntax_checker(SyntaxErrorList* errors) {
   return new SyntaxChecker(errors);
 }
+
+} // namespace protocol
 
 } // namespace herald

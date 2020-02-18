@@ -1,11 +1,14 @@
-#include "Parser.h"
+#include <herald/protocol/Parser.h>
+
+#include <herald/protocol/ParseTree.h>
 
 #include <herald/ScopedPtr.h>
 
-#include "ParseTree.h"
 #include "Token.h"
 
 namespace herald {
+
+namespace protocol {
 
 namespace {
 
@@ -30,11 +33,11 @@ public:
   }
   /// Parses for an integer.
   /// @returns A new integer instance.
-  parse_tree::Integer parse_integer() noexcept override;
+  Integer parse_integer() noexcept override;
   /// Parses for a size structure.
-  parse_tree::Size parse_size() noexcept override;
+  Size parse_size() noexcept override;
   /// Parses for a matrix.
-  ScopedPtr<parse_tree::Matrix> parse_matrix() override;
+  ScopedPtr<Matrix> parse_matrix() override;
 protected:
   /// Safely indicates if a token has a certain type.
   /// @param token A pointer of the token to check for.
@@ -84,7 +87,7 @@ protected:
   }
 };
 
-parse_tree::Integer ParserImpl::parse_integer() noexcept {
+Integer ParserImpl::parse_integer() noexcept {
 
   const auto* first = get_token(0);
 
@@ -96,20 +99,20 @@ parse_tree::Integer ParserImpl::parse_integer() noexcept {
 
   next(value_offset + 1);
 
-  return parse_tree::Integer(sign, value);
+  return Integer(sign, value);
 }
 
-parse_tree::Size ParserImpl::parse_size() noexcept {
+Size ParserImpl::parse_size() noexcept {
   auto w = parse_integer();
   auto h = parse_integer();
-  return parse_tree::Size(w, h);
+  return Size(w, h);
 }
 
-ScopedPtr<parse_tree::Matrix> ParserImpl::parse_matrix() {
+ScopedPtr<Matrix> ParserImpl::parse_matrix() {
 
   auto size = parse_size();
 
-  auto matrix = parse_tree::Matrix::make(size);
+  auto matrix = Matrix::make(size);
 
   if (!size.valid()) {
     return matrix;
@@ -139,5 +142,7 @@ ScopedPtr<parse_tree::Matrix> ParserImpl::parse_matrix() {
 ScopedPtr<Parser> Parser::make(const Token* tokens, std::size_t count) {
   return new ParserImpl(tokens, count);
 }
+
+} // namespace protocol
 
 } // namespace herald

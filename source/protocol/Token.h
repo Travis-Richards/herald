@@ -6,6 +6,8 @@
 
 namespace herald {
 
+namespace protocol {
+
 /// Enumerates the several types of tokens
 /// that can be found by the lexer.
 enum class TokenType : int {
@@ -104,5 +106,7 @@ public:
 /// @param t The token to print.
 /// @returns A reference to @p out.
 std::ostream& operator << (std::ostream& out, const Token& t);
+
+} // namespace protocol
 
 } // namespace herald

@@ -5,20 +5,22 @@ if (NOT TARGET "herald-common")
 endif (NOT TARGET "herald-common")
 
 add_library("herald-protocol" STATIC
-  "Command.h"
+  "include/herald/protocol/Command.h"
+  "include/herald/protocol/ParseTree.h"
+  "include/herald/protocol/Parser.h"
+  "include/herald/protocol/SyntaxChecker.h"
   "Command.cxx"
   "Lexer.h"
   "Lexer.cxx"
-  "ParseTree.h"
   "ParseTree.cxx"
-  "Parser.h"
   "Parser.cxx"
-  "SyntaxChecker.h"
   "SyntaxChecker.cxx"
   "Token.h"
   "Token.cxx")
 
 target_link_libraries("herald-protocol" PRIVATE "herald-common")
+
+target_include_directories("herald-protocol" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 find_package(GTest)
 

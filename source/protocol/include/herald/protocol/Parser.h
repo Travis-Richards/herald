@@ -7,15 +7,12 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
-class Token;
-
-namespace parse_tree {
+namespace protocol {
 
 class Integer;
-class Size;
 class Matrix;
-
-} // namespace parse_tree
+class Size;
+class Token;
 
 /// Used for parsing responses from the game.
 class Parser {
@@ -32,13 +29,15 @@ public:
   /// Parses an integer.
   /// @returns An integer node.
   /// Must be validated before using.
-  virtual parse_tree::Integer parse_integer() noexcept = 0;
+  virtual Integer parse_integer() noexcept = 0;
   /// Parses for a size specifier.
   /// @returns A size node.
   /// Must be validated before using.
-  virtual parse_tree::Size parse_size() noexcept = 0;
+  virtual Size parse_size() noexcept = 0;
   /// Parses for a matrix.
-  virtual ScopedPtr<parse_tree::Matrix> parse_matrix() = 0;
+  virtual ScopedPtr<Matrix> parse_matrix() = 0;
 };
+
+} // namespace protocol
 
 } // namespace herald

@@ -7,6 +7,8 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
+namespace protocol {
+
 class Token;
 
 /// Used for scanning tokens from a response protocol.
@@ -25,5 +27,7 @@ public:
   /// @returns A new token instance.
   virtual Token scan() noexcept = 0;
 };
+
+} // namespace protocol
 
 } // namespace herald

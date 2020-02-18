@@ -2,11 +2,13 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "Parser.h"
-#include "ParseTree.h"
+#include <herald/protocol/Parser.h>
+#include <herald/protocol/ParseTree.h>
+
 #include "Token.h"
 
 using namespace herald;
+using namespace herald::protocol;
 
 TEST(Parser, ParseInteger) {
 

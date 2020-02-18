@@ -8,6 +8,7 @@
 #include <cstring>
 
 using namespace herald;
+using namespace herald::protocol;
 
 namespace {
 

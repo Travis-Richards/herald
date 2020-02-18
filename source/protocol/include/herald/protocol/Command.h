@@ -7,6 +7,8 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
+namespace protocol {
+
 /// The base of a command.
 class Command {
 public:
@@ -39,5 +41,7 @@ public:
   /// @returns The size, in terms of bytes, of the command data.
   virtual std::size_t get_size() const noexcept = 0;
 };
+
+} // namespace protocol
 
 } // namespace herald

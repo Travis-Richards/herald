@@ -1,4 +1,4 @@
-#include "ParseTree.h"
+#include <herald/protocol/ParseTree.h>
 
 #include <herald/ScopedPtr.h>
 
@@ -8,7 +8,7 @@
 
 namespace herald {
 
-namespace parse_tree {
+namespace protocol {
 
 namespace {
 
@@ -96,6 +96,6 @@ ScopedPtr<Matrix> Matrix::make(const Size& s) {
   return new MatrixImpl(s);
 }
 
-} // namespace parse_tree
+} // namespace protocol
 
 } // namespace herald

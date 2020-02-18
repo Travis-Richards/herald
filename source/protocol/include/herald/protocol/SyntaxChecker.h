@@ -7,11 +7,9 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
-namespace parse_tree {
+namespace protocol {
 
 class Visitor;
-
-} // namespace parse_tree
 
 /// Enumerates the several possible
 /// syntax errors.
@@ -71,6 +69,8 @@ public:
 /// Creates a syntax checker.
 /// @param list A list to store syntax errors into.
 /// @returns A new instance of a syntax checker as a visitor interface.
-ScopedPtr<parse_tree::Visitor> make_syntax_checker(SyntaxErrorList* list);
+ScopedPtr<Visitor> make_syntax_checker(SyntaxErrorList* list);
+
+} // namespace protocol
 
 } // namespace herald

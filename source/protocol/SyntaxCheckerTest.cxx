@@ -2,11 +2,13 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "ParseTree.h"
-#include "SyntaxChecker.h"
+#include <herald/protocol/ParseTree.h>
+#include <herald/protocol/SyntaxChecker.h>
+
 #include "Token.h"
 
 using namespace herald;
+using namespace herald::protocol;
 
 TEST(SyntaxChecker, MissingIntegerValue) {
 
@@ -14,7 +16,7 @@ TEST(SyntaxChecker, MissingIntegerValue) {
 
   auto syntax_checker = make_syntax_checker(syntax_errors.get());
 
-  parse_tree::Integer value(nullptr, nullptr);
+  Integer value(nullptr, nullptr);
 
   value.accept(*syntax_checker);
 
@@ -33,7 +35,7 @@ TEST(SyntaxChecker, InvalidIntegerValue) {
 
   Token value_token(TokenType::Identifier, "id", 2, 0);
 
-  parse_tree::Integer value(nullptr, &value_token);
+  Integer value(nullptr, &value_token);
 
   value.accept(*syntax_checker);
 
@@ -52,7 +54,7 @@ TEST(SyntaxChecker, InvalidSignSymbol) {
 
   Token value_token(TokenType::Number, "12", 2, 0);
   Token sign_token(TokenType::Identifier, "id", 2, 0);
-  parse_tree::Integer value(&sign_token, &value_token);
+  Integer value(&sign_token, &value_token);
 
   value.accept(*syntax_checker);
 
@@ -70,7 +72,7 @@ TEST(SyntaxChecker, GoodInteger1) {
   auto syntax_checker = make_syntax_checker(syntax_errors.get());
 
   Token value_token(TokenType::Number, "12", 2, 0);
-  parse_tree::Integer value(nullptr, &value_token);
+  Integer value(nullptr, &value_token);
 
   value.accept(*syntax_checker);
 
@@ -85,7 +87,7 @@ TEST(SyntaxChecker, GoodInteger2) {
 
   Token sign_token(TokenType::NegativeSign, "-", 1, 0);
   Token value_token(TokenType::Number, "12", 2, 0);
-  parse_tree::Integer value(&sign_token, &value_token);
+  Integer value(&sign_token, &value_token);
 
   value.accept(*syntax_checker);
 
