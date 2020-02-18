@@ -36,7 +36,7 @@ if(APPLE AND Qt5_FOUND)
       COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite -dmg
       COMMENT "Running macdeployqt...")
 
-  elseif(WIN32 AND Qt5_FOUND)
+elseif(WIN32 AND Qt5_FOUND)
 
   get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
 
@@ -49,8 +49,9 @@ if(APPLE AND Qt5_FOUND)
 
   add_custom_command(TARGET herald-hub POST_BUILD
       COMMAND set PATH=%PATH%$<SEMICOLON>${qt_binary_dir}
-      COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald-hub>" --dir "${pkg_path}"
+      COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald-hub>" "$<TARGET_FILE:herald-toolkit>" --dir "${pkg_path}"
       COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald-hub>" "${pkg_path}/$<TARGET_FILE_NAME:herald-hub>"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald-toolkit>" "${pkg_path}/$<TARGET_FILE_NAME:herald-toolkit>"
       COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
       COMMENT "Running windeployqt...")
 
