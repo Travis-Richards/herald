@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project("herald" VERSION 0.4.0)
 
+# Find relevant packages
+
+find_package(Qt5 COMPONENTS Core Widgets)
+
+if (Qt5Core_FOUND OR Qt5Widgets_FOUND)
+  set (Qt5_FOUND TRUE)
+endif (Qt5Core_FOUND OR Qt5Widgets_FOUND)
+
 # Add components
 
 add_subdirectory("source/common")
@@ -10,7 +18,7 @@ add_subdirectory("source/protocol")
 add_subdirectory("source/toolkit")
 add_subdirectory("source")
 
-if(APPLE)
+if(APPLE AND Qt5_FOUND)
 
   if(EXISTS "/usr/local/opt/qt")
     list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt")
@@ -28,7 +36,7 @@ if(APPLE)
       COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite -dmg
       COMMENT "Running macdeployqt...")
 
-elseif(WIN32)
+  elseif(WIN32 AND Qt5_FOUND)
 
   get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
 
@@ -46,7 +54,7 @@ elseif(WIN32)
       COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
       COMMENT "Running windeployqt...")
 
-endif(APPLE)
+endif(APPLE AND Qt5_FOUND)
 
 set (CPACK_PACKAGE_NAME "Herald")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2D game engine")
