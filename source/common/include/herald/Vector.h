@@ -16,7 +16,7 @@ public:
   Vector() {}
   /// Constructs a vector via copy.
   /// @param other The vector to copy.
-  Vector(const Vector<T>& other) : vec(vec.other) {}
+  Vector(const Vector<T>& other) : vec(other.vec) {}
   /// Constructs a vector using move semantics.
   /// @param other The vector to move the data from.
   Vector(Vector<T>&& other) : vec(std::move(other.vec)) {}
