@@ -1,13 +1,12 @@
 #include "QtRoom.h"
 
 #include <herald/ScopedPtr.h>
+#include <herald/Vector.h>
 
 #include "QtModel.h"
 #include "QtTile.h"
 
 #include <QGraphicsItemGroup>
-
-#include <vector>
 
 namespace herald {
 
@@ -79,16 +78,25 @@ public:
   /// Updates the texture indices for the tiles.
   /// @param ellapsed_ms The updated timeline value.
   /// @param animation A reference to the animation table to get the texture indices from.
-  void update_texture_indices(std::size_t ellapsed_ms, const AnimationTable& animations) override {
-    for (auto& tile : tiles) {
-      tile->update_texture_index(ellapsed_ms, animations);
+  /// @returns A list of indices indicating which tiles were updated.
+  Vector<std::size_t> update_texture_indices(std::size_t ellapsed_ms, const AnimationTable& animations) override {
+
+    Vector<std::size_t> update_list;
+
+    for (std::size_t i = 0; i < tiles.size(); i++) {
+      if (tiles[i]->update_texture_index(ellapsed_ms, animations)) {
+        update_list.push_back(i);
+      }
     }
+
+    return update_list;
   }
   /// Updates the textures mapped onto each of the tiles.
+  /// @param mod_list A list of which tiles had their texture indices changed.
   /// @param textures The texture table to update the tiles with.
-  void update_textures(const QtTextureTable& textures) override {
-    for (auto& tile_ptr : tiles) {
-      tile_ptr->update_texture(textures);
+  void update_textures(const Vector<std::size_t>& mod_list, const QtTextureTable& textures) override {
+    for (const auto& tile_index : mod_list) {
+      tiles[tile_index]->update_texture(textures);
     }
   }
 protected:

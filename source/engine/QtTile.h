@@ -34,7 +34,8 @@ public:
   /// @param ellapsed_ms The updated timeline duration.
   /// @param animations A reference to the animation
   /// table to get the texture index from.
-  virtual void update_texture_index(std::size_t ellapsed_ms, const AnimationTable& animations) = 0;
+  /// @returns True if the texture index changed, false otherwise.
+  virtual bool update_texture_index(std::size_t ellapsed_ms, const AnimationTable& animations) = 0;
   /// Updates the texture displayed for the tile.
   /// @param textures The table to get the texture data from.
   virtual void update_texture(const QtTextureTable& textures) = 0;

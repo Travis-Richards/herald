@@ -7,8 +7,8 @@ class QSize;
 
 namespace herald {
 
-template <typename T>
-class ScopedPtr;
+template <typename T> class ScopedPtr;
+template <typename T> class Vector;
 
 class AnimationTable;
 class QtTextureTable;
@@ -33,11 +33,13 @@ public:
   /// Updates the texture indices used for each tile in the room.
   /// @param ellapsed_ms The updated number of ellapsed milliseconds.
   /// @param animations A reference to the animation table.
-  virtual void update_texture_indices(std::size_t ellapsed_ms, const AnimationTable& animations) = 0;
+  /// @returns A list of tile indices that indicate which ones have been updated.
+  virtual Vector<std::size_t> update_texture_indices(std::size_t ellapsed_ms, const AnimationTable& animations) = 0;
   /// Updates the textures assigned to each of the tiles.
   /// This should be called after the frame indices have been updated.
+  /// @param mod_list A list of which tiles had their texture indices changed.
   /// @param textures The textures to map onto the tiles.
-  virtual void update_textures(const QtTextureTable& textures) = 0;
+  virtual void update_textures(const Vector<std::size_t>& mod_list, const QtTextureTable& textures) = 0;
 };
 
 } // namespace herald

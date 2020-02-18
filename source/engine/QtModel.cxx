@@ -4,6 +4,7 @@
 #include <herald/AnimationTable.h>
 #include <herald/Index.h>
 #include <herald/ScopedPtr.h>
+#include <herald/Vector.h>
 
 #include "QtBackground.h"
 #include "QtObjectTable.h"
@@ -11,8 +12,6 @@
 #include "QtTextureTable.h"
 
 #include <QGraphicsScene>
-
-#include <utility>
 
 namespace herald {
 
@@ -59,8 +58,9 @@ public:
 
     ellapsed_ms += delta_ms;
 
-    room->update_texture_indices(ellapsed_ms, *animations);
-    room->update_textures(*textures);
+    auto mod_list = room->update_texture_indices(ellapsed_ms, *animations);
+
+    room->update_textures(mod_list, *textures);
 
     object_table->resize_standard(room->get_tile_size());
     object_table->update_positions(room->get_tile_size());

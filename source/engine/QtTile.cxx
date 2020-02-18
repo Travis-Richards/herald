@@ -43,11 +43,18 @@ public:
   /// @param ellapsed_ms The new total ellapsed seconds.
   /// @param animations A reference to the animation table
   /// to get the texture index from.
-  void update_texture_index(std::size_t ellapsed_ms, const AnimationTable& animations) override {
+  /// @returns True if the index changed, false otherwise.
+  bool update_texture_index(std::size_t ellapsed_ms, const AnimationTable& animations) override {
 
     auto* animation = animations.at(get_animation_index());
 
-    texture_index = animation->calculate_texture_index(ellapsed_ms);
+    auto next_texture_index = animation->calculate_texture_index(ellapsed_ms);
+
+    auto changed = texture_index != next_texture_index;
+
+    texture_index = next_texture_index;
+
+    return changed;
   }
   /// Updates the texture being displayed.
   /// @param textures The table to get the texture from.
