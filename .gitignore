@@ -6,5 +6,4 @@ moc_*.cpp
 moc_*.h
 qrc_*.cpp
 .qmake.stash
-herald
 demos/c/game
