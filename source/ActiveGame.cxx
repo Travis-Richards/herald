@@ -6,6 +6,7 @@
 #include "Controller.h"
 #include "ErrorLog.h"
 #include "GameInfo.h"
+#include "LegacyModelLoader.h"
 #include "ModelLoader.h"
 #include "ProcessApi.h"
 
@@ -154,6 +155,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
 bool ActiveGameImpl::open_model(const QString& game_path) {
 
+#if 0
   auto actions_path = QDir::cleanPath(game_path + QDir::separator() + "model.json");
 
   QFile json_file(actions_path);
@@ -168,6 +170,12 @@ bool ActiveGameImpl::open_model(const QString& game_path) {
   auto json_doc = QJsonDocument::fromJson(json_data);
 
   ModelLoader::load(engine->get_model(), json_doc.object(), game_path);
+
+#else
+  if (!load_legacy_model(engine->get_model(), game_path)) {
+    return false;
+  }
+#endif
 
   return true;
 }

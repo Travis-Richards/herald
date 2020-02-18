@@ -39,13 +39,10 @@ class ProjectCreator final : public QObject {
   QString location;
   /// The title of the game.
   QString title;
-  /// A pointer to the application manager.
-  Manager* manager;
 public:
   /// Constructs a new instance of the project creator.
-  /// @param m A pointer to the application manager.
   /// @param parent A pointer to the parent object.
-  ProjectCreator(Manager* m, QObject* parent) : QObject(parent), manager(m) {}
+  ProjectCreator(Manager*, QObject* parent) : QObject(parent) {}
   /// Gets the path to the game.
   QString get_game_path() {
     return QDir::cleanPath(location + QDir::separator() + title);

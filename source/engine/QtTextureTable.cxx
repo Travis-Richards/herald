@@ -31,6 +31,10 @@ public:
       return pixmaps.at(index);
     }
   }
+  /// Indicates the number of textures in the table.
+  std::size_t size() const noexcept override {
+    return pixmaps.size();
+  }
 };
 
 } // namespace

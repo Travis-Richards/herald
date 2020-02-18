@@ -15,9 +15,8 @@ namespace tk {
 namespace {
 
 class ActionEditor final : public TableItemEditor {
-  ProjectManager* manager;
 public:
-  ActionEditor(ProjectManager* m) : manager(m) {}
+  ActionEditor(ProjectManager*) {}
   QString add() override {
     return "";
   }

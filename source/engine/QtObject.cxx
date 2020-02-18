@@ -48,8 +48,10 @@ public:
     float w_factor = ((float) w_final) / w_initial;
     float h_factor = ((float) h_final) / h_initial;
 
-    item->setRect(w_factor * item_rect.x(),
-                  h_factor * item_rect.y(),
+    auto pos = get_position();
+
+    item->setRect(pos.x() * standard_size.width(),
+                  pos.y() * standard_size.height(),
                   w_factor * item_rect.width(),
                   h_factor * item_rect.height());
   }
@@ -77,7 +79,7 @@ public:
 
       auto item_rect = item->rect();
 
-      auto item_size = QSize(item_rect.width(), item_rect.width());
+      auto item_size = QSize(item_rect.width(), item_rect.height());
 
       item->setBrush(pixmap.scaled(item_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }

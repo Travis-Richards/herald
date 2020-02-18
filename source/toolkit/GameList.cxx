@@ -44,7 +44,7 @@ public:
     table->setItem(row, 1, new QTableWidgetItem(game_path));
   }
   /// Accesses the path to the game.
-  QString path() const noexcept {
+  QString path() const override {
     return game_path;
   }
   /// Accesses the title of the game.
@@ -67,7 +67,7 @@ public:
     }
   }
   /// Fills a table with the game info.
-  void fill_table(QTableWidget* table) {
+  void fill_table(QTableWidget* table) override {
 
     table->setRowCount((int) info_vec.size());
 

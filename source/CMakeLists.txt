@@ -49,6 +49,8 @@ add_executable("herald-hub" WIN32
   "Interpreter.cxx"
   "KeyController.h"
   "KeyController.cxx"
+  "LegacyModelLoader.h"
+  "LegacyModelLoader.cxx"
   "LineBuffer.h"
   "LineBuffer.cxx"
   "MainWindow.h"

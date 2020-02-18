@@ -41,7 +41,7 @@ public:
   }
   /// Resizes the number of objects in the table.
   /// @param count The number of objects to keep in the table.
-  void resize(std::size_t count) {
+  void resize(std::size_t count) override {
 
     /* Handle collapse */
     if (count < objects.size()) {

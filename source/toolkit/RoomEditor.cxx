@@ -37,11 +37,10 @@ public:
 };
 
 class RoomEditor final : public TableItemEditor {
-  ProjectManager* manager;
   /// A view of the room being edited.
   ScopedPtr<RoomView> room_view;
 public:
-  RoomEditor(ProjectManager* m) : manager(m) {}
+  RoomEditor(ProjectManager*) {}
   QString add() override {
     return "";
   }

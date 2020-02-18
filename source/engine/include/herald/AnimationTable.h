@@ -19,6 +19,9 @@ public:
   /// Adds an animation to the animation table.
   /// @param animation The animation to add to the table.
   virtual void add(ScopedPtr<Animation>&& animation) = 0;
+  /// Adds a still frame animation.
+  /// @param texture_index The index of the texture to add.
+  virtual void add_still_frame(Index texture_index) = 0;
   /// Accesses an animation at a specified index.
   /// @param index The index of the animation to get.
   /// @returns A pointer to the specified animation.
