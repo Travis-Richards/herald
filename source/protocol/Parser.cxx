@@ -38,7 +38,30 @@ public:
   Size parse_size() noexcept override;
   /// Parses for a matrix.
   ScopedPtr<Matrix> parse_matrix() override;
+  /// Parses an arbitrary node.
+  ScopedPtr<Node> parse_any() override;
 protected:
+  /// Parses a "set_action" statement.
+  ScopedPtr<SetActionStmt> parse_set_action_stmt() override;
+  /// Checks if the next token is a specific identifer.
+  /// If it is, the parser will move passed it.
+  /// @param id The identifier to check for.
+  /// @returns True on a match, false otherwise.
+  bool match_identifier(const char* id) {
+
+    const auto* id_token = get_token(0);
+    if (!id_token) {
+      return false;
+    } else if (!id_token->has_type(TokenType::Identifier)) {
+      return false;
+    } else if (!id_token->has_data(id)) {
+      return false;
+    }
+
+    next(1);
+
+    return true;
+  }
   /// Safely indicates if a token has a certain type.
   /// @param token A pointer of the token to check for.
   /// @param type The type to check for.
@@ -135,6 +158,27 @@ ScopedPtr<Matrix> ParserImpl::parse_matrix() {
   }
 
   return matrix;
+}
+
+ScopedPtr<Node> ParserImpl::parse_any() {
+
+  auto set_action_stmt = parse_set_action_stmt();
+  if (set_action_stmt) {
+    return set_action_stmt;
+  }
+
+  return nullptr;
+}
+
+ScopedPtr<SetActionStmt> ParserImpl::parse_set_action_stmt() {
+
+  if (!match_identifier("set_action")) {
+    return nullptr;
+  }
+
+  auto object = parse_integer();
+  auto action = parse_integer();
+  return new SetActionStmt(object, action);
 }
 
 } // namespace

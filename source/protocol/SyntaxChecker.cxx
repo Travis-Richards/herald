@@ -66,6 +66,11 @@ public:
       format_error(SyntaxErrorID::InvalidIntegerValue, formatter);
     }
   }
+  /// Checks the "set action" statement.
+  void visit(const SetActionStmt& stmt) override {
+    // TODO
+    (void)stmt;
+  }
   /// Checks a size instance.
   void visit(const Size& size) override {
     check_size_integer("width", size.get_width());

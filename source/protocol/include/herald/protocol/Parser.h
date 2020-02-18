@@ -11,6 +11,8 @@ namespace protocol {
 
 class Integer;
 class Matrix;
+class Node;
+class SetActionStmt;
 class Size;
 class Token;
 
@@ -26,10 +28,17 @@ public:
   /// Indicates when the parser has reached the
   /// end of the token array.
   virtual bool done() const noexcept = 0;
+  /// Parses an arbitrary node.
+  /// @returns A pointer to the node that was found.
+  virtual ScopedPtr<Node> parse_any() = 0;
   /// Parses an integer.
   /// @returns An integer node.
   /// Must be validated before using.
   virtual Integer parse_integer() noexcept = 0;
+  /// Parses a "set_action" statement.
+  /// @returns On success, a pointer to a "set_action" statement.
+  /// On failure, a null pointer.
+  virtual ScopedPtr<SetActionStmt> parse_set_action_stmt() = 0;
   /// Parses for a size specifier.
   /// @returns A size node.
   /// Must be validated before using.

@@ -12,6 +12,7 @@ namespace protocol {
 class Token;
 
 class Integer;
+class SetActionStmt;
 class Size;
 class Matrix;
 
@@ -25,6 +26,8 @@ public:
   virtual void visit(const Integer&) = 0;
   /// Visits a matrix.
   virtual void visit(const Matrix&) = 0;
+  /// Visits a "set action" statement.
+  virtual void visit(const SetActionStmt&) = 0;
   /// Visits a size node.
   virtual void visit(const Size&) = 0;
 };
@@ -157,6 +160,33 @@ public:
   virtual Integer get_integer(std::size_t index) const noexcept = 0;
   /// Accesses the number of integers in the marix.
   virtual std::size_t get_integer_count() const noexcept = 0;
+};
+
+/// A statement used to set the action
+/// that an object is currently performing.
+class SetActionStmt final : public Node {
+  /// The ID of the object to translate.
+  Integer object_id;
+  /// The ID of the action to assign the object.
+  Integer action_id;
+public:
+  /// Constructs a new "set action" statement.
+  /// @param o The object to modify the action of.
+  /// @param a The action to assign the object.
+  constexpr SetActionStmt(const Integer& o, const Integer& a) noexcept
+    : object_id(o), action_id(a) {}
+  /// Accepts a visitor.
+  void accept(Visitor& visitor) const override {
+    visitor.visit(*this);
+  }
+  /// Accesess the ID of the action.
+  Integer get_action_id() const noexcept {
+    return action_id;
+  }
+  /// Accesess the ID of the object.
+  Integer get_object_id() const noexcept {
+    return object_id;
+  }
 };
 
 } // namespace protocol

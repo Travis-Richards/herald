@@ -114,3 +114,23 @@ TEST(Parser, ParseMatrix) {
   EXPECT_EQ(values[4], 555);
   EXPECT_EQ(values[5], 666);
 }
+
+TEST(Parser, ParseSetActionStmt) {
+
+  std::vector<Token> tokens;
+  tokens.emplace_back(TokenType::Identifier, "set_action", sizeof("set_action") - 1, 0);
+  tokens.emplace_back(TokenType::Number, "4", 1, 0);
+  tokens.emplace_back(TokenType::Number, "5", 1, 0);
+
+  auto parser = Parser::make(tokens.data(), tokens.size());
+
+  auto set_action_stmt = parser->parse_set_action_stmt();
+
+  ASSERT_EQ(!!set_action_stmt, true);
+
+  auto action_id = set_action_stmt->get_action_id();
+  auto object_id = set_action_stmt->get_object_id();
+
+  EXPECT_EQ(action_id.valid(), true);
+  EXPECT_EQ(object_id.valid(), true);
+}
