@@ -1,15 +1,17 @@
 #pragma once
 
-#include "Controller.h"
+#include <herald/Controller.h>
 
 class QKeyEvent;
 
+namespace herald {
+
 /// A game controller based on keyboard input.
-class KeyController : public Controller {
+class QtKeyController : public Controller {
 public:
   /// Constructs the key controller instance.
-  /// @param parent A pointer to the parent object.
-  KeyController(QObject* parent) : Controller(parent) {}
+  /// @param o A pointer to the controller state observer.
+  QtKeyController(Controller::Observer* o) : Controller(o) {}
   /// Handles a key press event.
   /// Internally, this is used to generate controller signals.
   void handle_key_press(const QKeyEvent* event) {
@@ -26,3 +28,5 @@ protected:
   /// @param state The state of the key.
   void map(const QKeyEvent* event, bool state);
 };
+
+} // namespace herald

@@ -8,6 +8,7 @@ namespace herald {
 template <typename T>
 class ScopedPtr;
 
+class Controller;
 class QtModel;
 
 /// A target for the Qt engine to render to.
@@ -19,13 +20,16 @@ public:
   static ScopedPtr<QtTarget> make(QWidget* parent);
   /// Just a stub.
   virtual ~QtTarget() {}
-  /// Accesses a pointer to the graphics view.
-  /// @returns The pointer to the graphics view.
-  virtual QGraphicsView* get_graphics_view() = 0;
   /// Connects a model to the event system.
   /// This allows the model to be scaled to the size of the window view.
   /// This function is only here to be called by @ref QtEngine.
   virtual void connect_model(QtModel* model) = 0;
+  /// Accesses a pointer to the graphics view.
+  /// @returns The pointer to the graphics view.
+  virtual QGraphicsView* get_graphics_view() = 0;
+  /// Accesses a pointer to the window controller.
+  /// @returns A pointer to the window controller.
+  virtual Controller* get_controller() = 0;
 };
 
 } // namespace herald

@@ -2,6 +2,7 @@
 
 #include <herald/ScopedPtr.h>
 
+#include "QtKeyController.h"
 #include "QtModel.h"
 
 #include <QGraphicsView>
@@ -19,10 +20,12 @@ class GraphicsView final : public QGraphicsView {
   /// Every model that is connected gets automatically
   /// resizes to fit the graphics view.
   std::vector<QtModel*> connected_models;
+  /// The controller instance.
+  QtKeyController controller;
 public:
   /// Constructs the graphics view.
   /// @param parent A pointer to the parent widget.
-  GraphicsView(QWidget* parent) : QGraphicsView(parent) {
+  GraphicsView(QWidget* parent) : QGraphicsView(parent), controller(nullptr) {
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setFrameStyle(QFrame::NoFrame);
@@ -32,7 +35,19 @@ public:
   void connect(QtModel* model) {
     connected_models.emplace_back(model);
   }
+  /// Accesses a pointer to the controller.
+  Controller* get_controller() noexcept {
+    return &controller;
+  }
 protected:
+  /// Handles a key press event, updating controller states.
+  void keyPressEvent(QKeyEvent* event) override {
+    return QGraphicsView::keyPressEvent(event);
+  }
+  /// Handles a key release event, updating controller states.
+  void keyReleaseEvent(QKeyEvent* event) override {
+    return QGraphicsView::keyReleaseEvent(event);
+  }
   /// Overrides the resize event handler
   /// so that the engine can also handle
   /// resize events.
@@ -56,13 +71,17 @@ public:
   /// Constructs a new instance of a Qt target.
   /// @param parent A pointer to the parent widget.
   QtTargetImpl(QWidget* parent)  : graphics_view(new GraphicsView(parent)) { }
+  /// Connects a model to the resize event.
+  void connect_model(QtModel* model) override {
+    graphics_view->connect(model);
+  }
   /// Accesses a pointer to the graphics view.
   QGraphicsView* get_graphics_view() override {
     return graphics_view.get();
   }
-  /// Connects a model to the resize event.
-  void connect_model(QtModel* model) override {
-    graphics_view->connect(model);
+  /// Gets a pointer to the controller for the window.
+  Controller* get_controller() noexcept override {
+    return graphics_view->get_controller();
   }
 };
 

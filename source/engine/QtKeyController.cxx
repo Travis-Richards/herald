@@ -1,8 +1,10 @@
-#include "KeyController.h"
+#include "QtKeyController.h"
 
 #include <QKeyEvent>
 
-void KeyController::map(const QKeyEvent* event, bool state) {
+namespace herald {
+
+void QtKeyController::map(const QKeyEvent* event, bool state) {
   switch (event->key()) {
     case Qt::Key_Up:
     case Qt::Key_W:
@@ -38,3 +40,5 @@ void KeyController::map(const QKeyEvent* event, bool state) {
       break;
   }
 }
+
+} // namespace herald
