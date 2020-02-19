@@ -95,25 +95,7 @@ target_compile_options("herald-hub" PRIVATE ${cxxflags})
 
 install(TARGETS "herald-hub" DESTINATION "bin")
 
-if(APPLE AND Qt5_FOUND)
-
-  if(EXISTS "/usr/local/opt/qt")
-    list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt")
-  endif(EXISTS "/usr/local/opt/qt")
-
-  # Thank you RIP tutorial for this.
-
-  get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
-
-  get_filename_component(qt_binary_dir "${qmake_executable}" DIRECTORY)
-
-  find_program(mac_deploy_qt macdeployqt HINTS "${qt_binary_dir}")
-
-  add_custom_command(TARGET herald-hub POST_BUILD
-      COMMAND "${mac_deploy_qt}" "$<TARGET_FILE_DIR:herald-hub>/../.." -always-overwrite -dmg
-      COMMENT "Running macdeployqt...")
-
-elseif(WIN32 AND Qt5_FOUND)
+if(WIN32 AND Qt5_FOUND)
 
   get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
 
@@ -131,5 +113,4 @@ elseif(WIN32 AND Qt5_FOUND)
       COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
       COMMENT "Running windeployqt...")
 
-endif(APPLE AND Qt5_FOUND)
-
+endif(WIN32 AND Qt5_FOUND)
