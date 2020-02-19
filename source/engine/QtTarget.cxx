@@ -42,10 +42,12 @@ public:
 protected:
   /// Handles a key press event, updating controller states.
   void keyPressEvent(QKeyEvent* event) override {
+    controller.handle_key_press(event);
     return QGraphicsView::keyPressEvent(event);
   }
   /// Handles a key release event, updating controller states.
   void keyReleaseEvent(QKeyEvent* event) override {
+    controller.handle_key_release(event);
     return QGraphicsView::keyReleaseEvent(event);
   }
   /// Overrides the resize event handler
