@@ -33,7 +33,7 @@ make install
 
 # Make sure we run deployment scripts for macOS builds.
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  /usr/local/opt/qt/bin/macdeployqt herald-hub.app -dmg
+  /usr/local/opt/qt/bin/macdeployqt herald-hub -dmg
 fi
 
 # This is just for debugging
