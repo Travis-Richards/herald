@@ -4,14 +4,13 @@
 
 namespace herald {
 
+enum class Button : int;
+
 class Model;
 
 } // namespace herald
 
-enum class Button : int;
-
 class QString;
-class Scene;
 
 /// This class is responsible for abstracting
 /// the API in which the games are designed in.
@@ -37,7 +36,7 @@ public slots:
     update_axis(0, x, y);
   }
   /// Updates the button state for the default player.
-  void update_def_button(Button button, bool state) {
+  void update_def_button(herald::Button button, bool state) {
     update_button(0, button, state);
   }
   /// Updates an axis value for a controller.
@@ -49,7 +48,7 @@ public slots:
   /// @param controller The index of the controller sending the update.
   /// @param button The button that changed state.
   /// @param state The new state of the button.
-  virtual void update_button(int controller, Button button, bool state) = 0;
+  virtual void update_button(int controller, herald::Button button, bool state) = 0;
 signals:
   /// This signal is emitted when the background
   /// finished being assigned.

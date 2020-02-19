@@ -1,10 +1,10 @@
 #include "ProcessApi.h"
 
+#include <herald/Controller.h>
 #include <herald/ScopedPtr.h>
 
 #include "Api.h"
 #include "BackgroundModifier.h"
-#include "Controller.h"
 #include "Interpreter.h"
 #include "LineBuffer.h"
 #include "MenuBuilder.h"

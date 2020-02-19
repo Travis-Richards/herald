@@ -3,13 +3,13 @@
 #include <herald/ScopedPtr.h>
 
 #include "Api.h"
-#include "Controller.h"
 #include "ErrorLog.h"
 #include "GameInfo.h"
 #include "LegacyModelLoader.h"
 #include "ModelLoader.h"
 #include "ProcessApi.h"
 
+#include <herald/Controller.h>
 #include <herald/QtEngine.h>
 #include <herald/QtTarget.h>
 
@@ -28,7 +28,7 @@ namespace {
 using namespace herald;
 
 /// Implements the active game interface.
-class ActiveGameImpl final : public ActiveGame {
+class ActiveGameImpl final : public ActiveGame, public Controller::Observer {
   /// The engine instance that's running the game.
   ScopedPtr<Engine> engine;
   /// The widget responsible for logging errors.
@@ -67,6 +67,14 @@ public:
     timer.stop();
   }
 protected:
+  /// Updates axis values.
+  void axis_update(double x, double y) override {
+    api->update_axis(0, x, y);
+  }
+  /// Updates a button state.
+  void button_update(Button button, bool state) override {
+    api->update_button(0, button, state);
+  }
   /// Opesn a game at a specific path with supplemental info.
   /// @param path The path to the game to open.
   /// @param info Information regarding the game and how to open it.
@@ -127,8 +135,10 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   auto target = QtTarget::make(nullptr);
 
-  auto* graphics_view = target->get_graphics_view();
+  auto* controller = target->get_controller();
+  controller->set_observer(this);
 
+  auto* graphics_view = target->get_graphics_view();
   graphics_view->setWindowTitle(info.get_title());
 
   engine = QtEngine::make(std::move(target));
