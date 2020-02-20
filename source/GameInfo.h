@@ -5,6 +5,12 @@
 class Api;
 class QString;
 
+namespace herald {
+
+class Model;
+
+} // namespace herald
+
 /// Used to store information of a game.
 class GameInfo : public QObject {
 public:
@@ -28,7 +34,8 @@ public:
   virtual QString get_title() const = 0;
   /// Creates an API based on the game info.
   /// @param path The path to run the API from.
+  /// @param model A pointer to the game model for the API to modify.
   /// @param parent A pointer to the parent object for the API.
   /// @returns A new API instance on success, null on failure.
-  virtual Api* make_api(const QString& path, QObject* parent) const = 0;
+  virtual Api* make_api(const QString& path, herald::Model* model, QObject* parent) const = 0;
 };

@@ -1,5 +1,7 @@
 #include "GameInfo.h"
 
+#include <herald/ScopedPtr.h>
+
 #include "Api.h"
 #include "ProcessApi.h"
 
@@ -11,6 +13,8 @@
 #include <QSettings>
 #include <QString>
 #include <QStringList>
+
+using namespace herald;
 
 namespace {
 
@@ -123,26 +127,31 @@ public:
   }
   /// Creates an API based off the game info.
   /// @param path The path to run the API from.
+  /// @param m The model to be modified the the game API.
   /// @param parent A pointer to the parent object.
   /// @returns An API instance on success, false on failure.
-  Api* make_api(const QString& path, QObject* parent) const override;
+  Api* make_api(const QString& path, Model* m, QObject* parent) const override;
 protected:
   /// Creates a Java API.
+  /// @param m The model to be modified the the game API.
   /// @param parent A pointer to the parent object.
   /// @returns A new API instance on success, a null pointer on failure.
-  Api* make_java_api(const QString& path, QObject* parent) const;
+  Api* make_java_api(const QString& path, Model* m, QObject* parent) const;
   /// Creates a Python API.
   /// @param path The path of the game directory.
+  /// @param m The model to be modified the the game API.
   /// @param parent A pointer to the parent object.
   /// @returns A new API instance on success, a null pointer on failure.
-  Api* make_python_api(const QString& path, QObject* parent) const;
+  Api* make_python_api(const QString& path, Model* m, QObject* parent) const;
   /// Creates an arbitrary executable API.
+  /// @param path The path of the game directory.
+  /// @param m The model to be modified the the game API.
   /// @param parent A pointer to the parent object.
   /// @returns A new API instance on success, a null pointer on failure.
-  Api* make_executable_api(const QString& path, QObject* parent) const;
+  Api* make_executable_api(const QString& path, Model* m, QObject* parent) const;
 };
 
-Api* GameInfoImpl::make_api(const QString& path, QObject* parent) const {
+Api* GameInfoImpl::make_api(const QString& path, Model* m, QObject* parent) const {
 
   auto api_type = parse_api_name(root_object["api"].toString());
   switch (api_type) {
@@ -151,31 +160,40 @@ Api* GameInfoImpl::make_api(const QString& path, QObject* parent) const {
     case ApiType::Unknown:
       return nullptr;
     case ApiType::Executable:
-      return make_executable_api(path, parent);
+      return make_executable_api(path, m, parent);
     case ApiType::Java:
-      return make_java_api(path, parent);
+      return make_java_api(path, m, parent);
     case ApiType::Python:
-      return make_python_api(path, parent);
+      return make_python_api(path, m, parent);
   }
 
   return nullptr;
 }
 
-Api* GameInfoImpl::make_java_api(const QString& path, QObject* parent) const {
+Api* GameInfoImpl::make_java_api(const QString& path, Model* m, QObject* parent) const {
 
   auto init_class = root_object["initial_class"].toString();
   if (init_class.isEmpty()) {
     init_class = "Game";
   }
 
-  return make_process_api(find_java(), path, QStringList(init_class), parent);
+  auto api_factory = herald::ProcessApiFactory::make();
+  api_factory->set_model(m);
+  api_factory->set_program(find_java());
+  api_factory->set_working_directory(path);
+  api_factory->set_args(QStringList(init_class));
+  return api_factory->make_process_api(parent);
 }
 
-Api* GameInfoImpl::make_python_api(const QString& path, QObject* parent) const {
-  return make_process_api(find_python(), path, QStringList(), parent);
+Api* GameInfoImpl::make_python_api(const QString& path, Model* m, QObject* parent) const {
+  auto api_factory = herald::ProcessApiFactory::make();
+  api_factory->set_model(m);
+  api_factory->set_program(find_python());
+  api_factory->set_working_directory(path);
+  return api_factory->make_process_api(parent);
 }
 
-Api* GameInfoImpl::make_executable_api(const QString& path, QObject* parent) const {
+Api* GameInfoImpl::make_executable_api(const QString& path, Model* m, QObject* parent) const {
 
   QStringList args;
 
@@ -189,7 +207,12 @@ Api* GameInfoImpl::make_executable_api(const QString& path, QObject* parent) con
     args << arg.toString();
   }
 
-  return make_process_api(program, path, args, parent);
+  auto api_factory = herald::ProcessApiFactory::make();
+  api_factory->set_args(args);
+  api_factory->set_model(m);
+  api_factory->set_program(program);
+  api_factory->set_working_directory(path);
+  return api_factory->make_process_api(parent);
 }
 
 } // namespace

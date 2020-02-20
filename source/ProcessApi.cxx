@@ -9,6 +9,7 @@
 #include "LineBuffer.h"
 #include "MenuBuilder.h"
 #include "ObjectMapBuilder.h"
+#include "ResponseHandler.h"
 #include "RoomBuilder.h"
 #include "WorkQueue.h"
 #include "Writer.h"
@@ -20,7 +21,7 @@
 #include <QString>
 #include <QStringList>
 
-using namespace herald;
+namespace herald {
 
 namespace {
 
@@ -29,6 +30,8 @@ namespace {
 class ProcessApi final : public Api {
   /// The process to emit the engine commands.
   QProcess process;
+  /// The model to be modified.
+  Model* model;
   /// The line buffer for the standard output.
   LineBuffer* out_line_buffer;
   /// The line buffer for standard error output.
@@ -40,9 +43,11 @@ class ProcessApi final : public Api {
   bool exit_requested;
 public:
   /// Constructs an instance of the process API.
+  /// @param model_ The model to be modified.
   /// @param parent A pointer to the parent object.
-  ProcessApi(QObject* parent)
+  ProcessApi(Model* model_, QObject* parent)
     : Api(parent),
+      model(model_),
       out_line_buffer(nullptr),
       err_line_buffer(nullptr),
       work_queue(nullptr) {
@@ -80,11 +85,11 @@ public:
   /// Starts up the game.
   /// @param model The model to add the game data into.
   /// @returns True on success, false on failure.
-  bool start(Model* model) override {
+  bool start() override {
     add_work_item(protocol::Command::make_nullary("set_background"), make_background_modifier(model, this));
     add_work_item(protocol::Command::make_nullary("build_room"), make_room_builder(model, this));
     add_work_item(protocol::Command::make_nullary("build_object_map"), make_object_table_builder(model, this));
-    return handle_work_item();
+    return true;
   }
   /// This should only be called before the process is started.
   /// @param pwd The path to place the process into.
@@ -104,14 +109,14 @@ public:
   /// @param x The X value of the axis.
   /// @param y The Y value of the axis.
   void update_axis(int controller, double x, double y) override {
-    add_work_item(protocol::Command::make_axis_update(controller, x, y), nullptr);
+    add_work_item(protocol::Command::make_axis_update(controller, x, y), make_response_handler(model, this));
   }
   /// Notifies the process of a change in button state.
   /// @param controller The index of the controller.
   /// @param button The button that changed state.
   /// @param state The new state of the button.
   void update_button(int controller, Button button, bool state) override {
-    add_work_item(protocol::Command::make_button_update(controller, button_id(button), state), nullptr);
+    add_work_item(protocol::Command::make_button_update(controller, button_id(button), state), make_response_handler(model, this));
   }
 protected slots:
   /// Handles the finishing signal emitted from the process.
@@ -138,8 +143,6 @@ protected slots:
     work_queue->get_current_interpreter().interpret_text(line);
 
     work_queue->pop();
-
-    handle_work_item();
   }
   /// Handles a syntax error from the response.
   void handle_syntax_error(const protocol::SyntaxError& error) {
@@ -181,6 +184,8 @@ protected:
       connect(interpreter, &Interpreter::error, this, &ProcessApi::handle_syntax_error);
     }
 
+    send_command(*cmd);
+
     work_queue->add(std::move(cmd), interpreter);
   }
   /// Sends a command to the process.
@@ -194,27 +199,39 @@ protected:
       return ((std::size_t) write_count) == command.get_size();
     }
   }
-  /// Handles the current item in the work queue.
-  /// @returns True on success, false on failure.
-  bool handle_work_item() {
+};
 
-    if (work_queue->empty()) {
-      return true;
-    }
-
-    return send_command(work_queue->get_current_command());
+class ProcessApiFactoryImpl final : public ProcessApiFactory {
+  QStringList args;
+  QString program;
+  QString pwd;
+  Model* model;
+public:
+  ProcessApiFactoryImpl() : model(nullptr) {}
+  Api* make_process_api(QObject* parent) override {
+    auto* process_api = new ProcessApi(model, parent);
+    process_api->set_working_directory(pwd);
+    process_api->start(program, args);
+    return process_api;
+  }
+  void set_args(const QStringList& args_) override {
+    args = args_;
+  }
+  void set_model(Model* model_) override {
+    model = model_;
+  }
+  void set_program(const QString& program_) override {
+    program = program_;
+  }
+  void set_working_directory(const QString& pwd_) override {
+    pwd = pwd_;
   }
 };
 
 } // namespace
 
-Api* make_process_api(const QString& program,
-                      const QString& path,
-                      const QStringList& args,
-                      QObject* parent) {
-
-  auto process_api = new ProcessApi(parent);
-  process_api->set_working_directory(path);
-  process_api->start(program, args);
-  return process_api;
+ScopedPtr<ProcessApiFactory> ProcessApiFactory::make() {
+  return new ProcessApiFactoryImpl;
 }
+
+} // namespace herald

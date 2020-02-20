@@ -8,6 +8,7 @@
 #include "LegacyModelLoader.h"
 #include "ModelLoader.h"
 #include "ProcessApi.h"
+#include "ResponseHandler.h"
 
 #include <herald/Controller.h>
 #include <herald/QtEngine.h>
@@ -128,11 +129,6 @@ void ActiveGameImpl::close() {
 
 bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
-  api = info.make_api(path, this);
-  if (!api) {
-    return fail("Failed to create API instance");
-  }
-
   auto target = QtTarget::make(nullptr);
 
   auto* controller = target->get_controller();
@@ -143,11 +139,10 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   engine = QtEngine::make(std::move(target));
 
-#if 0
-  auto* controller = scene_view->get_controller();
-  connect(controller, &Controller::update_axis,   api, &Api::update_def_axis);
-  connect(controller, &Controller::update_button, api, &Api::update_def_button);
-#endif
+  api = info.make_api(path, engine->get_model(), this);
+  if (!api) {
+    return fail("Failed to create API instance");
+  }
 
   error_log = new ErrorLog(nullptr);
 
@@ -158,9 +153,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
   graphics_view->show();
 
-  auto success = api->start(engine->get_model());
-
-  return success;
+  return api->start();
 }
 
 bool ActiveGameImpl::open_model(const QString& game_path) {

@@ -33,6 +33,9 @@ class Game {
         return updateAxis(scanner);
       case "update_button":
         return updateButton(scanner);
+      case "":
+        // Ignore
+        return true;
       default:
         // Unknown command
         System.err.println("unknown command: " + command);
@@ -52,6 +55,8 @@ class Game {
    * @return Always returns true.
    * */
   static boolean updateAxis(Scanner scanner) {
+
+    System.err.println("here");
 
     int controller = scanner.nextInt();
     double x = scanner.nextDouble();
@@ -78,7 +83,7 @@ class Game {
 
     int controller = scanner.nextInt();
     int button = scanner.nextInt();
-    boolean state =  scanner.nextBoolean();
+    int state =  scanner.nextInt();
 
     return updateButton(controller, button, state);
   }
@@ -86,11 +91,11 @@ class Game {
    * @param controller The ID of the controller being updated.
    * @param button The ID of the button being updated.
    * @param state The new state of the button.
-   * True means that it is currently being pressed,
-   * false means that it is no longer being pressed.
+   * One means that it is currently being pressed,
+   * zero means that it is no longer being pressed.
    * @return Always returns true.
    * */
-  static boolean updateButton(int controller, int button, boolean state) {
+  static boolean updateButton(int controller, int button, int state) {
     System.err.println("updated button: " + controller + " " + button + " " + state);
     return true;
   }

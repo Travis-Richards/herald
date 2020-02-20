@@ -17,8 +17,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace {

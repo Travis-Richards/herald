@@ -20,7 +20,7 @@ public:
   /// Handles a key release event.
   /// Internally, this is used to generate controller signals.
   void handle_key_release(const QKeyEvent* event) {
-    map(event, true);
+    map(event, false);
   }
 protected:
   /// Maps a key event to a button or axis state.

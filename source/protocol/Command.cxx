@@ -38,7 +38,7 @@ protected:
   /// Appends a boolean value to the command data.
   /// @param value The value to append.
   void append(bool value) {
-    data += value ? "true" : "false";
+    data += value ? "1" : "0";
   }
   /// Appends a size value to the command data.
   /// @param value The value to append.
@@ -67,10 +67,12 @@ public:
 class AxisUpdateCommand final : public CommandBase {
 public:
   AxisUpdateCommand(std::size_t c, double x, double y) {
+    append("update_axis");
+    append('\n');
     append(c);
-    append(' ');
+    append('\n');
     append(x);
-    append(' ');
+    append('\n');
     append(y);
     append('\n');
   }
@@ -80,10 +82,12 @@ public:
 class ButtonUpdateCommand final : public CommandBase {
 public:
   ButtonUpdateCommand(std::size_t c, std::size_t b, bool state) {
+    append("update_button");
+    append('\n');
     append(c);
-    append(' ');
+    append('\n');
     append(b);
-    append(' ');
+    append('\n');
     append(state);
     append('\n');
   }

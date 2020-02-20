@@ -25,9 +25,8 @@ public:
   /// Just a stub.
   virtual ~Api() {}
   /// Starts the game.
-  /// @param model The game model to be modified.
   /// @returns True on success, false on failure.
-  virtual bool start(herald::Model* model) = 0;
+  virtual bool start() = 0;
   /// Exits the game.
   virtual void exit() = 0;
 public slots:

@@ -66,6 +66,8 @@ add_executable("herald-hub" WIN32
   "PathSetting.cxx"
   "ProcessApi.h"
   "ProcessApi.cxx"
+  "ResponseHandler.h"
+  "ResponseHandler.cxx"
   "RoomBuilder.h"
   "RoomBuilder.cxx"
   "SelectionIndex.h"
