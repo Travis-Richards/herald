@@ -61,6 +61,8 @@ public:
 
     room_view = RoomView::make(parent);
 
+    room_view->resize(5, 5);
+
     parent->layout()->addWidget(room_view->get_widget());
     parent->layout()->addWidget(new SizeEditor(this, parent));
   }
