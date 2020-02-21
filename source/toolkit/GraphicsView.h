@@ -14,8 +14,7 @@ public:
   /// Constructs a new instance of a graphics view.
   /// @param scene The scene to be rendered.
   /// @param parent A pointer to the parent widget.
-  GraphicsView(QGraphicsScene* scene, QWidget* parent)
-    : QGraphicsView(scene, parent) {}
+  GraphicsView(QGraphicsScene* scene, QWidget* parent);
 signals:
   /// Emitted when the view is resized.
   /// @param size The size the view is being changed to.

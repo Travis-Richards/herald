@@ -21,8 +21,10 @@ public:
   /// @returns A new game list.
   static ScopedPtr<GameList> make();
   /// Opens the game list from settings.
+  /// @param remove_invalid Whether or not to
+  /// remove paths from the game list that no longer exist.
   /// @returns A new game list instance.
-  static ScopedPtr<GameList> open(const QSettings& settings);
+  static ScopedPtr<GameList> open(QSettings& settings, bool remove_invalid = true);
   /// Just a stub.
   virtual ~GameList() {}
   /// Gets game information from a certain index.

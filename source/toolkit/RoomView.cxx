@@ -15,16 +15,30 @@ namespace tk {
 
 namespace {
 
+/// A tile is a single square that's
+/// part of the room view.
 class Tile final {
   /// The graphics item for the tile.
   ScopedPtr<QGraphicsRectItem> item;
 public:
+  /// Constructs a new tile instance.
+  /// @param parent A pointer to the parent graphics item.
   Tile(QGraphicsItem* parent = nullptr) : item(new QGraphicsRectItem(parent)) {
     item->setRect(0, 0, 1, 1);
+    item->setPen(QPen(Qt::blue));
   }
+  /// Accesses a pointer to the graphics item.
   QGraphicsItem* get_item() noexcept {
     return item.get();
   }
+  /// Repositions the tile in case of either a window
+  /// resize event or a room resize event.
+  /// @param x The X coordinate to place the tile at,
+  /// in terms of tile positions.
+  /// @param y The Y coordinate to place the tile at,
+  /// in terms of tile positions.
+  /// @param w The width, in pixels, to make the tile.
+  /// @param h The height, in pixels, to make the tile.
   void reposition(std::size_t x, std::size_t y,
                   std::size_t w, std::size_t h) {
     item->setRect(x * w, y * h, w, h);
@@ -78,6 +92,8 @@ public:
     for (auto i = prev_size; i < next_size; i++) {
       scene->addItem(tiles[i].get_item());
     }
+
+    handle_widget_resize(view->size());
   }
 protected slots:
   /// Handles the resizing of the graphics view.

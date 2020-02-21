@@ -4,6 +4,7 @@
 
 #include "ActionEditor.h"
 #include "AnimationEditor.h"
+#include "CodeEditor.h"
 #include "GameInfo.h"
 #include "ProjectManager.h"
 #include "RoomEditor.h"
@@ -30,6 +31,8 @@ class ProjectViewImpl final : public ProjectView {
   ScopedPtr<QMainWindow> main_window;
   /// A pointer to the widget containing the tabs.
   ScopedPtr<QTabWidget> tab_widget;
+  /// A pointer to the code editor tab.
+  ScopedPtr<CodeEditor> code_editor;
   /// A pointer to the room editor.
   ScopedPtr<TableEditor> room_editor;
   /// A pointer to the action editor.
@@ -47,6 +50,9 @@ public:
 
     tab_widget = ScopedPtr<QTabWidget>(new QTabWidget(main_window.get()));
 
+    code_editor = CodeEditor::make(manager, tab_widget.get());
+
+    tab_widget->addTab(code_editor->get_widget(), QObject::tr("Code"));
     tab_widget->addTab(make_rooms_tab(manager, tab_widget.get()),      QObject::tr("Rooms"));
     tab_widget->addTab(make_actions_tab(manager, tab_widget.get()),    QObject::tr("Actions"));
     tab_widget->addTab(make_animations_tab(manager, tab_widget.get()), QObject::tr("Animations"));

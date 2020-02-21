@@ -1,0 +1,3 @@
+[submodule "source/toolkit/QCodeEditor"]
+	path = source/toolkit/QCodeEditor
+	url = https://github.com/tay10r/QCodeEditor

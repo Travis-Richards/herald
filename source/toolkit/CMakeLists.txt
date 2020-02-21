@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Git REQUIRED)
 
 if(NOT TARGET "herald-common")
   add_subdirectory("../common" "common")
@@ -10,6 +11,20 @@ if(NOT TARGET "herald-engine")
   add_subdirectory("../engine" "engine")
 endif(NOT TARGET "herald-engine")
 
+if(NOT EXISTS "QCodeEditor/CMakeLists.txt")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "QCodeEditor"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    ERROR_VARIABLE GIT_CMD_ERROR)
+
+  if(GIT_CMD_ERROR)
+    message(FATAL_ERROR "Failed to clone code editor")
+  endif(GIT_CMD_ERROR)
+
+endif(NOT EXISTS "QCodeEditor/CMakeLists.txt")
+
+add_subdirectory("QCodeEditor")
+
 set(CMAKE_AUTOMOC ON)
 
 add_executable("herald-toolkit" WIN32
@@ -18,6 +33,8 @@ add_executable("herald-toolkit" WIN32
   "ActionEditor.cxx"
   "AnimationEditor.h"
   "AnimationEditor.cxx"
+  "CodeEditor.h"
+  "CodeEditor.cxx"
   "GameInfo.h"
   "GameList.h"
   "GameList.cxx"
@@ -33,6 +50,8 @@ add_executable("herald-toolkit" WIN32
   "RoomEditor.cxx"
   "RoomView.h"
   "RoomView.cxx"
+  "SourceFile.h"
+  "SourceFile.cxx"
   "StartupDialog.h"
   "StartupDialog.cxx"
   "TableEditor.h"
@@ -45,6 +64,7 @@ add_executable("herald-toolkit" WIN32
 
 target_link_libraries("herald-toolkit" PRIVATE
   Qt5::Widgets
+  QCodeEditor
   "herald-common"
   "herald-engine")
 

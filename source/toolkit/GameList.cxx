@@ -82,6 +82,24 @@ public:
   }
 };
 
+/// Removes directories from a directory list that do not exist.
+/// @param paths The directory paths to check.
+/// @returns A list of directory paths that are valid.
+/// A directory path is valid if it exists and it is a directory.
+QStringList remove_invalid_dirs(const QStringList& paths) {
+
+  QStringList out;
+
+  for (const auto& path : paths) {
+    QFileInfo info(path);
+    if (info.exists() && info.isDir()) {
+      out << path;
+    }
+  }
+
+  return out;
+}
+
 } // namespace
 
 ScopedPtr<GameInfo> GameInfo::open(const char* filename) {
@@ -92,11 +110,18 @@ ScopedPtr<GameList> GameList::make() {
   return new GameListImpl();
 }
 
-ScopedPtr<GameList> GameList::open(const QSettings& settings) {
+ScopedPtr<GameList> GameList::open(QSettings& settings, bool remove_invalid) {
 
   auto game_list = GameList::make();
 
   auto path_list = settings.value("gamelist").toStringList();
+
+  if (remove_invalid) {
+
+    path_list = remove_invalid_dirs(path_list);
+
+    settings.setValue("gamelist", path_list);
+  }
 
   for (const auto& path : path_list) {
 

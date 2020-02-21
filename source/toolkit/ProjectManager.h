@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+class QAbstractItemModel;
+class QModelIndex;
 class QString;
 class QStringList;
 
@@ -13,6 +15,7 @@ class ScopedPtr;
 namespace tk {
 
 class GameInfo;
+class SourceFile;
 
 /// Used to manage the data of a project.
 class ProjectManager {
@@ -29,6 +32,11 @@ public:
   /// Deletes a texture from the project.
   /// @param name The name of the texture to delete.
   virtual void delete_texture(const QString& name) = 0;
+  /// Gets the model of the project.
+  virtual QAbstractItemModel* get_model() = 0;
+  /// Gets the index of the source code tree within the model.
+  /// @returns The index of the source code tree within the model.
+  virtual QModelIndex get_source_index() const = 0;
   /// Lists the textures in the project.
   /// @returns A list of texture names that exist in the project.
   virtual QStringList list_textures() const = 0;
@@ -39,6 +47,10 @@ public:
   /// Opens the game information for the project.
   /// @returns The game info for the project.
   virtual ScopedPtr<GameInfo> open_info() const = 0;
+  /// Opens a source file from the project.
+  /// @param index The model index for the source file to open.
+  /// @returns A pointer to the specified source file.
+  virtual ScopedPtr<SourceFile> open_source_file(const QModelIndex& index) const = 0;
   /// Renames a texture.
   /// @param index The index of the texture to rename.
   /// @param name The name to give the texture.

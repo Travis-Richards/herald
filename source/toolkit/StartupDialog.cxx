@@ -82,7 +82,7 @@ public slots:
 
     add_to_game_list();
 
-    return make_info_file();
+    return make_dirs() && make_info_file();
   }
   /// Chooses the API to make the project in.
   /// @param api_ The choosen API name.
@@ -115,15 +115,30 @@ protected:
 
     settings.setValue("gamelist", game_list);
   }
-  /// Creates the information file used to open the game.
+  /// Creates the directories to be used by the game.
   /// @returns True on success, false on failure.
-  bool make_info_file() {
+  bool make_dirs() {
 
     QDir game_dir(location);
 
     if (!game_dir.mkdir(title)) {
       return false;
-    } else if (!game_dir.cd(title)) {
+    }
+
+    if (!game_dir.cd(title)) {
+      return false;
+    }
+
+    return game_dir.mkdir("audio")
+        && game_dir.mkdir("source")
+        && game_dir.mkdir("textures");
+  }
+  /// Creates the information file used to open the game.
+  /// @returns True on success, false on failure.
+  bool make_info_file() {
+
+    QDir game_dir(location);
+    if (!game_dir.cd(title)) {
       return false;
     }
 
@@ -183,8 +198,11 @@ public:
   StartupDialogImpl(Manager* m)
     : manager(m),
       root_widget(new QWidget()),
-      project_creator(new ProjectCreator(m, root_widget.get())),
-      game_list(GameList::open(QSettings())) {
+      project_creator(new ProjectCreator(m, root_widget.get())) {
+
+    QSettings settings;
+
+    game_list = GameList::open(settings);
 
     setup_root_widget();
   }
