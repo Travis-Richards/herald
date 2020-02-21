@@ -17,9 +17,9 @@ if(NOT EXISTS "QCodeEditor/CMakeLists.txt")
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     ERROR_VARIABLE GIT_CMD_ERROR)
 
-  if(GIT_CMD_ERROR)
+  if(NOT ${GIT_CMD_ERROR} EQUAL 0)
     message(FATAL_ERROR "Failed to clone code editor")
-  endif(GIT_CMD_ERROR)
+  endif(NOT ${GIT_CMD_ERROR} EQUAL 0)
 
 endif(NOT EXISTS "QCodeEditor/CMakeLists.txt")
 
