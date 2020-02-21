@@ -13,7 +13,9 @@ endif(NOT TARGET "herald-engine")
 
 if(NOT EXISTS "QCodeEditor/CMakeLists.txt")
 
-  execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "QCodeEditor"
+  set(submodule_path "${CMAKE_CURRENT_SOURCE_DIR}/QCodeEditor")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "${submodule_path}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     ERROR_VARIABLE GIT_CMD_ERROR)
 
