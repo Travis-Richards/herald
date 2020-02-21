@@ -2,6 +2,7 @@
 
 #include "ProjectManager.h"
 #include "SourceFile.h"
+#include "SourceManager.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -24,8 +25,8 @@ namespace {
 
 /// The implementation of the code editor interface.
 class CodeEditorImpl final : public CodeEditor {
-  /// A pointer to the project manager.
-  ProjectManager* project_manager;
+  /// The source code manager.
+  SourceManager* source_manager;
   /// The widget containing the code editor contents.
   ScopedPtr<QWidget> root_widget;
   /// A pointer to the code editing widget.
@@ -52,17 +53,18 @@ public:
   /// Constructs a new instance of the code editor.
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
-  CodeEditorImpl(ProjectManager* manager, QWidget* parent) : project_manager(manager) {
+  CodeEditorImpl(ProjectManager* manager, QWidget* parent) : source_manager(manager->get_source_manager()) {
 
     root_widget = ScopedPtr<QWidget>(new QWidget(parent));
 
     QGridLayout* layout = new QGridLayout(root_widget.get());
 
     code_editor = ScopedPtr<QCodeEditor>(new QCodeEditor(root_widget.get()));
+    code_editor->setWordWrapMode(QTextOption::NoWrap);
 
     source_tree_view = ScopedPtr<QTreeView>(new QTreeView(root_widget.get()));
-    source_tree_view->setModel(manager->get_model());
-    source_tree_view->setRootIndex(manager->get_source_index());
+    source_tree_view->setModel(source_manager->get_model());
+    source_tree_view->setRootIndex(source_manager->get_root());
 
     auto open_functor = [this](const QModelIndex& index) {
       open_source_file(index);
@@ -94,7 +96,7 @@ protected:
   /// @returns True on success, false on failure.
   bool open_source_file(const QModelIndex& index) {
 
-    auto source_file = project_manager->open_source_file(index);
+    auto source_file = source_manager->open(index);
 
     switch (source_file->get_type()) {
       case SourceFileType::Invalid:

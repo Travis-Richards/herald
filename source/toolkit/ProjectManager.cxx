@@ -3,7 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "GameInfo.h"
-#include "SourceFile.h"
+#include "SourceManager.h"
 
 #include <QDir>
 #include <QFile>
@@ -155,8 +155,8 @@ public:
 class ProjectManagerImpl final : public ProjectManager {
   /// The game directory.
   QDir game_dir;
-  /// The file system model for the project tree.
-  QFileSystemModel model;
+  /// The source code tree manager.
+  ScopedPtr<SourceManager> source_manager;
 public:
   /// Adds a new texture to the project.
   /// @param path The path of the texture to open.
@@ -179,15 +179,10 @@ public:
 
     modify_model(texture_deleter);
   }
-  /// Accesses a pointer to the source tree model.
-  /// @returns A pointer to the source tree model.
-  QAbstractItemModel* get_model() override {
-    return &model;
-  }
-  /// Gets the index to the source code tree.
-  /// @returns A model index pointing to the source code tree.
-  QModelIndex get_source_index() const override {
-    return model_index_of("source");
+  /// Accesses a pointer to the source manager.
+  /// @returns A pointer to the source tree manager.
+  SourceManager* get_source_manager() noexcept override {
+    return source_manager.get();
   }
   /// Lists the textures in the project.
   QStringList list_textures() const override {
@@ -208,19 +203,13 @@ public:
       return false;
     }
 
-    model.setRootPath(path);
+    source_manager = SourceManager::make(game_dir.filePath("source"));
 
     return true;
   }
   /// Opens the game information.
   ScopedPtr<GameInfo> open_info() const override {
     return GameInfo::open(game_dir.filePath("info.json").toStdString().c_str());
-  }
-  /// Opens a source file at the specified model index.
-  /// @param index The index index to open the source file at.
-  /// @returns A pointer to a new source file instance.
-  ScopedPtr<SourceFile> open_source_file(const QModelIndex& index) const override {
-    return SourceFile::from_fs(model.filePath(index));
   }
   /// Renames a texture.
   /// @param index The index of the texture to rename.
@@ -313,12 +302,6 @@ protected:
     model.save(model_path);
 
     return true;
-  }
-  /// Gets the model index of a subdirectory of the project.
-  /// @param relative_path The path to the directory to get the index of.
-  /// @returns The model index for the specified directory.
-  QModelIndex model_index_of(const QString& relative_path) const {
-    return model.index(model.rootDirectory().filePath(relative_path));
   }
 };
 
