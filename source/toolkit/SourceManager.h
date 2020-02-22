@@ -24,8 +24,9 @@ public:
   /// Just a stub.
   virtual ~SourceManager() {}
   /// Creates a new, unique, source file.
+  /// @param ext The extension to give the source file.
   /// @returns True on success, false on failure.
-  virtual bool create_source_file() = 0;
+  virtual bool create_source_file(const QString& ext) = 0;
   /// Accesses a pointer to the Qt item model for the source tree.
   virtual QAbstractItemModel* get_model() noexcept = 0;
   /// Accesses the index that points to the root of the source tree.

@@ -15,6 +15,7 @@ class ScopedPtr;
 namespace tk {
 
 class GameInfo;
+class Language;
 class SourceManager;
 
 /// Used to manage the data of a project.
@@ -32,6 +33,8 @@ public:
   /// Deletes a texture from the project.
   /// @param name The name of the texture to delete.
   virtual void delete_texture(const QString& name) = 0;
+  /// Accesses a pointer to the language used for the project.
+  virtual Language* get_language() noexcept = 0;
   /// Accesses the source tree manager.
   /// @returns A pointer to the source tree manager.
   virtual SourceManager* get_source_manager() noexcept = 0;

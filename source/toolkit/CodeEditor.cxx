@@ -1,5 +1,6 @@
 #include "CodeEditor.h"
 
+#include "Language.h"
 #include "ProjectManager.h"
 #include "SourceFile.h"
 #include "SourceManager.h"
@@ -25,6 +26,8 @@ namespace {
 class CodeEditorImpl final : public CodeEditor {
   /// The source code manager.
   SourceManager* source_manager;
+  /// A pointer to the language used by the project.
+  Language* language;
   /// The widget containing the code editor contents.
   ScopedPtr<QWidget> root_widget;
   /// A pointer to the code editing widget.
@@ -51,7 +54,12 @@ public:
   /// Constructs a new instance of the code editor.
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
-  CodeEditorImpl(ProjectManager* manager, QWidget* parent) : source_manager(manager->get_source_manager()) {
+  CodeEditorImpl(ProjectManager* manager, QWidget* parent)
+    : source_manager(nullptr), language(nullptr) {
+
+    source_manager = manager->get_source_manager();
+
+    language = manager->get_language();
 
     root_widget = ScopedPtr<QWidget>(new QWidget(parent));
 
@@ -96,7 +104,7 @@ protected:
     auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget);
 
     auto new_source_functor = [this](bool) {
-      source_manager->create_source_file();
+      source_manager->create_source_file(language->default_extension());
     };
 
     auto save_functor = [this](bool) {

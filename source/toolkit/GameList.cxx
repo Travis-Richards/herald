@@ -26,7 +26,7 @@ class GameInfoImpl final : public GameInfo {
 public:
   /// Constructs a game information instance from a file.
   /// @param path The path to the game.
-  GameInfoImpl(const char* path) : game_path(path) {
+  GameInfoImpl(const QString& path) : game_path(path) {
 
     auto info_path = QDir::cleanPath(game_path + QDir::separator() + "info.json");
 
@@ -42,6 +42,10 @@ public:
   void fill_row(QTableWidget* table, int row) {
     table->setItem(row, 0, new QTableWidgetItem(title()));
     table->setItem(row, 1, new QTableWidgetItem(game_path));
+  }
+  /// Accesses the API used by the game.
+  QString api() const override {
+    return root_object["api"].toString();
   }
   /// Accesses the path to the game.
   QString path() const override {
@@ -102,8 +106,8 @@ QStringList remove_invalid_dirs(const QStringList& paths) {
 
 } // namespace
 
-ScopedPtr<GameInfo> GameInfo::open(const char* filename) {
-  return new GameInfoImpl(filename);
+ScopedPtr<GameInfo> GameInfo::open(const QString& path) {
+  return new GameInfoImpl(path);
 }
 
 ScopedPtr<GameList> GameList::make() {

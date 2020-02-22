@@ -30,12 +30,13 @@ public:
     model.setRootPath(path);
   }
   /// Creates a new, unique source file.
+  /// @param ext The extension to give the source file.
   /// @returns True on success, false on failure.
-  bool create_source_file() override {
+  bool create_source_file(const QString& ext) override {
 
     for (int i = 0; i < 256; i++) {
 
-      auto path = make_source_file_path(i);
+      auto path = make_source_file_path(i, ext);
 
       QFileInfo file_info(path);
       if (!file_info.exists()) {
@@ -122,14 +123,15 @@ protected:
   /// Creates a a source file path.
   /// @param index The number assigned to the source file path.
   /// If this is equal to zero, then no number is appended to the source file path.
+  /// @param ext The extension to give the source file.
   /// @returns A unique source file path.
   /// This path is used when creating new source files
   /// using a generated file name.
-  QString make_source_file_path(int index) {
+  QString make_source_file_path(int index, const QString& ext) {
 
     auto path = QDir::cleanPath(model.rootPath() + QDir::separator() + "Untitled " + QString::number(index));
 
-    path += ".java";
+    path += ext;
 
     return path;
   }

@@ -3,6 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "GameInfo.h"
+#include "Language.h"
 #include "SourceManager.h"
 
 #include <QDir>
@@ -157,6 +158,8 @@ class ProjectManagerImpl final : public ProjectManager {
   QDir game_dir;
   /// The source code tree manager.
   ScopedPtr<SourceManager> source_manager;
+  /// The language used by the project.
+  ScopedPtr<Language> language;
 public:
   /// Adds a new texture to the project.
   /// @param path The path of the texture to open.
@@ -178,6 +181,10 @@ public:
     };
 
     modify_model(texture_deleter);
+  }
+  /// Accesses a pointer to the project language.
+  Language* get_language() noexcept override {
+    return language.get();
   }
   /// Accesses a pointer to the source manager.
   /// @returns A pointer to the source tree manager.
@@ -210,11 +217,15 @@ public:
 
     source_manager = SourceManager::make(game_dir.filePath("source"));
 
+    auto info = open_info();
+
+    language = Language::make_from_name(info->api());
+
     return true;
   }
   /// Opens the game information.
   ScopedPtr<GameInfo> open_info() const override {
-    return GameInfo::open(game_dir.filePath("info.json").toStdString().c_str());
+    return GameInfo::open(game_dir.absolutePath());
   }
   /// Renames a texture.
   /// @param index The index of the texture to rename.
