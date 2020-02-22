@@ -17,7 +17,7 @@ if(NOT EXISTS "QCodeEditor/CMakeLists.txt")
 
   execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "${submodule_path}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    ERROR_VARIABLE GIT_CMD_ERROR)
+    RESULT_VARIABLE GIT_CMD_ERROR)
 
   if(NOT ${GIT_CMD_ERROR} EQUAL 0)
     message(FATAL_ERROR "Failed to clone code editor")
