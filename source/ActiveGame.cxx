@@ -31,7 +31,9 @@ using namespace herald;
 /// Implements the active game interface.
 class ActiveGameImpl final : public ActiveGame, public Controller::Observer {
   /// The engine instance that's running the game.
-  ScopedPtr<Engine> engine;
+  ScopedPtr<QtEngine> engine;
+  /// The window that's displaying the game.
+  ScopedPtr<QtTarget> target;
   /// The widget responsible for logging errors.
   ErrorLog* error_log;
   /// The API controlling the game play.
@@ -129,7 +131,7 @@ void ActiveGameImpl::close() {
 
 bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
 
-  auto target = QtTarget::make(nullptr);
+  target = QtTarget::make(nullptr);
 
   auto* controller = target->get_controller();
   controller->set_observer(this);
@@ -137,7 +139,7 @@ bool ActiveGameImpl::open(const QString& path, const GameInfo& info) {
   auto* graphics_view = target->get_graphics_view();
   graphics_view->setWindowTitle(info.get_title());
 
-  engine = QtEngine::make(std::move(target));
+  engine = QtEngine::make(target.get());
 
   api = info.make_api(path, engine->get_model(), this);
   if (!api) {
