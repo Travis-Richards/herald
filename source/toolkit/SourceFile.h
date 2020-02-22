@@ -1,6 +1,7 @@
 #pragma once
 
 class QString;
+class QTextDocument;
 
 namespace herald {
 
@@ -33,8 +34,12 @@ public:
   static ScopedPtr<SourceFile> from_fs(const QString& path);
   /// Just a stub.
   virtual ~SourceFile() {}
-  /// Accesses the code associated with the file.
-  virtual const QString& get_code() const noexcept = 0;
+  /// Accesses the text document containing the code.
+  /// @returns A pointer to the text document containing the code.
+  virtual QTextDocument* get_code() noexcept = 0;
+  /// Accesses the text document containing the code.
+  /// @returns A pointer to the text document containing the code.
+  virtual const QTextDocument* get_code() const noexcept = 0;
   /// Accesses the type of the source code file.
   virtual SourceFileType get_type() const noexcept = 0;
 };

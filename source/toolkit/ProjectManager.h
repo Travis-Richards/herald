@@ -38,6 +38,9 @@ public:
   /// Lists the textures in the project.
   /// @returns A list of texture names that exist in the project.
   virtual QStringList list_textures() const = 0;
+  /// Indicates whether or not there are unsaved changes in the project.
+  /// @returns True if there are unsaved changes, false if everything is saved.
+  virtual bool has_unsaved_changes() const = 0;
   /// Opens a project.
   /// @param game_path The path to the game project.
   /// @returns True on success, false on failure.
@@ -49,6 +52,9 @@ public:
   /// @param index The index of the texture to rename.
   /// @param name The name to give the texture.
   virtual void rename_texture(std::size_t index, const QString& name) = 0;
+  /// Saves the project data.
+  /// @returns True on success, false on failure.
+  virtual bool save_all() = 0;
   /// Gets the path of a texture.
   /// @param name The name of the texture to get the path of.
   /// @returns The path of the specified texture.

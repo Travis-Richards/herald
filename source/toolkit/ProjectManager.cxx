@@ -184,6 +184,11 @@ public:
   SourceManager* get_source_manager() noexcept override {
     return source_manager.get();
   }
+  /// Indicates whether or not there are unsaved changes in the project.
+  /// @returns True if there's unsaved changes, false otherwise.
+  bool has_unsaved_changes() const override {
+    return source_manager->has_unsaved_changes();
+  }
   /// Lists the textures in the project.
   QStringList list_textures() const override {
 
@@ -221,6 +226,11 @@ public:
     };
 
     modify_model(mutator);
+  }
+  /// Saves all project data.
+  /// @returns True on success, false on failure.
+  bool save_all() override {
+    return true;
   }
   /// Gets the path to a texture file.
   /// @param name The name of the texture to get the path of.

@@ -12,10 +12,12 @@
 #include "TableItemEditor.h"
 #include "TextureEditor.h"
 
+#include <QCloseEvent>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListView>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -25,10 +27,62 @@ namespace tk {
 
 namespace {
 
+/// A derived main window class.
+/// This is used to check for when
+/// the window is getting closed. If
+/// it's getting closed, we check to see
+/// if there's any unsaved changes before
+/// we exit the project.
+class MainWindow final : public QMainWindow {
+  /// A pointer to the project manager.
+  ProjectManager* project_manager;
+public:
+  /// Constructs a new instance of the main window.
+  /// @param p A pointer to the project manager.
+  MainWindow(ProjectManager* p) : project_manager(p) {}
+protected:
+  /// Overrides the close event.
+  /// Checks for unsaved changes before exiting.
+  void closeEvent(QCloseEvent* event) override {
+
+    auto should_ignore = false;
+
+    if (project_manager->has_unsaved_changes()) {
+
+      QString title(tr("Unsaved Changes"));
+
+      QString msg(tr("Save changes made to project?"));
+
+      auto buttons = QMessageBox::Save
+                   | QMessageBox::Discard
+                   | QMessageBox::Cancel;
+
+      auto button = QMessageBox::question(this, title, msg, buttons);
+
+      switch (button) {
+        case QMessageBox::Cancel:
+          should_ignore = true;
+          break;
+        case QMessageBox::Save:
+          project_manager->save_all();
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (should_ignore) {
+      event->ignore();
+    } else {
+      QMainWindow::closeEvent(event);
+    }
+  }
+};
+
 /// This is the implementation of the project view inteface.
 class ProjectViewImpl final : public ProjectView {
   /// A pointer to the main window.
-  ScopedPtr<QMainWindow> main_window;
+  ScopedPtr<MainWindow> main_window;
   /// A pointer to the widget containing the tabs.
   ScopedPtr<QTabWidget> tab_widget;
   /// A pointer to the code editor tab.
@@ -46,7 +100,7 @@ public:
   /// @param manager A pointer to the project manager.
   ProjectViewImpl(ProjectManager* manager) {
 
-    main_window = ScopedPtr<QMainWindow>(new QMainWindow());
+    main_window = ScopedPtr<MainWindow>(new MainWindow(manager));
 
     tab_widget = ScopedPtr<QTabWidget>(new QTabWidget(main_window.get()));
 
@@ -67,7 +121,7 @@ public:
   }
   /// Shows the window.
   void show() override {
-    main_window->show();
+    main_window->showMaximized();
   }
 protected:
   /// Creates the rooms tab.

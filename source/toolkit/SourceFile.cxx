@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QString>
+#include <QTextDocument>
 
 namespace herald {
 
@@ -17,17 +18,21 @@ namespace {
 class DefaultSourceFile final : public SourceFile {
   /// The type associated with this source file.
   SourceFileType type;
-  /// The code associated with the file.
-  QString code;
+  /// The document containing the code.
+  QTextDocument code;
 public:
   /// Opens a source file.
   /// @param path The path to the source file to open.
   DefaultSourceFile(const QString& path) : type(SourceFileType::Invalid) {
     open(path);
   }
-  /// Accesses the IO device to read and write data.
-  const QString& get_code() const noexcept override {
-    return code;
+  /// Accesses a pointer to the document containing the code.
+  QTextDocument* get_code() noexcept override {
+    return &code;
+  }
+  /// Accesses a pointer to the document containing the code.
+  const QTextDocument* get_code() const noexcept override {
+    return &code;
   }
   /// Accesses the type associated with the source file.
   SourceFileType get_type() const noexcept override {
@@ -51,7 +56,8 @@ protected:
       return false;
     }
 
-    code = file.readAll();
+    code.setPlainText(file.readAll());
+
     type = parse_type(file_info.suffix());
 
     return true;

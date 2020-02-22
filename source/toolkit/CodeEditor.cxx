@@ -15,8 +15,6 @@
 #include <QJavaHighlighter>
 #include <QPythonHighlighter>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {
@@ -61,6 +59,7 @@ public:
 
     code_editor = ScopedPtr<QCodeEditor>(new QCodeEditor(root_widget.get()));
     code_editor->setWordWrapMode(QTextOption::NoWrap);
+    code_editor->setReadOnly(true);
 
     source_tree_view = ScopedPtr<QTreeView>(new QTreeView(root_widget.get()));
     source_tree_view->setModel(source_manager->get_model());
@@ -85,10 +84,35 @@ protected:
   /// @param parent A pointer to the parent widget.
   /// @returns The widget containing the buttons.
   QWidget* make_buttons_widget(QWidget* parent) {
+
     QWidget* buttons_widget = new QWidget(parent);
+
     QHBoxLayout* layout = new QHBoxLayout(buttons_widget);
-    layout->addWidget(new QPushButton(QObject::tr("Build"), buttons_widget));
-    layout->addWidget(new QPushButton(QObject::tr("Run"), buttons_widget));
+
+    auto* new_source_file_button = new QPushButton(QObject::tr("New Source File"), buttons_widget);
+    auto* new_directory          = new QPushButton(QObject::tr("New Directory"),   buttons_widget);
+    auto* save_button            = new QPushButton(QObject::tr("Save"),            buttons_widget);
+    auto* build_button           = new QPushButton(QObject::tr("Build"),           buttons_widget);
+    auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget);
+
+    auto new_source_functor = [this](bool) {
+      source_manager->create_source_file();
+    };
+
+    auto save_functor = [this](bool) {
+      source_manager->save_modified();
+    };
+
+    QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
+
+    QObject::connect(save_button, &QPushButton::clicked, save_functor);
+
+    layout->addWidget(new_source_file_button);
+    layout->addWidget(new_directory);
+    layout->addWidget(save_button);
+    layout->addWidget(build_button);
+    layout->addWidget(run_button);
+
     return buttons_widget;
   }
   /// Opens a source file.
@@ -97,6 +121,9 @@ protected:
   bool open_source_file(const QModelIndex& index) {
 
     auto source_file = source_manager->open(index);
+
+    code_editor->setDocument(source_file->get_code());
+    code_editor->setReadOnly(false);
 
     switch (source_file->get_type()) {
       case SourceFileType::Invalid:
@@ -108,8 +135,6 @@ protected:
         code_editor->setHighlighter(new QPythonHighlighter);
         break;
     }
-
-    code_editor->setText(source_file->get_code());
 
     return true;
   }

@@ -5,6 +5,10 @@
 #include <herald/ScopedPtr.h>
 
 #include <QFileSystemModel>
+#include <QSaveFile>
+#include <QTextDocument>
+
+#include <map>
 
 namespace herald {
 
@@ -17,11 +21,29 @@ namespace {
 class DefaultSourceManager final : public SourceManager {
   /// The file system model for the source tree.
   QFileSystemModel model;
+  /// A map of files currently opened.
+  std::map<QString, ScopedPtr<SourceFile>> opened_files;
 public:
   /// Constructs a new instance of the source manager.
   /// @param path The path to the source tree manager.
   DefaultSourceManager(const QString& path) {
     model.setRootPath(path);
+  }
+  /// Creates a new, unique source file.
+  /// @returns True on success, false on failure.
+  bool create_source_file() override {
+
+    for (int i = 0; i < 256; i++) {
+
+      auto path = make_source_file_path(i);
+
+      QFileInfo file_info(path);
+      if (!file_info.exists()) {
+        return QFile(path).open(QIODevice::WriteOnly);
+      }
+    }
+
+    return true;
   }
   /// Accesses a pointer to the model.
   QAbstractItemModel* get_model() noexcept override {
@@ -31,11 +53,85 @@ public:
   QModelIndex get_root() const override {
     return model.index(model.rootPath());
   }
+  /// Indicates if any of the source code files
+  /// has unsaved changes.
+  bool has_unsaved_changes() const override {
+
+    for (auto& file : opened_files) {
+      if (file.second->get_code()->isModified()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
   /// Opens a file at a specific index.
   /// @param index The index of the file to open.
   /// @returns A pointer to the specified source file.
-  ScopedPtr<SourceFile> open(const QModelIndex& index) const override {
-    return SourceFile::from_fs(model.filePath(index));
+  SourceFile* open(const QModelIndex& index) override {
+
+    auto path = model.filePath(index);
+
+    auto it = opened_files.find(path);
+    if (it == opened_files.end()) {
+      return open_without_cache(path);
+    } else {
+      return it->second.get();
+    }
+  }
+  /// Saves all modified files.
+  /// @returns True on success, false on failure.
+  bool save_modified() override {
+
+    for (auto& source_file : opened_files) {
+
+      auto* doc = source_file.second->get_code();
+      if (!doc->isModified()) {
+        continue;
+      }
+
+      QSaveFile output_file(source_file.first);
+
+      if (!output_file.open(QIODevice::WriteOnly)) {
+        return false;
+      }
+
+      output_file.write(doc->toPlainText().toUtf8());
+
+      if (output_file.commit()) {
+        doc->setModified(false);
+      }
+    }
+
+    return true;
+  }
+protected:
+  /// Opens a file without checking to see if it's in cache.
+  /// @param path The path of the file to open.
+  /// @returns a pointer to the specified file.
+  SourceFile* open_without_cache(const QString& path) {
+
+    auto source_file = SourceFile::from_fs(path);
+
+    auto* source_file_ptr = source_file.get();
+
+    opened_files[path] = std::move(source_file);
+
+    return source_file_ptr;
+  }
+  /// Creates a a source file path.
+  /// @param index The number assigned to the source file path.
+  /// If this is equal to zero, then no number is appended to the source file path.
+  /// @returns A unique source file path.
+  /// This path is used when creating new source files
+  /// using a generated file name.
+  QString make_source_file_path(int index) {
+
+    auto path = QDir::cleanPath(model.rootPath() + QDir::separator() + "Untitled " + QString::number(index));
+
+    path += ".java";
+
+    return path;
   }
 };
 
