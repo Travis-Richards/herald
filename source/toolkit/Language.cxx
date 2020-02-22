@@ -21,7 +21,7 @@ class NullLanguage final : public Language {
 public:
   /// Does nothing.
   /// @returns Always returns true.
-  bool build(SourceManager*) {
+  bool build(SourceManager*) override {
     return true;
   }
   /// Does nothing.
