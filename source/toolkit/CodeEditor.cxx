@@ -1,6 +1,7 @@
 #include "CodeEditor.h"
 
 #include "Console.h"
+#include "GameProcess.h"
 #include "Language.h"
 #include "ProcessQueue.h"
 #include "ProjectManager.h"
@@ -8,6 +9,9 @@
 #include "SourceManager.h"
 
 #include <herald/ScopedPtr.h>
+
+#include <herald/QtEngine.h>
+#include <herald/QtTarget.h>
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -40,6 +44,14 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<QTreeView> source_tree_view;
   /// The console for program output.
   ScopedPtr<Console> console;
+  /// The window that the game is being rendered to.
+  ScopedPtr<QtTarget> game_target;
+  /// A pointer to the game engine.
+  ScopedPtr<QtEngine> game_engine;
+  /// The process running the game.
+  /// This pointer may be null when the
+  /// game isn't running.
+  ScopedPtr<GameProcess> game_process;
   /// A queue of processes used to build the source files.
   ScopedPtr<ProcessQueue> process_queue;
   /// The width of the grid layout.
@@ -164,9 +176,12 @@ protected:
       language->build(*process_queue.get(), *source_manager);
     };
 
+    auto run_functor = [this](bool) { run(); };
+
     QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
     QObject::connect(save_button,            &QPushButton::clicked, save_functor);
     QObject::connect(build_button,           &QPushButton::clicked, build_functor);
+    QObject::connect(run_button,             &QPushButton::clicked, run_functor);
 
     layout->addWidget(new_source_file_button);
     layout->addWidget(new_directory);
@@ -202,6 +217,23 @@ protected:
     code_editor->setReadOnly(read_only);
 
     return true;
+  }
+  /// Runs the game.
+  void run() {
+
+    if (game_process) {
+      game_process->waitOrKill();
+    }
+
+    if (!game_target) {
+      game_target = QtTarget::make(nullptr);
+    }
+
+    if (!game_engine) {
+      game_engine = QtEngine::make(game_target.get());
+    }
+
+    game_target->show();
   }
 };
 

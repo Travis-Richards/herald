@@ -2,6 +2,7 @@
 
 #include <herald/ScopedPtr.h>
 
+#include <QFontDatabase>
 #include <QTextEdit>
 
 namespace herald {
@@ -20,6 +21,7 @@ public:
   ConsoleImpl(QWidget* parent) {
     text_edit = ScopedPtr<QTextEdit>(new QTextEdit(parent));
     text_edit->setReadOnly(true);
+    text_edit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
   }
   /// Gets a pointer to the console widget.
   /// @returns A pointer to the console widget.

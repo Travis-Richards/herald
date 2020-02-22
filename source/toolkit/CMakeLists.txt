@@ -48,6 +48,8 @@ add_executable("herald-toolkit" WIN32
   "GameInfo.h"
   "GameList.h"
   "GameList.cxx"
+  "GameProcess.h"
+  "GameProcess.cxx"
   "GraphicsView.h"
   "GraphicsView.cxx"
   "JavaLanguage.h"
