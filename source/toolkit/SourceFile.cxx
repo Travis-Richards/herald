@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QString>
 #include <QTextDocument>
 
@@ -24,7 +25,10 @@ public:
   /// Opens a source file.
   /// @param path The path to the source file to open.
   DefaultSourceFile(const QString& path) : type(SourceFileType::Invalid) {
+
     open(path);
+
+    code.setDefaultFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
   }
   /// Accesses a pointer to the document containing the code.
   QTextDocument* get_code() noexcept override {
