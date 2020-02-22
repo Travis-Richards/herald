@@ -17,12 +17,12 @@ namespace {
 class QtEngineImpl final : public QtEngine {
   /// The Qt data model.
   ScopedPtr<QtModel> model;
-  /// The taregt to render to.
-  ScopedPtr<QtTarget> target;
+  /// The target to render to.
+  QtTarget* target;
 public:
   /// Constructs an instance of the Qt engine.
   /// @param t The target to render to.
-  QtEngineImpl(ScopedPtr<QtTarget>&& t) : model(QtModel::make()), target(std::move(t)) {
+  QtEngineImpl(QtTarget* t) : model(QtModel::make()), target(t) {
 
     target->get_graphics_view()->setScene(model->get_scene());
 
@@ -43,8 +43,8 @@ public:
 
 } // namespace
 
-ScopedPtr<QtEngine> QtEngine::make(ScopedPtr<QtTarget>&& target) {
-  return new QtEngineImpl(std::move(target));
+ScopedPtr<QtEngine> QtEngine::make(QtTarget* target) {
+  return new QtEngineImpl(target);
 }
 
 } // namespace herald

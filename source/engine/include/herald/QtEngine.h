@@ -15,7 +15,7 @@ public:
   /// Creates a new instance of the Qt engine.
   /// @param target The target to render to.
   /// @returns A new Qt engine instance.
-  static ScopedPtr<QtEngine> make(ScopedPtr<QtTarget>&& target);
+  static ScopedPtr<QtEngine> make(QtTarget* target);
   /// Just a stub.
   virtual ~QtEngine() {}
 };
