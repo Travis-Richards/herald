@@ -1,3 +1,4 @@
+#include <herald/sysinfo/ProgramFinder.h>
 #include <herald/sysinfo/Registry.h>
 
 #include <herald/ScopedPtr.h>
@@ -32,6 +33,18 @@ int main() {
 
   query_and_print(*registry, Registry::Specifier(Registry::Key::CurrentUser, "Environment", "Qt5_DIR"));
   query_and_print(*registry, Registry::Specifier(Registry::Key::CurrentUser, "Environment", "Path"));
+
+  auto program_finder = ProgramFinder::make();
+
+  program_finder->add_env_list("PATH");
+
+  program_finder->add_registry_path(Registry::Specifier(Registry::Key::LocalMachine, "JavaSoft", "Java Runtime Environment"));
+
+  if (program_finder->find("java")) {
+    std::cerr << "Java found at: " << program_finder->get_last_result() << std::endl;
+  } else {
+    std::cerr << "Java not found" << std::endl;
+  }
 
   return 0;
 }

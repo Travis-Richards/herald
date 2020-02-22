@@ -56,8 +56,8 @@ public:
 class RegistryString final {
   /// A pointer to the string data.
   char* data;
-  /// The number of bytes allocated for the string.
-  std::size_t max;
+  /// The number of characters in the string.
+  std::size_t size_;
 public:
   /// Creates an "invalid" registry string.
   /// @returns A registry string with no data.
@@ -89,12 +89,26 @@ public:
   inline bool valid() const noexcept {
     return data != nullptr;
   }
+  /// Accesses the string size.
+  /// This is the number of characters in the string,
+  /// not including the null terminating character.
+  inline std::size_t size() const noexcept {
+    return size_;
+  }
+  /// Accesses a beginning iterator.
+  const char* begin() const noexcept {
+    return data;
+  }
+  /// Accesses an ending iterator.
+  const char* end() const noexcept {
+    return data + size_;
+  }
   /// Accesses a character in the registry string.
   /// @param index The index of the character to get.
   /// @returns The specified character on success,
   /// a value of zero in the case that the index of out of bounds.
   inline char operator [] (std::size_t index) const noexcept {
-    return (index < max) ? data[index] : 0;
+    return (index < size_) ? data[index] : 0;
   }
 };
 

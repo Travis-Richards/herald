@@ -138,20 +138,20 @@ public:
 RegistryString::RegistryString(std::size_t s) {
   if (s > 0) {
     data = (char*) std::calloc(1, (s + 1));
-    max = data ? s : 0;
+    size_ = data ? s : 0;
   } else {
     data = nullptr;
-    max = 0;
+    size_ = 0;
   }
 }
 
 RegistryString::RegistryString(RegistryString&& other) {
 
   data = other.data;
-  max = other.max;
+  size_ = other.size_;
 
   other.data = nullptr;
-  other.max = 0;
+  other.size_ = 0;
 }
 
 RegistryString::~RegistryString() {
