@@ -123,10 +123,12 @@ protected:
     auto source_file = source_manager->open(index);
 
     code_editor->setDocument(source_file->get_code());
-    code_editor->setReadOnly(false);
+
+    auto read_only = false;
 
     switch (source_file->get_type()) {
       case SourceFileType::Invalid:
+        read_only = true;
         break;
       case SourceFileType::Java:
         code_editor->setHighlighter(new QJavaHighlighter);
@@ -135,6 +137,8 @@ protected:
         code_editor->setHighlighter(new QPythonHighlighter);
         break;
     }
+
+    code_editor->setReadOnly(read_only);
 
     return true;
   }
