@@ -80,6 +80,12 @@ public:
       return it->second.get();
     }
   }
+  /// Gets the path of a specified file.
+  /// @param index The index of the file to get the path of.
+  /// @returns The path of the specified file.
+  QString path_of(const QModelIndex& index) override {
+    return model.filePath(index);
+  }
   /// Saves all modified files.
   /// @returns True on success, false on failure.
   bool save_modified() override {

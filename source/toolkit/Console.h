@@ -24,6 +24,10 @@ public:
   /// This is required when adding the console to a layout.
   /// @returns A pointer to the console widget.
   virtual QWidget* get_widget() noexcept = 0;
+  /// Logs information sent from a process' standard output file.
+  virtual void log_stdout(const QString& str) = 0;
+  /// Logs information sent from a process' standard error file.
+  virtual void log_stderr(const QString& str) = 0;
   /// Prints a message to the console, with a newline
   /// automatically added to the end of the string.
   /// @param msg The message to log.

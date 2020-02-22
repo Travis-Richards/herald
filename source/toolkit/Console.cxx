@@ -26,10 +26,18 @@ public:
   QWidget* get_widget() noexcept override {
     return text_edit.get();
   }
+  /// Logs a process' standard error file data.
+  void log_stderr(const QString& str) override {
+    text_edit->insertPlainText(str);
+  }
+  /// Logs a process' standard output file data.
+  void log_stdout(const QString& str) override {
+    text_edit->insertPlainText(str);
+  }
   /// Prints a message to the console, with a newline.
   void println(const QString& msg) override {
-    text_edit->append(msg);
-    text_edit->append(QString('\n'));
+    text_edit->insertPlainText(msg);
+    text_edit->insertPlainText(QString('\n'));
   }
 };
 

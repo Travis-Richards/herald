@@ -7,8 +7,6 @@
 
 #include <QString>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {
@@ -21,7 +19,7 @@ class NullLanguage final : public Language {
 public:
   /// Does nothing.
   /// @returns Always returns true.
-  bool build(SourceManager*) override {
+  bool build(ProcessQueue&, SourceManager&) override {
     return true;
   }
   /// Does nothing.

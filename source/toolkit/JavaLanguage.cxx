@@ -1,11 +1,15 @@
 #include "JavaLanguage.h"
 
 #include "Language.h"
+#include "ProcessQueue.h"
+#include "SourceManager.h"
 
 #include <herald/ScopedPtr.h>
 
 #include <herald/sysinfo/ProgramFinder.h>
 
+#include <QModelIndex>
+#include <QProcess>
 #include <QString>
 
 namespace herald {
@@ -19,7 +23,22 @@ class JavaLanguage final : public Language {
 public:
   /// Builds the project.
   /// @returns True on success, false on failure.
-  bool build(SourceManager*) override {
+  bool build(ProcessQueue& process_queue, SourceManager& source_manager) override {
+
+    auto* process = process_queue.add();
+
+    auto source_root = source_manager.path_of(source_manager.get_root());
+
+    auto java_compiler = "javac";
+
+    QStringList args;
+    args << "Game.java";
+
+    process->setWorkingDirectory(source_root);
+    process->setProgram(java_compiler);
+    process->setArguments(args);
+    process->start();
+
     return true;
   }
   /// Gets the default extension for source files.

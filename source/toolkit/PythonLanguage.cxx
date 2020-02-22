@@ -19,7 +19,7 @@ class PythonLanguage final : public Language {
 public:
   /// Builds the project.
   /// @returns True on success, false on failure.
-  bool build(SourceManager*) override {
+  bool build(ProcessQueue&, SourceManager&) override {
     return true;
   }
   /// Gets the default extension for source files.

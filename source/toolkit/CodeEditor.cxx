@@ -2,6 +2,7 @@
 
 #include "Console.h"
 #include "Language.h"
+#include "ProcessQueue.h"
 #include "ProjectManager.h"
 #include "SourceFile.h"
 #include "SourceManager.h"
@@ -39,6 +40,8 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<QTreeView> source_tree_view;
   /// The console for program output.
   ScopedPtr<Console> console;
+  /// A queue of processes used to build the source files.
+  ScopedPtr<ProcessQueue> process_queue;
   /// The width of the grid layout.
   static constexpr int grid_width = 10;
   /// The height of the grid layout.
@@ -108,6 +111,11 @@ public:
     layout->addWidget(source_tree_view.get(), button_widget_height, 0,                fs_widget_height,     fs_widget_width);
     layout->addWidget(code_editor.get(),      button_widget_height, fs_widget_width,  code_editor_height,   code_editor_width);
     layout->addWidget(console->get_widget(),  console_y_offset,     console_x_offset, console_height,       console_width);
+
+    // Create the process queue for
+    // building the source files.
+
+    process_queue = ProcessQueue::make(console.get());
   }
   /// Accesses a pointer to the code editing widget.
   QWidget* get_widget() noexcept override {
@@ -137,9 +145,13 @@ protected:
       source_manager->save_modified();
     };
 
-    QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
+    auto build_functor = [this](bool) {
+      language->build(*process_queue.get(), *source_manager);
+    };
 
-    QObject::connect(save_button, &QPushButton::clicked, save_functor);
+    QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
+    QObject::connect(save_button,            &QPushButton::clicked, save_functor);
+    QObject::connect(build_button,           &QPushButton::clicked, build_functor);
 
     layout->addWidget(new_source_file_button);
     layout->addWidget(new_directory);

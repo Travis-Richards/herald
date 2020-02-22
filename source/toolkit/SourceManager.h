@@ -39,6 +39,13 @@ public:
   /// @returns The file corresponding to the specified index.
   /// The source manager retains ownership of the source file.
   virtual SourceFile* open(const QModelIndex& index) = 0;
+  /// Gets the path of file in the source directory.
+  /// This should be used sparingly because it won't
+  /// work in cases where the sources aren't managed
+  /// in a file system.
+  /// @param index The index of the file to get the path to.
+  /// @returns The path of the specified file.
+  virtual QString path_of(const QModelIndex& index) = 0;
   /// Save all files that have been opened and modified.
   /// @returns True if all files saved succesfully, false if
   /// there was at least one error.
