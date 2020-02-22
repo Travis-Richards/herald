@@ -1,5 +1,6 @@
 #include "CodeEditor.h"
 
+#include "Console.h"
 #include "Language.h"
 #include "ProjectManager.h"
 #include "SourceFile.h"
@@ -30,10 +31,14 @@ class CodeEditorImpl final : public CodeEditor {
   Language* language;
   /// The widget containing the code editor contents.
   ScopedPtr<QWidget> root_widget;
+  /// A pointer to the buttons widget.
+  ScopedPtr<QWidget> buttons_widget;
   /// A pointer to the code editing widget.
   ScopedPtr<QCodeEditor> code_editor;
   /// A view of the source code tree.
   ScopedPtr<QTreeView> source_tree_view;
+  /// The console for program output.
+  ScopedPtr<Console> console;
   /// The width of the grid layout.
   static constexpr int grid_width = 10;
   /// The height of the grid layout.
@@ -49,7 +54,15 @@ class CodeEditorImpl final : public CodeEditor {
   /// The width, in terms of grid units, of the code editor.
   static constexpr int code_editor_width = grid_width - fs_widget_width;
   /// The height, in terms of grid units, of the code editor.
-  static constexpr int code_editor_height = grid_height - button_widget_height;
+  static constexpr int code_editor_height = 17;
+  /// The Y offset of the console.
+  static constexpr int console_y_offset = button_widget_height + code_editor_height;
+  /// The X offset of the console.
+  static constexpr int console_x_offset = 0;
+  /// The height of the console, in grid units.
+  static constexpr int console_height = grid_height - (button_widget_height + code_editor_height);
+  /// The width of the console, in grid units.
+  static constexpr int console_width = grid_width;
 public:
   /// Constructs a new instance of the code editor.
   /// @param manager A pointer to the project manager.
@@ -65,6 +78,8 @@ public:
 
     QGridLayout* layout = new QGridLayout(root_widget.get());
 
+    // Create code editor widget
+
     code_editor = ScopedPtr<QCodeEditor>(new QCodeEditor(root_widget.get()));
     code_editor->setWordWrapMode(QTextOption::NoWrap);
     code_editor->setReadOnly(true);
@@ -79,9 +94,20 @@ public:
 
     QObject::connect(source_tree_view.get(), &QTreeView::clicked, open_functor);
 
-    layout->addWidget(make_buttons_widget(root_widget.get()), 0, 0, button_widget_height, button_widget_width);
-    layout->addWidget(source_tree_view.get(), button_widget_height, 0, fs_widget_height, fs_widget_width);
-    layout->addWidget(code_editor.get(), button_widget_height, fs_widget_width, code_editor_height, code_editor_width);
+    // Create buttons widget
+
+    buttons_widget = make_buttons_widget(root_widget.get());
+
+    // Create  console widget
+
+    console = Console::make(root_widget.get());
+
+    // Add main widgets to layout
+
+    layout->addWidget(buttons_widget.get(),   0,                    0,                button_widget_height, button_widget_width);
+    layout->addWidget(source_tree_view.get(), button_widget_height, 0,                fs_widget_height,     fs_widget_width);
+    layout->addWidget(code_editor.get(),      button_widget_height, fs_widget_width,  code_editor_height,   code_editor_width);
+    layout->addWidget(console->get_widget(),  console_y_offset,     console_x_offset, console_height,       console_width);
   }
   /// Accesses a pointer to the code editing widget.
   QWidget* get_widget() noexcept override {
@@ -91,17 +117,17 @@ protected:
   /// Creates the widget containing the buttons for the code editor.
   /// @param parent A pointer to the parent widget.
   /// @returns The widget containing the buttons.
-  QWidget* make_buttons_widget(QWidget* parent) {
+  ScopedPtr<QWidget> make_buttons_widget(QWidget* parent) {
 
-    QWidget* buttons_widget = new QWidget(parent);
+    ScopedPtr<QWidget> buttons_widget = new QWidget(parent);
 
-    QHBoxLayout* layout = new QHBoxLayout(buttons_widget);
+    QHBoxLayout* layout = new QHBoxLayout(buttons_widget.get());
 
-    auto* new_source_file_button = new QPushButton(QObject::tr("New Source File"), buttons_widget);
-    auto* new_directory          = new QPushButton(QObject::tr("New Directory"),   buttons_widget);
-    auto* save_button            = new QPushButton(QObject::tr("Save"),            buttons_widget);
-    auto* build_button           = new QPushButton(QObject::tr("Build"),           buttons_widget);
-    auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget);
+    auto* new_source_file_button = new QPushButton(QObject::tr("New Source File"), buttons_widget.get());
+    auto* new_directory          = new QPushButton(QObject::tr("New Directory"),   buttons_widget.get());
+    auto* save_button            = new QPushButton(QObject::tr("Save"),            buttons_widget.get());
+    auto* build_button           = new QPushButton(QObject::tr("Build"),           buttons_widget.get());
+    auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget.get());
 
     auto new_source_functor = [this](bool) {
       source_manager->create_source_file(language->default_extension());

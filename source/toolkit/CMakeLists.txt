@@ -43,6 +43,8 @@ add_executable("herald-toolkit" WIN32
   "AnimationEditor.cxx"
   "CodeEditor.h"
   "CodeEditor.cxx"
+  "Console.h"
+  "Console.cxx"
   "GameInfo.h"
   "GameList.h"
   "GameList.cxx"
