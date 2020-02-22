@@ -62,6 +62,8 @@ protected:
 
     code.setPlainText(file.readAll());
 
+    code.setModified(false);
+
     type = parse_type(file_info.suffix());
 
     return true;

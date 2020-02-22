@@ -4,6 +4,8 @@
 
 #include <herald/ScopedPtr.h>
 
+#include <herald/sysinfo/ProgramFinder.h>
+
 #include <QString>
 
 namespace herald {
@@ -29,7 +31,13 @@ public:
   /// was found on the system. This
   /// requires a JDK to be installed.
   bool found_on_system() override {
-    return true;
+
+    auto program_finder = sysinfo::ProgramFinder::make();
+
+    program_finder->add_env_list("PATH");
+
+    return program_finder->find("java")
+        && program_finder->find("javac");
   }
 };
 

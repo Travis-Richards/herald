@@ -11,6 +11,10 @@ if(NOT TARGET "herald-engine")
   add_subdirectory("../engine" "engine")
 endif(NOT TARGET "herald-engine")
 
+if(NOT TARGET "herald-sysinfo")
+  add_subdirectory("../sysinfo" "sysinfo")
+endif(NOT TARGET "herald-sysinfo")
+
 if(NOT EXISTS "QCodeEditor/CMakeLists.txt")
 
   set(submodule_path "${CMAKE_CURRENT_SOURCE_DIR}/QCodeEditor")
@@ -78,7 +82,8 @@ target_link_libraries("herald-toolkit" PRIVATE
   Qt5::Widgets
   QCodeEditor
   "herald-common"
-  "herald-engine")
+  "herald-engine"
+  "herald-sysinfo")
 
 set_target_properties("herald-toolkit" PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
