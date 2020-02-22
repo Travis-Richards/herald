@@ -127,7 +127,7 @@ protected slots:
       emit error_occurred(QString("Game process crashed."));
     } else if (!exit_requested) {
       emit error_occurred(QString("Game process exited prematurely (exit code: ")
-                        + QString(exit_code)
+                        + QString::number(exit_code)
                         + QString(")"));
     }
   }
