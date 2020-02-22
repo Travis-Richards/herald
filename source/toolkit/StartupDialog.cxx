@@ -82,7 +82,7 @@ public slots:
 
     add_to_game_list();
 
-    return make_dirs() && make_info_file();
+    return make_dirs() && make_files();
   }
   /// Chooses the API to make the project in.
   /// @param api_ The choosen API name.
@@ -132,6 +132,23 @@ protected:
     return game_dir.mkdir("audio")
         && game_dir.mkdir("source")
         && game_dir.mkdir("textures");
+  }
+  /// Creates all initial files for the project.
+  /// This includes JSON files and source code files.
+  /// @returns True on success, false on failure.
+  bool make_files() {
+
+    QDir source_dir(QDir::cleanPath(location + QDir::separator() + title));
+
+    source_dir.cd("source");
+
+    if (api == "Java") {
+      QFile::copy(":templates/java/Game.java", source_dir.filePath("Game.java"));
+    } else if (api == "Python") {
+      QFile::copy(":templates/python/__main__.py", source_dir.filePath("__main__.py"));
+    }
+
+    return make_info_file();
   }
   /// Creates the information file used to open the game.
   /// @returns True on success, false on failure.

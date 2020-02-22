@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file>templates/java/Game.java</file>
+  <file>templates/python/__main__.py</file>
+</qresource>
+</RCC>

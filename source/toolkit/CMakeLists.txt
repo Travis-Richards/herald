@@ -28,9 +28,11 @@ endif(NOT EXISTS "QCodeEditor/CMakeLists.txt")
 add_subdirectory("QCodeEditor")
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 add_executable("herald-toolkit" WIN32
   "main.cxx"
+  "templates.qrc"
   "ActionEditor.h"
   "ActionEditor.cxx"
   "AnimationEditor.h"
