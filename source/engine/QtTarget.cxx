@@ -85,6 +85,14 @@ public:
   Controller* get_controller() noexcept override {
     return graphics_view->get_controller();
   }
+  /// Shows the graphics window.
+  void show() override {
+    graphics_view->show();
+  }
+  /// Hides the graphics window.
+  void hide() override {
+    graphics_view->hide();
+  }
 };
 
 } // namespace

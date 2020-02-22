@@ -30,6 +30,10 @@ public:
   /// Accesses a pointer to the window controller.
   /// @returns A pointer to the window controller.
   virtual Controller* get_controller() = 0;
+  /// Shows the target window.
+  virtual void show() = 0;
+  /// Hides the target window.
+  virtual void hide() = 0;
 };
 
 } // namespace herald
