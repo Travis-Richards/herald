@@ -61,11 +61,11 @@ class CodeEditorImpl final : public CodeEditor {
   /// The Y offset of the console.
   static constexpr int console_y_offset = button_widget_height + code_editor_height;
   /// The X offset of the console.
-  static constexpr int console_x_offset = 0;
+  static constexpr int console_x_offset = fs_widget_width;
   /// The height of the console, in grid units.
   static constexpr int console_height = grid_height - (button_widget_height + code_editor_height);
   /// The width of the console, in grid units.
-  static constexpr int console_width = grid_width;
+  static constexpr int console_width = grid_width - fs_widget_width;
 public:
   /// Constructs a new instance of the code editor.
   /// @param manager A pointer to the project manager.
@@ -87,15 +87,7 @@ public:
     code_editor->setWordWrapMode(QTextOption::NoWrap);
     code_editor->setReadOnly(true);
 
-    source_tree_view = ScopedPtr<QTreeView>(new QTreeView(root_widget.get()));
-    source_tree_view->setModel(source_manager->get_model());
-    source_tree_view->setRootIndex(source_manager->get_root());
-
-    auto open_functor = [this](const QModelIndex& index) {
-      open_source_file(index);
-    };
-
-    QObject::connect(source_tree_view.get(), &QTreeView::clicked, open_functor);
+    source_tree_view = make_source_tree(root_widget.get());
 
     // Create buttons widget
 
@@ -122,6 +114,29 @@ public:
     return root_widget.get();
   }
 protected:
+  /// Creates the source tree view.
+  /// @param parent A pointer to the parent widget.
+  /// @returns A new source tree view.
+  ScopedPtr<QTreeView> make_source_tree(QWidget* parent) {
+
+    auto* source_model = source_manager->get_model();
+
+    auto tree_view = ScopedPtr<QTreeView>(new QTreeView(parent));
+    tree_view->setModel(source_model);
+    tree_view->setRootIndex(source_manager->get_root());
+
+    for (int i = 1; i < source_model->columnCount(); i++) {
+      tree_view->setColumnHidden(i, true);
+    }
+
+    auto open_functor = [this](const QModelIndex& index) {
+      open_source_file(index);
+    };
+
+    QObject::connect(tree_view.get(), &QTreeView::clicked, open_functor);
+
+    return tree_view;
+  }
   /// Creates the widget containing the buttons for the code editor.
   /// @param parent A pointer to the parent widget.
   /// @returns The widget containing the buttons.
