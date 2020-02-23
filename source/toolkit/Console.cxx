@@ -3,6 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include <QFontDatabase>
+#include <QScrollBar>
 #include <QTextEdit>
 
 namespace herald {
@@ -54,6 +55,7 @@ protected:
     text_edit->insertPlainText(to_string(tag));
     text_edit->insertPlainText(" \uff5c ");
     text_edit->insertPlainText(msg);
+    scroll_to_bottom();
   }
   /// Converts a tag into a string.
   /// @param tag The tag to convert to a string.
@@ -83,6 +85,11 @@ protected:
     }
 
     return QString(" ");
+  }
+  /// Scrolls to the botton of the console.
+  void scroll_to_bottom() {
+    auto* scroll_bar = text_edit->verticalScrollBar();
+    scroll_bar->setValue(scroll_bar->maximum());
   }
 };
 
