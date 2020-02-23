@@ -115,6 +115,23 @@ protected:
 
     settings.setValue("gamelist", game_list);
   }
+  /// Copies a file from one location to another, without
+  /// copying meta data, such as file permissions.
+  bool copy_file(const QString& src, const QString& dst) {
+
+    QFile dst_file(dst);
+
+    QFile src_file(src);
+
+    if (!src_file.open(QIODevice::ReadOnly)
+     || !dst_file.open(QIODevice::WriteOnly)) {
+      return false;
+    }
+
+    dst_file.write(src_file.readAll());
+
+    return true;
+  }
   /// Creates the directories to be used by the game.
   /// @returns True on success, false on failure.
   bool make_dirs() {
@@ -143,9 +160,9 @@ protected:
     source_dir.cd("source");
 
     if (api == "Java") {
-      QFile::copy(":templates/java/Game.java", source_dir.filePath("Game.java"));
+      copy_file(":templates/java/Game.java", source_dir.filePath("Game.java"));
     } else if (api == "Python") {
-      QFile::copy(":templates/python/__main__.py", source_dir.filePath("__main__.py"));
+      copy_file(":templates/python/__main__.py", source_dir.filePath("__main__.py"));
     }
 
     return make_info_file();
