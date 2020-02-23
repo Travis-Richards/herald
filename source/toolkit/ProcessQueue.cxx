@@ -18,28 +18,80 @@ namespace {
 class ConsoleProcess final : public QProcess {
   /// The console to write output content to.
   Console* console;
+  /// Used for buffering error content
+  /// until a newline is found.
+  QString err_buffer;
+  /// Used for buffering output content
+  /// until a newline is found.
+  QString out_buffer;
 public:
   /// Constructs a new instance of a console process.
   /// @param c The console to write the output
   /// and error content to.
   ConsoleProcess(Console* c) : console(c) {
-    connect(this, &QProcess::readyReadStandardOutput, this, &ConsoleProcess::read_output);
-    connect(this, &QProcess::readyReadStandardError,  this, &ConsoleProcess::read_error);
+    connect(this, &QProcess::readyReadStandardOutput, this, &ConsoleProcess::read_stdout);
+    connect(this, &QProcess::readyReadStandardError,  this, &ConsoleProcess::read_stderr);
   }
 protected slots:
   /// Reads the process' standard output.
-  void read_output() {
-
-    setReadChannel(QProcess::StandardOutput);
-
-    console->log_stdout(readLine());
+  void read_stdout() {
+    out_buffer += readAllStandardOutput();
+    flush_stdout();
   }
   /// Reads the process' standard error output.
-  void read_error() {
+  void read_stderr() {
+    err_buffer += readAllStandardError();
+    flush_stderr();
+  }
+protected:
+  /// Writes all completed lines to the console.
+  void flush_stdout() {
 
-    setReadChannel(QProcess::StandardError);
+    auto lines = remove_completed_lines(out_buffer);
 
-    console->log_stderr(readLine());
+    for (const auto& line : lines) {
+      console->log_stdout(line + '\n');
+    }
+  }
+  /// Writes all completed lines to the console.
+  void flush_stderr() {
+
+    auto lines = remove_completed_lines(err_buffer);
+
+    for (const auto& line : lines) {
+      console->log_stderr(line + '\n');
+    }
+  }
+  /// Removes all completed lines from a buffer
+  /// and puts them into a string list.
+  static QStringList remove_completed_lines(QString& buffer) {
+
+    QStringList output;
+
+    QString line;
+
+    int last_found_line = 0;
+
+    for (int i = 0; i < buffer.size(); i++) {
+
+      if ((buffer[i] == '\r') || (buffer[i] == '\n')) {
+
+        if (!line.isEmpty()) {
+          output << line;
+          line.clear();
+        }
+
+        last_found_line = i;
+
+      } else {
+
+        line += buffer[i];
+      }
+    }
+
+    buffer.remove(0, last_found_line);
+
+    return output;
   }
 };
 
