@@ -222,6 +222,10 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<QWidget> root_widget;
   /// A pointer to the buttons widget.
   ScopedPtr<QWidget> buttons_widget;
+  /// The button for building the project.
+  ScopedPtr<QPushButton> build_button;
+  /// The button for running the project.
+  ScopedPtr<QPushButton> run_button;
   /// Manages the opened files.
   ScopedPtr<OpenedFileManager> opened_file_manager;
   /// A view of the source code tree.
@@ -277,6 +281,15 @@ public:
 
     QGridLayout* layout = new QGridLayout(root_widget.get());
 
+    // Create  console widget
+
+    console = Console::make(root_widget.get());
+
+    // Create the process queue for
+    // building the source files.
+
+    process_queue = ProcessQueue::make(console.get());
+
     // Create code editor widget
 
     opened_file_manager = ScopedPtr<OpenedFileManager>(new OpenedFileManager(root_widget.get()));
@@ -287,21 +300,12 @@ public:
 
     buttons_widget = make_buttons_widget(root_widget.get());
 
-    // Create  console widget
-
-    console = Console::make(root_widget.get());
-
     // Add main widgets to layout
 
     layout->addWidget(buttons_widget.get(),              0,                    0,                button_widget_height, button_widget_width);
     layout->addWidget(source_tree_view.get(),            button_widget_height, 0,                fs_widget_height,     fs_widget_width);
     layout->addWidget(opened_file_manager->get_widget(), button_widget_height, fs_widget_width,  code_editor_height,   code_editor_width);
     layout->addWidget(console->get_widget(),             console_y_offset,     console_x_offset, console_height,       console_width);
-
-    // Create the process queue for
-    // building the source files.
-
-    process_queue = ProcessQueue::make(console.get());
   }
   /// Accesses a pointer to the code editing widget.
   QWidget* get_widget() noexcept override {
@@ -340,11 +344,15 @@ protected:
 
     QHBoxLayout* layout = new QHBoxLayout(buttons_widget.get());
 
+    build_button = ScopedPtr<QPushButton>(new QPushButton(QObject::tr("Build"), buttons_widget.get()));
+    run_button   = ScopedPtr<QPushButton>(new QPushButton(QObject::tr("Run"),   buttons_widget.get()));
+
+    process_queue->enable_on_completion(build_button.get());
+    process_queue->enable_on_completion(run_button.get());
+
     auto* new_source_file_button = new QPushButton(QObject::tr("New Source File"), buttons_widget.get());
     auto* new_directory          = new QPushButton(QObject::tr("New Directory"),   buttons_widget.get());
     auto* save_button            = new QPushButton(QObject::tr("Save"),            buttons_widget.get());
-    auto* build_button           = new QPushButton(QObject::tr("Build"),           buttons_widget.get());
-    auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget.get());
 
     save_button->setShortcut(Qt::Key_S | Qt::CTRL);
     build_button->setShortcut(Qt::Key_B | Qt::CTRL);
@@ -360,14 +368,14 @@ protected:
 
     QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
     QObject::connect(save_button,            &QPushButton::clicked, save_functor);
-    QObject::connect(build_button,           &QPushButton::clicked, build_functor);
-    QObject::connect(run_button,             &QPushButton::clicked, run_functor);
+    QObject::connect(build_button.get(),     &QPushButton::clicked, build_functor);
+    QObject::connect(run_button.get(),       &QPushButton::clicked, run_functor);
 
     layout->addWidget(new_source_file_button);
     layout->addWidget(new_directory);
     layout->addWidget(save_button);
-    layout->addWidget(build_button);
-    layout->addWidget(run_button);
+    layout->addWidget(build_button.get());
+    layout->addWidget(run_button.get());
 
     return buttons_widget;
   }
@@ -386,6 +394,10 @@ protected:
   }
   /// Builds the project.
   void build() {
+
+    run_button->setEnabled(false);
+
+    build_button->setEnabled(false);
 
     console->clear();
 

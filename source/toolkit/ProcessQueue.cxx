@@ -5,6 +5,7 @@
 #include <herald/ScopedPtr.h>
 
 #include <QProcess>
+#include <QPushButton>
 #include <QTextStream>
 
 #include <vector>
@@ -102,6 +103,8 @@ class ProcessQueueImpl final : public ProcessQueue {
   Console* console;
   /// The container of processes started by the queue.
   std::vector<ScopedPtr<QProcess>> process_vec;
+  /// The buttons to enable on completion of the queue.
+  std::vector<QPushButton*> completion_buttons;
   /// The number of processes that failed.
   int failure_count;
   /// The number of processes that crashed.
@@ -121,6 +124,11 @@ public:
     process_vec.emplace_back(std::move(process));
 
     return process_ptr;
+  }
+  /// Adds a button to a list of buttons to
+  /// enable when the queue completes.
+  void enable_on_completion(QPushButton* button) override {
+    completion_buttons.emplace_back(button);
   }
   /// Starts all processes in the build queue.
   void start_all() override {
@@ -183,11 +191,20 @@ protected:
     }
 
     if (process_vec.empty()) {
+
+      enable_buttons();
+
       if (failure_count || crash_count) {
         inform_build_failure();
       } else {
         console->println("Build complete", Console::Tag::Success);
       }
+    }
+  }
+  /// Enables buttons in the completion button list.
+  void enable_buttons() {
+    for (auto* button : completion_buttons) {
+      button->setEnabled(true);
     }
   }
   /// Informs the user, through the console, that the build has failed.
