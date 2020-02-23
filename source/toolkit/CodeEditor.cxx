@@ -15,6 +15,7 @@
 
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QMenu>
 #include <QPushButton>
 #include <QSaveFile>
 #include <QTabWidget>
@@ -212,6 +213,30 @@ protected:
   }
 };
 
+/// A derived tree view for specially handling
+/// the source tree directory.
+class SourceTreeView final : public QTreeView {
+  /// The context menu for folders.
+  QMenu folder_menu;
+  /// The context menu for files.
+  QMenu file_menu;
+public:
+  /// Constructs a new instance of the source tree view.
+  /// @param source_manager A pointer to the source manager.
+  /// @param widget A pointer to the parent widget.
+  SourceTreeView(SourceManager* source_manager, QWidget* parent) : QTreeView(parent) {
+
+    auto* model = source_manager->get_model();
+
+    setModel(model);
+    setRootIndex(source_manager->get_root());
+
+    for (int i = 1; i < model->columnCount(); i++) {
+      setColumnHidden(i, true);
+    }
+  }
+};
+
 /// The implementation of the code editor interface.
 class CodeEditorImpl final : public CodeEditor {
   /// The source code manager.
@@ -317,15 +342,7 @@ protected:
   /// @returns A new source tree view.
   ScopedPtr<QTreeView> make_source_tree(QWidget* parent) {
 
-    auto* source_model = source_manager->get_model();
-
-    auto tree_view = ScopedPtr<QTreeView>(new QTreeView(parent));
-    tree_view->setModel(source_model);
-    tree_view->setRootIndex(source_manager->get_root());
-
-    for (int i = 1; i < source_model->columnCount(); i++) {
-      tree_view->setColumnHidden(i, true);
-    }
+    auto tree_view = ScopedPtr<SourceTreeView>(new SourceTreeView(source_manager, parent));
 
     auto open_functor = [this](const QModelIndex& index) {
       open_source_file(index);
