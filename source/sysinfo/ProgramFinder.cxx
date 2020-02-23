@@ -34,7 +34,7 @@ public:
   /// Adds a list of paths to the program finder.
   /// @param list The list to parse for paths.
   /// @param separator The list separator character.
-  void add_path_list(const char* list, char separator) {
+  void add_path_list(const char* list, char separator) override {
 
     std::string path;
 

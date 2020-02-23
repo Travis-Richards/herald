@@ -2,13 +2,17 @@ cmake_minimum_required(VERSION 3.0)
 
 # Detect compiler, adjust CXX flags
 
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
- OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 
-  set (cxxflags -Wall -Wextra -Werror -Wfatal-errors -std=c++11)
+  set(cxxflags -Wall -Wextra -Werror -Wfatal-errors -std=c++11)
 
-endif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND cxxflags -Wsuggest-override)
+  endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
+endif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+   OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 
 # Declare common library.
 # All libraries will link to

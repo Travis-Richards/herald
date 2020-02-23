@@ -19,7 +19,7 @@ class ManagerImpl final : public Manager {
   ScopedPtr<ProjectView> project_view;
 public:
   /// Opens a project.
-  bool open_project(const QString& game_path) {
+  bool open_project(const QString& game_path) override {
 
     project_manager = ProjectManager::make();
 
