@@ -4,9 +4,7 @@
 
 #include <QFile>
 #include <QFileInfo>
-#include <QFontDatabase>
 #include <QString>
-#include <QTextDocument>
 
 namespace herald {
 
@@ -19,55 +17,44 @@ namespace {
 class DefaultSourceFile final : public SourceFile {
   /// The type associated with this source file.
   SourceFileType type;
-  /// The document containing the code.
-  QTextDocument code;
+  /// The filename of the source file.
+  QString name;
+  /// The full path to the source file.
+  QString path;
 public:
   /// Opens a source file.
-  /// @param path The path to the source file to open.
-  DefaultSourceFile(const QString& path) : type(SourceFileType::Invalid) {
-
-    open(path);
-
-    code.setDefaultFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+  /// @param filename The path to the source file to open.
+  DefaultSourceFile(const QString& filename) : type(SourceFileType::Invalid) {
+    QFileInfo file_info(filename);
+    path = file_info.absoluteFilePath();
+    name = file_info.fileName();
+    type = parse_type(file_info.suffix());
   }
-  /// Accesses a pointer to the document containing the code.
-  QTextDocument* get_code() noexcept override {
-    return &code;
+  /// Accesses the full path of the source file.
+  const QString& get_id() const noexcept override {
+    return path;
   }
-  /// Accesses a pointer to the document containing the code.
-  const QTextDocument* get_code() const noexcept override {
-    return &code;
+  /// Accesses the filename of the source file.
+  const QString& get_name() const noexcept override {
+    return name;
   }
   /// Accesses the type associated with the source file.
   SourceFileType get_type() const noexcept override {
     return type;
   }
-protected:
-  /// Opens a file specified by the path.
-  /// @param path The path of the file to open.
-  /// @returns True on success, false on failure.
-  bool open(const QString& path) {
-
-    QFileInfo file_info(path);
-
-    if (!file_info.exists() || !file_info.isFile()) {
-      return false;
-    }
+  /// Reads all of the source file's content.
+  /// @returns The content of the source file.
+  QString read_content() const override {
 
     QFile file(path);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      return false;
+      return QString();
     }
 
-    code.setPlainText(file.readAll());
-
-    code.setModified(false);
-
-    type = parse_type(file_info.suffix());
-
-    return true;
+    return file.readAll();
   }
+protected:
   /// Parses the file extension for the source file type.
   /// @param ext The extension of the source file.
   /// @returns The type of the source file.

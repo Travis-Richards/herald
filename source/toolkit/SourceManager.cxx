@@ -57,13 +57,6 @@ public:
   /// Indicates if any of the source code files
   /// has unsaved changes.
   bool has_unsaved_changes() const override {
-
-    for (auto& file : opened_files) {
-      if (file.second->get_code()->isModified()) {
-        return true;
-      }
-    }
-
     return false;
   }
   /// Opens a file at a specific index.
@@ -89,27 +82,6 @@ public:
   /// Saves all modified files.
   /// @returns True on success, false on failure.
   bool save_modified() override {
-
-    for (auto& source_file : opened_files) {
-
-      auto* doc = source_file.second->get_code();
-      if (!doc->isModified()) {
-        continue;
-      }
-
-      QSaveFile output_file(source_file.first);
-
-      if (!output_file.open(QIODevice::WriteOnly)) {
-        return false;
-      }
-
-      output_file.write(doc->toPlainText().toUtf8());
-
-      if (output_file.commit()) {
-        doc->setModified(false);
-      }
-    }
-
     return true;
   }
 protected:

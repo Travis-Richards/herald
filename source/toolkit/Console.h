@@ -14,6 +14,24 @@ namespace tk {
 /// errors get logged to.
 class Console {
 public:
+  /// Used to tag information
+  /// being logged to the console.
+  enum class Tag {
+    /// Writes a message without a tag.
+    None,
+    /// Indicates that the information
+    /// is mostly verbose.
+    Info,
+    /// Indicates the information
+    /// describes an error.
+    Error,
+    /// Indicates that the information
+    /// describes a warning.
+    Warning,
+    /// Indicates that the information
+    /// describes a success message.
+    Success
+  };
   /// Creates a new console instance.
   /// @param parent A pointer to the parent widget.
   /// @returns A new console instance.
@@ -33,7 +51,8 @@ public:
   /// Prints a message to the console, with a newline
   /// automatically added to the end of the string.
   /// @param msg The message to log.
-  virtual void println(const QString& msg) = 0;
+  /// @param tag The tag that indicates what kind of message this is.
+  virtual void println(const QString& msg, Tag tag = Tag::None) = 0;
 };
 
 } // namespace tk

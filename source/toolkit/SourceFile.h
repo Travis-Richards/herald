@@ -34,14 +34,17 @@ public:
   static ScopedPtr<SourceFile> from_fs(const QString& path);
   /// Just a stub.
   virtual ~SourceFile() {}
-  /// Accesses the text document containing the code.
-  /// @returns A pointer to the text document containing the code.
-  virtual QTextDocument* get_code() noexcept = 0;
-  /// Accesses the text document containing the code.
-  /// @returns A pointer to the text document containing the code.
-  virtual const QTextDocument* get_code() const noexcept = 0;
+  /// Accesses an ID of the source file.
+  /// On a file system, this would be the full path of the source file.
+  virtual const QString& get_id() const noexcept = 0;
+  /// Accesses the name given to the source file.
+  /// This includes the file extension.
+  virtual const QString& get_name() const noexcept = 0;
   /// Accesses the type of the source code file.
   virtual SourceFileType get_type() const noexcept = 0;
+  /// Reads the contents of the source file.
+  /// @returns The contents of the source file.
+  virtual QString read_content() const = 0;
 };
 
 } // namespace tk

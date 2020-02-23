@@ -16,11 +16,14 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QSaveFile>
 #include <QTabWidget>
+#include <QTextStream>
 #include <QTreeView>
 
 #include <QCodeEditor>
 #include <QJavaHighlighter>
+#include <QPythonCompleter>
 #include <QPythonHighlighter>
 
 namespace herald {
@@ -33,15 +36,93 @@ namespace {
 class OpenedFileEditor final {
   /// The source file content editor.
   QCodeEditor editor;
+  /// The source file being edited.
+  SourceFile* source_file;
 public:
   /// Constructs a new instance of the opened file editor.
   /// @param parent A pointer to the parent widget.
-  OpenedFileEditor(QWidget* parent) : editor(parent) {
-    editor.setWordWrapMode(QTextOption::NoWrap);
+  OpenedFileEditor(SourceFile* source_file_, QWidget* parent)
+      : editor(parent), source_file(source_file_) {
+
+    configure_editor();
+  }
+  /// Connects the modification signal to the tab
+  /// widget so that we can notify our user that
+  /// the modification has been acknowledged.
+  void connect_label_update(QTabWidget* tab_widget) {
+
+    auto mod_functor = [this, tab_widget](bool modified) {
+
+      auto tab_index = tab_widget->indexOf(get_widget());
+
+      const auto* suffix = modified ? " \u2022" : "";
+
+      tab_widget->setTabText(tab_index, source_file->get_name() + suffix);
+    };
+
+    QObject::connect(editor.document(), &QTextDocument::modificationChanged, mod_functor);
   }
   /// Accesses the root widget of the editor.
   QWidget* get_widget() {
     return &editor;
+  }
+  /// Indicates if this editor has a specified source file.
+  /// @returns True if it has the source file, false otherwise.
+  inline bool contains(const SourceFile* other_source_file) const noexcept {
+    return source_file->get_id() == other_source_file->get_id();
+  }
+  /// Whether or not the code was modified.
+  /// @returns True if the code was modified, false otherwise.
+  inline bool is_modified() const noexcept {
+    return editor.document()->isModified();
+  }
+  /// Saves the file if the contents were edited.
+  /// @returns True on success, false on failure.
+  bool save_if_modified() {
+
+    if (!is_modified()) {
+      return true;
+    }
+
+    QSaveFile save_file(source_file->get_id());
+
+    if (!save_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      return false;
+    }
+
+    QTextStream stream(&save_file);
+
+    stream << editor.document()->toPlainText();
+
+    if (!save_file.commit()) {
+      return false;
+    }
+
+    editor.document()->setModified(false);
+
+    return true;
+  }
+protected:
+  /// Configures the editor for the source file.
+  void configure_editor() {
+
+    editor.setText(source_file->read_content());
+
+    editor.setWordWrapMode(QTextOption::NoWrap);
+
+    switch (source_file->get_type()) {
+      case SourceFileType::Java:
+        editor.setHighlighter(new QJavaHighlighter);
+        break;
+      case SourceFileType::Python:
+        editor.setHighlighter(new QPythonHighlighter);
+        editor.setCompleter(new QPythonCompleter);
+        break;
+      case SourceFileType::Invalid:
+        break;
+    }
+
+    editor.document()->setModified(false);
   }
 };
 
@@ -56,6 +137,12 @@ public:
   /// @param parent A pointer to the parent widget.
   OpenedFileManager(QWidget* parent) : tab_widget(parent) {
 
+    tab_widget.setMovable(true);
+    tab_widget.setTabsClosable(true);
+
+    auto close_functor = [this](int index) { close_tab(index); };
+
+    QObject::connect(&tab_widget, &QTabWidget::tabCloseRequested, close_functor);
   }
   /// Accesses the root widget for the file manager.
   QWidget* get_widget() noexcept {
@@ -63,15 +150,65 @@ public:
   }
   /// Opens a new source file.
   /// @param source_file The source file to edit.
-  void open(const SourceFile& source_file) {
+  void open(SourceFile* source_file) {
 
-    (void)source_file;
+    auto editor = ScopedPtr<OpenedFileEditor>(new OpenedFileEditor(source_file, &tab_widget));
 
-    auto editor = ScopedPtr<OpenedFileEditor>(new OpenedFileEditor(&tab_widget));
+    editor->connect_label_update(&tab_widget);
 
-    tab_widget.addTab(editor->get_widget(), "File");
+    auto tab_index = tab_widget.addTab(editor->get_widget(), source_file->get_name());
+
+    tab_widget.setCurrentIndex(tab_index);
 
     editor_vec.emplace_back(std::move(editor));
+  }
+  /// Attempts to switch to an existing source file, if it is opened.
+  /// @param source_file The source file to switch to.
+  /// @returns True if the source file was found, false otherwise.
+  bool open_existing(const SourceFile* source_file) {
+
+    for (std::size_t i = 0; i < editor_vec.size(); i++) {
+      if (editor_vec[i]->contains(source_file)) {
+        tab_widget.setCurrentIndex((int) i);
+        return true;
+      }
+    }
+
+    return false;
+  }
+  /// Saves all modified documents.
+  /// @returns True on success, false on failure.
+  bool save_modified() {
+
+    auto success = true;
+
+    for (auto& editor : editor_vec) {
+      success &= editor->save_if_modified();
+    }
+
+    return success;
+  }
+protected:
+  /// Attempts to close a tab, if it hasn't been modified.
+  /// @param index The index of the tab to close.
+  /// @returns True if the tab was closed, false otherwise.
+  bool close_tab(int index) {
+
+    std::size_t uindex = (std::size_t) index;
+
+    if (uindex >= editor_vec.size()) {
+      // Probably won't happen but
+      // just to be sure.
+      return false;
+    }
+
+    if (!editor_vec[uindex]->is_modified()) {
+      tab_widget.removeTab(index);
+      editor_vec.erase(editor_vec.begin() + uindex);
+      return true;
+    } else {
+      return false;
+    }
   }
 };
 
@@ -89,9 +226,11 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<OpenedFileManager> opened_file_manager;
   /// A view of the source code tree.
   ScopedPtr<QTreeView> source_tree_view;
-  /// The console for program output.
+  /// The console to log process output to.
   ScopedPtr<Console> console;
-  /// The window that the game is being rendered to.
+  /// A queue of processes used to build the source files.
+  ScopedPtr<ProcessQueue> process_queue;
+  /// The console for program output.  ScopedPtr<Console> console; / The window that the game is being rendered to.
   ScopedPtr<QtTarget> game_target;
   /// A pointer to the game engine.
   ScopedPtr<QtEngine> game_engine;
@@ -99,8 +238,6 @@ class CodeEditorImpl final : public CodeEditor {
   /// This pointer may be null when the
   /// game isn't running.
   ScopedPtr<GameProcess> game_process;
-  /// A queue of processes used to build the source files.
-  ScopedPtr<ProcessQueue> process_queue;
   /// The width of the grid layout.
   static constexpr int grid_width = 10;
   /// The height of the grid layout.
@@ -209,17 +346,17 @@ protected:
     auto* build_button           = new QPushButton(QObject::tr("Build"),           buttons_widget.get());
     auto* run_button             = new QPushButton(QObject::tr("Run"),             buttons_widget.get());
 
+    save_button->setShortcut(Qt::Key_S | Qt::CTRL);
+    build_button->setShortcut(Qt::Key_B | Qt::CTRL);
+    run_button->setShortcut(Qt::Key_R | Qt::CTRL);
+
     auto new_source_functor = [this](bool) {
       source_manager->create_source_file(language->default_extension());
     };
 
-    auto save_functor = [this](bool) {
-      source_manager->save_modified();
-    };
-
+    auto save_functor  = [this](bool) { save(); };
     auto build_functor = [this](bool) { build(); };
-
-    auto run_functor = [this](bool) { run(); };
+    auto run_functor   = [this](bool) { run(); };
 
     QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
     QObject::connect(save_button,            &QPushButton::clicked, save_functor);
@@ -241,7 +378,9 @@ protected:
 
     auto source_file = source_manager->open(index);
 
-    opened_file_manager->open(*source_file);
+    if (!opened_file_manager->open_existing(source_file)) {
+      opened_file_manager->open(source_file);
+    }
 
     return true;
   }
@@ -249,6 +388,8 @@ protected:
   void build() {
 
     console->clear();
+
+    console->println("Starting build", Console::Tag::Info);
 
     language->build(*process_queue.get(), *source_manager);
   }
@@ -271,6 +412,10 @@ protected:
 
     game_target->show();
   }
+  /// Saves the source code that was modified.
+  void save() {
+    opened_file_manager->save_modified();
+  };
 };
 
 } // namespace
