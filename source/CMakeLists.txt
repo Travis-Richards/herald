@@ -19,7 +19,12 @@ list(APPEND LIBS
   Qt5::Widgets)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+
+# Make sure we have the dependencies
+
+if(NOT TARGET "herald-icons")
+  add_subdirectory("../icons" "icons")
+endif(NOT TARGET "herald-icons")
 
 # Here we declare the main program.
 
@@ -76,8 +81,7 @@ add_executable("herald-hub" WIN32
   "WorkQueue.h"
   "WorkQueue.cxx"
   "Writer.h"
-  "Writer.cxx"
-  "${PROJECT_SOURCE_DIR}/icons.qrc")
+  "Writer.cxx")
 
 set_target_properties("herald-hub" PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
@@ -85,6 +89,7 @@ set_target_properties("herald-hub" PROPERTIES
 target_link_libraries("herald-hub" PRIVATE
   ${LIBS}
   "herald-common"
+  "herald-icons"
   "herald-engine"
   "herald-protocol")
 

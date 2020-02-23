@@ -9,6 +9,8 @@ int main(int argc, char** argv) {
   QCoreApplication::setOrganizationName("Taylor Holberton");
   QCoreApplication::setApplicationName("Herald");
 
+  Q_INIT_RESOURCE(icons);
+
   auto* manager = Manager::make(&app);
 
   MainWindow main_window;

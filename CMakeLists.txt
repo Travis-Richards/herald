@@ -12,6 +12,7 @@ endif (Qt5Core_FOUND OR Qt5Widgets_FOUND)
 
 # Add components
 
+add_subdirectory("icons")
 add_subdirectory("source/common")
 add_subdirectory("source/engine")
 add_subdirectory("source/protocol")
