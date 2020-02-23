@@ -226,6 +226,10 @@ class SourceTreeView final : public QTreeView {
   QMenu folder_menu;
   /// The context menu for files.
   QMenu file_menu;
+  /// The context menu to show when
+  /// neither a file or folder was
+  /// selected.
+  QMenu fallback_menu;
 public:
   /// Constructs a new instance of the source tree view.
   /// @param source_manager A pointer to the source manager.
@@ -240,6 +244,40 @@ public:
     for (int i = 1; i < model->columnCount(); i++) {
       setColumnHidden(i, true);
     }
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    add_menu_options();
+
+    connect(this, &SourceTreeView::customContextMenuRequested, this, &SourceTreeView::make_context_menu);
+  }
+protected:
+  /// Adds the options for context menus.
+  void add_menu_options() {
+    add_folder_menu_options();
+    add_fallback_menu_options();
+  }
+  /// Creates the file menu options.
+  void add_file_menu_options() {
+    file_menu.addAction(tr("Open"));
+    file_menu.addAction(tr("Rename"));
+    file_menu.addAction(tr("Delete"));
+  }
+  /// Adds the options for folder context menus.
+  void add_folder_menu_options() {
+    folder_menu.addAction(tr("Create File"));
+    folder_menu.addAction(tr("Create Folder"));
+    folder_menu.addAction(tr("Rename"));
+  }
+  /// Creates the fallback menu options.
+  void add_fallback_menu_options() {
+    fallback_menu.addAction(tr("Create File"));
+    fallback_menu.addAction(tr("Create Folder"));
+  }
+  /// Creates a context menu for a certain point on the source tree view.
+  /// @param point The point at which to show the menu.
+  void make_context_menu(const QPoint& point) {
+    fallback_menu.exec(viewport()->mapToGlobal(point));
   }
 };
 

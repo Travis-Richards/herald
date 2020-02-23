@@ -194,7 +194,7 @@ public:
   /// Indicates whether or not there are unsaved changes in the project.
   /// @returns True if there's unsaved changes, false otherwise.
   bool has_unsaved_changes() const override {
-    return source_manager->has_unsaved_changes();
+    return false;
   }
   /// Lists the textures in the project.
   QStringList list_textures() const override {

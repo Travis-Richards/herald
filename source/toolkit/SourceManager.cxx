@@ -54,11 +54,6 @@ public:
   QModelIndex get_root() const override {
     return model.index(model.rootPath());
   }
-  /// Indicates if any of the source code files
-  /// has unsaved changes.
-  bool has_unsaved_changes() const override {
-    return false;
-  }
   /// Opens a file at a specific index.
   /// @param index The index of the file to open.
   /// @returns A pointer to the specified source file.
@@ -78,11 +73,6 @@ public:
   /// @returns The path of the specified file.
   QString path_of(const QModelIndex& index) override {
     return model.filePath(index);
-  }
-  /// Saves all modified files.
-  /// @returns True on success, false on failure.
-  bool save_modified() override {
-    return true;
   }
 protected:
   /// Opens a file without checking to see if it's in cache.

@@ -31,9 +31,6 @@ public:
   virtual QAbstractItemModel* get_model() noexcept = 0;
   /// Accesses the index that points to the root of the source tree.
   virtual QModelIndex get_root() const = 0;
-  /// Indicates if there are unsaved changes.
-  /// @returns True if there are unsaved changes, false otherwise.
-  virtual bool has_unsaved_changes() const = 0;
   /// Opens a source file from a model index.
   /// @param index The index of the file from the source tree model.
   /// @returns The file corresponding to the specified index.
@@ -46,10 +43,6 @@ public:
   /// @param index The index of the file to get the path to.
   /// @returns The path of the specified file.
   virtual QString path_of(const QModelIndex& index) = 0;
-  /// Save all files that have been opened and modified.
-  /// @returns True if all files saved succesfully, false if
-  /// there was at least one error.
-  virtual bool save_modified() = 0;
 };
 
 } // namespace tk
