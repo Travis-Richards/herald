@@ -8,5 +8,6 @@
   <file>icons/save.svg</file>
   <file>icons/settings.svg</file>
   <file>icons/trash.svg</file>
+  <file>icons/hammer.svg</file>
 </qresource>
 </RCC>
