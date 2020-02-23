@@ -12,10 +12,13 @@ namespace tk {
 
 /// Enumerates the several types of source files.
 enum class SourceFileType : int {
-  /// An invalid source file. This happens
-  /// when an item is opened that cannot have
-  /// representation as a source code file.
-  Invalid,
+  /// Indicates that the source file
+  /// type is unknown.
+  Unknown,
+  /// Indicates that this is a binary
+  /// file type and should not put into
+  /// a code editor.
+  Binary,
   /// A Java source code file.
   Java,
   /// A Python source code file.

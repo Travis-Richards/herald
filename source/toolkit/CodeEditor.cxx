@@ -107,11 +107,12 @@ protected:
   /// Configures the editor for the source file.
   void configure_editor() {
 
-    editor.setText(source_file->read_content());
-
     editor.setWordWrapMode(QTextOption::NoWrap);
 
     switch (source_file->get_type()) {
+      case SourceFileType::Binary:
+      case SourceFileType::Unknown:
+        break;
       case SourceFileType::Java:
         editor.setHighlighter(new QJavaHighlighter);
         break;
@@ -119,8 +120,13 @@ protected:
         editor.setHighlighter(new QPythonHighlighter);
         editor.setCompleter(new QPythonCompleter);
         break;
-      case SourceFileType::Invalid:
-        break;
+    }
+
+    if (source_file->get_type() != SourceFileType::Binary) {
+      editor.setText(source_file->read_content());
+    } else {
+      editor.setPlaceholderText("Binary Contents");
+      editor.setReadOnly(true);
     }
 
     editor.document()->setModified(false);
@@ -402,6 +408,10 @@ protected:
   bool open_source_file(const QModelIndex& index) {
 
     auto source_file = source_manager->open(index);
+
+    if (source_file->get_type() == SourceFileType::Binary) {
+      return false;
+    }
 
     if (!opened_file_manager->open_existing(source_file)) {
       opened_file_manager->open(source_file);

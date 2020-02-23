@@ -24,7 +24,7 @@ class DefaultSourceFile final : public SourceFile {
 public:
   /// Opens a source file.
   /// @param filename The path to the source file to open.
-  DefaultSourceFile(const QString& filename) : type(SourceFileType::Invalid) {
+  DefaultSourceFile(const QString& filename) : type(SourceFileType::Unknown) {
     QFileInfo file_info(filename);
     path = file_info.absoluteFilePath();
     name = file_info.fileName();
@@ -64,8 +64,12 @@ protected:
       return SourceFileType::Java;
     } else if (ext == "py") {
       return SourceFileType::Python;
+    } else if ((ext == "pyc")
+            || (ext == "class")
+            || (ext == "bin")) {
+      return SourceFileType::Binary;
     } else {
-      return SourceFileType::Invalid;
+      return SourceFileType::Unknown;
     }
   }
 };
