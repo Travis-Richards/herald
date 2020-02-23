@@ -34,7 +34,7 @@ public:
     QStringList args;
     args << "-m";
     args << "py_compile";
-    args << ".";
+    args << "__main__.py";
 
     process->setWorkingDirectory(source_root);
     process->setProgram(find_python("python"));
