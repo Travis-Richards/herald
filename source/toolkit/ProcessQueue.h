@@ -1,6 +1,7 @@
 #pragma once
 
 class QProcess;
+class QPushButton;
 
 namespace herald {
 
@@ -22,13 +23,12 @@ public:
   /// Just a stub.
   virtual ~ProcessQueue() {}
   /// Adds a process to the process queue.
-  /// The process isn't started until the
-  /// start function is called from the pointer
-  /// returned by this function.
   /// @returns A pointer to the newly made process.
   /// This may be used to set the process parameters
   /// before launching the process.
   virtual QProcess* add() = 0;
+  /// Starts all processes in the queue.
+  virtual void start_all() = 0;
 };
 
 } // namespace tk

@@ -230,7 +230,7 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<Console> console;
   /// A queue of processes used to build the source files.
   ScopedPtr<ProcessQueue> process_queue;
-  /// The console for program output.  ScopedPtr<Console> console; / The window that the game is being rendered to.
+  /// The window that the game is being rendered to.
   ScopedPtr<QtTarget> game_target;
   /// A pointer to the game engine.
   ScopedPtr<QtEngine> game_engine;
@@ -392,6 +392,8 @@ protected:
     console->println("Starting build", Console::Tag::Info);
 
     language->build(*process_queue.get(), *source_manager);
+
+    process_queue->start_all();
   }
   /// Runs the game.
   void run() {

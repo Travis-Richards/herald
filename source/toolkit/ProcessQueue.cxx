@@ -5,6 +5,7 @@
 #include <herald/ScopedPtr.h>
 
 #include <QProcess>
+#include <QTextStream>
 
 #include <vector>
 
@@ -101,10 +102,14 @@ class ProcessQueueImpl final : public ProcessQueue {
   Console* console;
   /// The container of processes started by the queue.
   std::vector<ScopedPtr<QProcess>> process_vec;
+  /// The number of processes that failed.
+  int failure_count;
+  /// The number of processes that crashed.
+  int crash_count;
 public:
   /// Constructs a new instance of the process queue.
   /// @param c A pointer to the console to log output to.
-  ProcessQueueImpl(Console* c) : console(c) {}
+  ProcessQueueImpl(Console* c) : console(c), failure_count(0), crash_count(0) {}
   /// Adds a process to the queue.
   /// @returns A pointer to the process that was added.
   QProcess* add() override {
@@ -117,6 +122,17 @@ public:
 
     return process_ptr;
   }
+  /// Starts all processes in the build queue.
+  void start_all() override {
+
+    failure_count = 0;
+
+    crash_count = 0;
+
+    for (auto& process : process_vec) {
+      process->start();
+    }
+  }
 protected:
   /// Creates a new process to be added to the queue.
   /// This function also does the job of connecting
@@ -126,7 +142,75 @@ protected:
 
     auto process = ScopedPtr<ConsoleProcess>(new ConsoleProcess(console));
 
+    QProcess* process_ptr = process.get();
+
+    auto finish_functor = [this, process_ptr](int exit_code, QProcess::ExitStatus status) {
+      handle_finished(process_ptr, exit_code, status);
+    };
+
+    QObject::connect(process.get(), static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), finish_functor);
+
     return process;
+  }
+  /// Handles a finished process.
+  /// @param process_ptr A pointer to the process that completed.
+  /// This is used to remove the process from the process queue.
+  /// @param exit_code The exit code of the process.
+  /// If this is non-zero, then the process queue is
+  /// considered to have failed.
+  /// @param status The exit status of the process.
+  /// If the status indicates that there was a crash,
+  /// then it is indicated in the console message.
+  void handle_finished(QProcess* process_ptr, int exit_code, QProcess::ExitStatus status) {
+
+    if ((status == QProcess::NormalExit) && (exit_code != 0)) {
+      failure_count++;
+    } else if (status == QProcess::CrashExit) {
+      crash_count++;
+    }
+
+    remove(process_ptr);
+  }
+  /// Removes a process from the queue.
+  /// @param process_ptr A pointer to the process to remove.
+  void remove(QProcess* process_ptr) {
+
+    for (std::size_t i = 0; i < process_vec.size(); i++) {
+      if (process_vec[i].get() == process_ptr) {
+        process_vec.erase(process_vec.begin() + i);
+        break;
+      }
+    }
+
+    if (process_vec.empty()) {
+      if (failure_count || crash_count) {
+        inform_build_failure();
+      } else {
+        console->println("Build complete", Console::Tag::Success);
+      }
+    }
+  }
+  /// Informs the user, through the console, that the build has failed.
+  /// Indicates the numbed of failed jobs and the number of crashed jobs.
+  void inform_build_failure() {
+
+    QString message;
+
+    QTextStream stream(&message);
+
+    stream << "Build failed";
+
+    if (failure_count > 0) {
+      stream << " (failures: " << failure_count << ")";
+    }
+
+    if (crash_count > 0) {
+      stream << " (crashes: " << crash_count << ")";
+    }
+
+    stream << endl;
+
+    console->println(message, Console::Tag::Error);
   }
 };
 

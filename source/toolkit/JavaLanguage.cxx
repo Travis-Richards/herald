@@ -37,7 +37,6 @@ public:
     process->setWorkingDirectory(source_root);
     process->setProgram(java_compiler);
     process->setArguments(args);
-    process->start();
 
     return true;
   }

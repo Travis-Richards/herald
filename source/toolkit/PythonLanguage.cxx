@@ -39,7 +39,6 @@ public:
     process->setWorkingDirectory(source_root);
     process->setProgram(find_python("python"));
     process->setArguments(args);
-    process->start();
 
     return true;
   }
