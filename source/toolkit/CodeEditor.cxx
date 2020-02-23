@@ -16,6 +16,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QTabWidget>
 #include <QTreeView>
 
 #include <QCodeEditor>
@@ -28,6 +29,52 @@ namespace tk {
 
 namespace {
 
+/// Responsible for editing a single source file.
+class OpenedFileEditor final {
+  /// The source file content editor.
+  QCodeEditor editor;
+public:
+  /// Constructs a new instance of the opened file editor.
+  /// @param parent A pointer to the parent widget.
+  OpenedFileEditor(QWidget* parent) : editor(parent) {
+    editor.setWordWrapMode(QTextOption::NoWrap);
+  }
+  /// Accesses the root widget of the editor.
+  QWidget* get_widget() {
+    return &editor;
+  }
+};
+
+/// Manages opened source files.
+class OpenedFileManager final {
+  /// The widget containing the opened file tabs.
+  QTabWidget tab_widget;
+  /// The container of opened file editors.
+  std::vector<ScopedPtr<OpenedFileEditor>> editor_vec;
+public:
+  /// Constructs a new instance of the opened file manager.
+  /// @param parent A pointer to the parent widget.
+  OpenedFileManager(QWidget* parent) : tab_widget(parent) {
+
+  }
+  /// Accesses the root widget for the file manager.
+  QWidget* get_widget() noexcept {
+    return &tab_widget;
+  }
+  /// Opens a new source file.
+  /// @param source_file The source file to edit.
+  void open(const SourceFile& source_file) {
+
+    (void)source_file;
+
+    auto editor = ScopedPtr<OpenedFileEditor>(new OpenedFileEditor(&tab_widget));
+
+    tab_widget.addTab(editor->get_widget(), "File");
+
+    editor_vec.emplace_back(std::move(editor));
+  }
+};
+
 /// The implementation of the code editor interface.
 class CodeEditorImpl final : public CodeEditor {
   /// The source code manager.
@@ -38,8 +85,8 @@ class CodeEditorImpl final : public CodeEditor {
   ScopedPtr<QWidget> root_widget;
   /// A pointer to the buttons widget.
   ScopedPtr<QWidget> buttons_widget;
-  /// A pointer to the code editing widget.
-  ScopedPtr<QCodeEditor> code_editor;
+  /// Manages the opened files.
+  ScopedPtr<OpenedFileManager> opened_file_manager;
   /// A view of the source code tree.
   ScopedPtr<QTreeView> source_tree_view;
   /// The console for program output.
@@ -95,9 +142,7 @@ public:
 
     // Create code editor widget
 
-    code_editor = ScopedPtr<QCodeEditor>(new QCodeEditor(root_widget.get()));
-    code_editor->setWordWrapMode(QTextOption::NoWrap);
-    code_editor->setReadOnly(true);
+    opened_file_manager = ScopedPtr<OpenedFileManager>(new OpenedFileManager(root_widget.get()));
 
     source_tree_view = make_source_tree(root_widget.get());
 
@@ -111,10 +156,10 @@ public:
 
     // Add main widgets to layout
 
-    layout->addWidget(buttons_widget.get(),   0,                    0,                button_widget_height, button_widget_width);
-    layout->addWidget(source_tree_view.get(), button_widget_height, 0,                fs_widget_height,     fs_widget_width);
-    layout->addWidget(code_editor.get(),      button_widget_height, fs_widget_width,  code_editor_height,   code_editor_width);
-    layout->addWidget(console->get_widget(),  console_y_offset,     console_x_offset, console_height,       console_width);
+    layout->addWidget(buttons_widget.get(),              0,                    0,                button_widget_height, button_widget_width);
+    layout->addWidget(source_tree_view.get(),            button_widget_height, 0,                fs_widget_height,     fs_widget_width);
+    layout->addWidget(opened_file_manager->get_widget(), button_widget_height, fs_widget_width,  code_editor_height,   code_editor_width);
+    layout->addWidget(console->get_widget(),             console_y_offset,     console_x_offset, console_height,       console_width);
 
     // Create the process queue for
     // building the source files.
@@ -196,23 +241,7 @@ protected:
 
     auto source_file = source_manager->open(index);
 
-    code_editor->setDocument(source_file->get_code());
-
-    auto read_only = false;
-
-    switch (source_file->get_type()) {
-      case SourceFileType::Invalid:
-        read_only = true;
-        break;
-      case SourceFileType::Java:
-        code_editor->setHighlighter(new QJavaHighlighter);
-        break;
-      case SourceFileType::Python:
-        code_editor->setHighlighter(new QPythonHighlighter);
-        break;
-    }
-
-    code_editor->setReadOnly(read_only);
+    opened_file_manager->open(*source_file);
 
     return true;
   }
