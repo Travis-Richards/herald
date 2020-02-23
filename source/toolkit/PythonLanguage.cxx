@@ -2,7 +2,7 @@
 
 #include "Language.h"
 #include "ProcessQueue.h"
-#include "SourceManager.h"
+#include "SourceTreeModel.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -25,11 +25,11 @@ public:
   /// @param process_queue The queue to add the build process to.
   /// @param source_manager The source manager to retrieve the source path from.
   /// @returns True on success, false on failure.
-  bool build(ProcessQueue& process_queue, SourceManager& source_manager) override {
+  bool build(ProcessQueue& process_queue, SourceTreeModel& source_tree) override {
 
     auto* process = process_queue.add();
 
-    auto source_root = source_manager.path_of(source_manager.get_root());
+    auto source_root = source_tree.rootPath();
 
     QStringList args;
     args << "-m";

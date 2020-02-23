@@ -72,8 +72,6 @@ add_executable("herald-toolkit" WIN32
   "RoomView.cxx"
   "SourceFile.h"
   "SourceFile.cxx"
-  "SourceManager.h"
-  "SourceManager.cxx"
   "SourceTreeModel.h"
   "SourceTreeModel.cxx"
   "StartupDialog.h"

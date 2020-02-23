@@ -19,7 +19,7 @@ class NullLanguage final : public Language {
 public:
   /// Does nothing.
   /// @returns Always returns true.
-  bool build(ProcessQueue&, SourceManager&) override {
+  bool build(ProcessQueue&, SourceTreeModel&) override {
     return true;
   }
   /// Does nothing.

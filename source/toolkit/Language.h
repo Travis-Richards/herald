@@ -10,7 +10,7 @@ class ScopedPtr;
 namespace tk {
 
 class ProcessQueue;
-class SourceManager;
+class SourceTreeModel;
 
 /// The base of any supported language.
 class Language {
@@ -25,10 +25,10 @@ public:
   virtual ~Language() {}
   /// Builds the sources from the source tree.
   /// @param process_queue The queue to add build jobs to.
-  /// @param source_manager The source manager containing the source tree.
+  /// @param source_tree The data model for the source tree.
   /// @returns True on success, false on failure.
   virtual bool build(ProcessQueue& process_queue,
-                     SourceManager& source_manager) = 0;
+                     SourceTreeModel& source_tree) = 0;
   /// The default extension used when creating files.
   /// @returns The extension used when creating files.
   virtual QString default_extension() = 0;

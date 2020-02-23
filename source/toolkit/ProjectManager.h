@@ -16,7 +16,7 @@ namespace tk {
 
 class GameInfo;
 class Language;
-class SourceManager;
+class SourceTreeModel;
 
 /// Used to manage the data of a project.
 class ProjectManager {
@@ -35,9 +35,9 @@ public:
   virtual void delete_texture(const QString& name) = 0;
   /// Accesses a pointer to the language used for the project.
   virtual Language* get_language() noexcept = 0;
-  /// Accesses the source tree manager.
-  /// @returns A pointer to the source tree manager.
-  virtual SourceManager* get_source_manager() noexcept = 0;
+  /// Accesses the source tree model.
+  /// @returns A pointer to the source tree model.
+  virtual SourceTreeModel* get_source_tree_model() noexcept = 0;
   /// Lists the textures in the project.
   /// @returns A list of texture names that exist in the project.
   virtual QStringList list_textures() const = 0;

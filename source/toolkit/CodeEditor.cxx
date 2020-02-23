@@ -6,7 +6,7 @@
 #include "ProcessQueue.h"
 #include "ProjectManager.h"
 #include "SourceFile.h"
-#include "SourceManager.h"
+#include "SourceTreeModel.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -16,6 +16,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSaveFile>
 #include <QTabWidget>
@@ -222,24 +223,21 @@ protected:
 /// A derived tree view for specially handling
 /// the source tree directory.
 class SourceTreeView final : public QTreeView {
+  /// The source tree model
+  /// that the source tree view is for.
+  SourceTreeModel* model;
   /// The context menu for folders.
   QMenu folder_menu;
   /// The context menu for files.
   QMenu file_menu;
-  /// The context menu to show when
-  /// neither a file or folder was
-  /// selected.
-  QMenu fallback_menu;
 public:
   /// Constructs a new instance of the source tree view.
-  /// @param source_manager A pointer to the source manager.
+  /// @param m A pointer to the source tree model.
   /// @param widget A pointer to the parent widget.
-  SourceTreeView(SourceManager* source_manager, QWidget* parent) : QTreeView(parent) {
-
-    auto* model = source_manager->get_model();
+  SourceTreeView(SourceTreeModel* m, QWidget* parent) : QTreeView(parent), model(m) {
 
     setModel(model);
-    setRootIndex(source_manager->get_root());
+    setRootIndex(model->index(model->rootPath()));
 
     for (int i = 1; i < model->columnCount(); i++) {
       setColumnHidden(i, true);
@@ -249,42 +247,98 @@ public:
 
     add_menu_options();
 
-    connect(this, &SourceTreeView::customContextMenuRequested, this, &SourceTreeView::make_context_menu);
+    connect(this, &SourceTreeView::customContextMenuRequested, this, &SourceTreeView::run_context_menu);
   }
 protected:
   /// Adds the options for context menus.
   void add_menu_options() {
+    add_file_menu_options();
     add_folder_menu_options();
-    add_fallback_menu_options();
   }
   /// Creates the file menu options.
   void add_file_menu_options() {
-    file_menu.addAction(tr("Open"));
-    file_menu.addAction(tr("Rename"));
-    file_menu.addAction(tr("Delete"));
+
+    auto* delete_action = file_menu.addAction(tr("Delete"));
+
+    connect(delete_action, &QAction::triggered, this, &SourceTreeView::delete_file);
   }
   /// Adds the options for folder context menus.
   void add_folder_menu_options() {
-    folder_menu.addAction(tr("Create File"));
-    folder_menu.addAction(tr("Create Folder"));
-    folder_menu.addAction(tr("Rename"));
-  }
-  /// Creates the fallback menu options.
-  void add_fallback_menu_options() {
-    fallback_menu.addAction(tr("Create File"));
-    fallback_menu.addAction(tr("Create Folder"));
+
+    auto* create_file_action = folder_menu.addAction(tr("Create File"));
+    auto* create_dir_action  = folder_menu.addAction(tr("Create Folder"));
+
+    connect(create_file_action, &QAction::triggered, this, &SourceTreeView::create_file);
+    connect(create_dir_action,  &QAction::triggered, this, &SourceTreeView::create_dir);
   }
   /// Creates a context menu for a certain point on the source tree view.
   /// @param point The point at which to show the menu.
-  void make_context_menu(const QPoint& point) {
-    fallback_menu.exec(viewport()->mapToGlobal(point));
+  void run_context_menu(const QPoint& point) {
+
+    auto index = indexAt(point);
+
+    choose_menu(index).exec(viewport()->mapToGlobal(point));
+  }
+  /// Chooses the menu to be executed, based on an item index.
+  /// @param index The index of the item that was clicked when
+  /// the menu was requested.
+  QMenu& choose_menu(const QModelIndex& index) {
+    if (!index.isValid() || model->isDir(index)) {
+      return folder_menu;
+    } else {
+      return file_menu;
+    }
+  }
+  /// Creates a new file.
+  void create_file() {
+
+    auto indices = selectedIndexes();
+
+    for (auto index : indices) {
+      model->create_source_file(index);
+    }
+  }
+  /// Creates a new directory.
+  void create_dir() {
+
+    auto indices = selectedIndexes();
+
+    if (indices.isEmpty()) {
+      model->create_dir(model->index(model->rootPath()));
+    }
+
+    for (auto index : indices) {
+      model->create_dir(index);
+    }
+  }
+  /// Deletes the selected file.
+  void delete_file() {
+
+    auto buttons = QMessageBox::Yes | QMessageBox::Cancel;
+
+    auto def_button = QMessageBox::Cancel;
+
+    auto hit_button = QMessageBox::warning(this, tr("Confirm Deletion"), tr("Are you sure you'd like to delete this?"), buttons, def_button);
+
+    if (hit_button == QMessageBox::Yes) {
+      delete_file_without_confirmation();
+    }
+  }
+  /// Deletes the selected files without confirmation.
+  void delete_file_without_confirmation() {
+
+    auto indices = selectedIndexes();
+
+    for (auto index : indices) {
+      model->remove(index);
+    }
   }
 };
 
 /// The implementation of the code editor interface.
 class CodeEditorImpl final : public CodeEditor {
-  /// The source code manager.
-  SourceManager* source_manager;
+  /// The source code tree model.
+  SourceTreeModel* source_tree;
   /// A pointer to the language used by the project.
   Language* language;
   /// The widget containing the code editor contents.
@@ -340,9 +394,9 @@ public:
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
   CodeEditorImpl(ProjectManager* manager, QWidget* parent)
-    : source_manager(nullptr), language(nullptr) {
+    : source_tree(nullptr), language(nullptr) {
 
-    source_manager = manager->get_source_manager();
+    source_tree = manager->get_source_tree_model();
 
     language = manager->get_language();
 
@@ -386,7 +440,7 @@ protected:
   /// @returns A new source tree view.
   ScopedPtr<QTreeView> make_source_tree(QWidget* parent) {
 
-    auto tree_view = ScopedPtr<SourceTreeView>(new SourceTreeView(source_manager, parent));
+    auto tree_view = ScopedPtr<SourceTreeView>(new SourceTreeView(source_tree, parent));
 
     auto open_functor = [this](const QModelIndex& index) {
       open_source_file(index);
@@ -411,29 +465,20 @@ protected:
     process_queue->enable_on_completion(build_button.get());
     process_queue->enable_on_completion(run_button.get());
 
-    auto* new_source_file_button = new QPushButton(QObject::tr("New Source File"), buttons_widget.get());
-    auto* new_directory          = new QPushButton(QObject::tr("New Directory"),   buttons_widget.get());
-    auto* save_button            = new QPushButton(QObject::tr("Save"),            buttons_widget.get());
+    auto* save_button = new QPushButton(QObject::tr("Save"),            buttons_widget.get());
 
     save_button->setShortcut(Qt::Key_S | Qt::CTRL);
     build_button->setShortcut(Qt::Key_B | Qt::CTRL);
     run_button->setShortcut(Qt::Key_R | Qt::CTRL);
 
-    auto new_source_functor = [this](bool) {
-      source_manager->create_source_file(language->default_extension());
-    };
-
     auto save_functor  = [this](bool) { save(); };
     auto build_functor = [this](bool) { build(); };
     auto run_functor   = [this](bool) { run(); };
 
-    QObject::connect(new_source_file_button, &QPushButton::clicked, new_source_functor);
     QObject::connect(save_button,            &QPushButton::clicked, save_functor);
     QObject::connect(build_button.get(),     &QPushButton::clicked, build_functor);
     QObject::connect(run_button.get(),       &QPushButton::clicked, run_functor);
 
-    layout->addWidget(new_source_file_button);
-    layout->addWidget(new_directory);
     layout->addWidget(save_button);
     layout->addWidget(build_button.get());
     layout->addWidget(run_button.get());
@@ -445,7 +490,7 @@ protected:
   /// @returns True on success, false on failure.
   bool open_source_file(const QModelIndex& index) {
 
-    auto source_file = source_manager->open(index);
+    auto source_file = source_tree->open(index);
 
     if (source_file->get_type() == SourceFileType::Binary) {
       return false;
@@ -468,7 +513,7 @@ protected:
 
     console->println("Starting build", Console::Tag::Info);
 
-    language->build(*process_queue.get(), *source_manager);
+    language->build(*process_queue.get(), *source_tree);
 
     process_queue->start_all();
   }

@@ -4,7 +4,7 @@
 
 #include "GameInfo.h"
 #include "Language.h"
-#include "SourceManager.h"
+#include "SourceTreeModel.h"
 
 #include <QDir>
 #include <QFile>
@@ -156,8 +156,8 @@ public:
 class ProjectManagerImpl final : public ProjectManager {
   /// The game directory.
   QDir game_dir;
-  /// The source code tree manager.
-  ScopedPtr<SourceManager> source_manager;
+  /// The model for the project's source tree.
+  ScopedPtr<SourceTreeModel> source_tree;
   /// The language used by the project.
   ScopedPtr<Language> language;
 public:
@@ -188,8 +188,8 @@ public:
   }
   /// Accesses a pointer to the source manager.
   /// @returns A pointer to the source tree manager.
-  SourceManager* get_source_manager() noexcept override {
-    return source_manager.get();
+  SourceTreeModel* get_source_tree_model() noexcept override {
+    return source_tree.get();
   }
   /// Indicates whether or not there are unsaved changes in the project.
   /// @returns True if there's unsaved changes, false otherwise.
@@ -215,7 +215,7 @@ public:
       return false;
     }
 
-    source_manager = SourceManager::make(game_dir.filePath("source"));
+    source_tree = SourceTreeModel::make(game_dir.filePath("source"));
 
     auto info = open_info();
 
