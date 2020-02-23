@@ -23,6 +23,10 @@ public:
     text_edit->setReadOnly(true);
     text_edit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
   }
+  /// Erases the console content.
+  void clear() override {
+    text_edit->clear();
+  }
   /// Gets a pointer to the console widget.
   /// @returns A pointer to the console widget.
   QWidget* get_widget() noexcept override {

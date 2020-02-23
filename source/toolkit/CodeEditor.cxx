@@ -172,9 +172,7 @@ protected:
       source_manager->save_modified();
     };
 
-    auto build_functor = [this](bool) {
-      language->build(*process_queue.get(), *source_manager);
-    };
+    auto build_functor = [this](bool) { build(); };
 
     auto run_functor = [this](bool) { run(); };
 
@@ -218,8 +216,17 @@ protected:
 
     return true;
   }
+  /// Builds the project.
+  void build() {
+
+    console->clear();
+
+    language->build(*process_queue.get(), *source_manager);
+  }
   /// Runs the game.
   void run() {
+
+    console->clear();
 
     if (game_process) {
       game_process->waitOrKill();

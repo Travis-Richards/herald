@@ -20,6 +20,8 @@ public:
   static ScopedPtr<Console> make(QWidget* parent);
   /// Just a stub.
   virtual ~Console() {}
+  /// Clears the contents on the console.
+  virtual void clear() = 0;
   /// Accesses the console widget.
   /// This is required when adding the console to a layout.
   /// @returns A pointer to the console widget.
