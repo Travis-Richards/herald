@@ -62,6 +62,8 @@ add_executable("herald-toolkit" WIN32
   "ProcessQueue.cxx"
   "ProjectManager.h"
   "ProjectManager.cxx"
+  "ProjectModel.h"
+  "ProjectModel.cxx"
   "ProjectView.h"
   "ProjectView.cxx"
   "PythonLanguage.h"
