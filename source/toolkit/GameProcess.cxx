@@ -20,15 +20,15 @@ class GameProcessImpl final : public GameProcess {
   QProcess process;
   /// A pointer to the model that the game
   /// process will modify.
-  Model* model;
+  //Model* model;
   /// A pointer to the console to log errors to.
   Console* console;
 public:
   /// Constructs a new instance of a game process.
   /// @param m The model for the process to modify.
   /// @param c A console to log errors to.
-  GameProcessImpl(Model* m, Console* c)
-    : model(m), console(c) {
+  GameProcessImpl(Model*, Console* c)
+    : console(c) {
 
     auto read_stdout_functor = [this]() { read_stdout(); };
     auto read_stderr_functor = [this]() { read_stderr(); };
