@@ -7,8 +7,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {

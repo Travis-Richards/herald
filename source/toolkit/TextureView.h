@@ -1,5 +1,6 @@
 #pragma once
 
+class QByteArray;
 class QString;
 class QWidget;
 
@@ -23,9 +24,9 @@ public:
   /// being used to display the texture.
   virtual QWidget* get_widget() noexcept = 0;
   /// Opens a texture to be displayed by the widget.
-  /// @param filename The name of the file to open.
+  /// @param data The image data of the texture to open.
   /// @returns True on success, false on failure.
-  virtual bool open_texture(const QString& filename) = 0;
+  virtual bool open_texture(const QByteArray& data) = 0;
 };
 
 } // namespace tk

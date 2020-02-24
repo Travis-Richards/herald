@@ -54,17 +54,15 @@ public:
     return view.get();
   }
   /// Opens a texture to be displayed.
-  /// @param filename The name of the file to open.
+  /// @param data The image file data to display.
   /// @returns True on success, false on failure.
-  bool open_texture(const QString& filename) override {
-
-    texture = QPixmap(filename);
-
-    if (!texture.isNull()) {
+  bool open_texture(const QByteArray& data) override {
+    if (texture.loadFromData(data)) {
       adjust_texture_size();
+      return true;
+    } else {
+      return false;
     }
-
-    return !texture.isNull();
   }
 protected:
   /// Handles the resizing of the window.

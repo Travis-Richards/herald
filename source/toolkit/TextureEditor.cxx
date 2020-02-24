@@ -55,7 +55,7 @@ public:
   /// Selects the texture to edit.
   /// @param name The name of the selected texture.
   void select(const QString& name) override {
-    texture_widget->open_texture(model->access_texture_table()->get_path(name));
+    texture_widget->open_texture(model->access_texture_table()->get_data(name));
   }
   /// Sets up the widget used to view the textures.
   /// @param widget A pointer to the widget to setup.

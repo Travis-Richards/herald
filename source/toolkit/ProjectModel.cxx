@@ -11,8 +11,6 @@
 
 #include <vector>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {
@@ -21,31 +19,43 @@ namespace {
 
 /// A single entry in the texture table.
 struct Texture final {
-  /// The path to the texture.
-  QString path;
   /// The name given to the texture.
   QString name;
+  /// The image data of the texture.
+  QByteArray data;
   /// Constructs a new entry instance.
-  /// @param p The path of the entry.
-  Texture(const QString& p) : path(p) {
-    QFileInfo file_info(p);
-    name = file_info.baseName();
+  /// @param path The path of the entry.
+  Texture(const QString& path) : name(QFileInfo(path).baseName()) {
+    read_data(path);
   }
   /// Constructs the texture from a JSON value.
   /// @param json_value The JSON value to get the from.
   /// This should be an object value.
   Texture(const QJsonValue& json_value) {
     auto obj = json_value.toObject();
-    path = obj["path"].toString();
     name = obj["name"].toString();
+    data = QByteArray::fromBase64(obj["data"].toString().toUtf8());
   }
   /// Converts the texture to a JSON value.
   /// @returns The JSON representation of the texture.
   QJsonValue to_json() const {
     QJsonObject object;
     object["name"] = name;
-    object["path"] = path;
+    object["data"] = QString(data.toBase64());
     return object;
+  }
+protected:
+  /// Reads the file data.
+  /// @param path The path to get the data from.
+  /// @returns True on success, false on failure.
+  bool read_data(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+      return false;
+    } else {
+      data = file.readAll();
+      return true;
+    }
   }
 };
 
@@ -64,13 +74,13 @@ public:
   /// Gets the full path of a texture.
   /// @param name The name of the texture to get the path of.
   /// @returns The path of the specified texture.
-  QString get_path(const QString& name) const override {
+  QByteArray get_data(const QString& name) const override {
 
     auto it = find_texture(name);
     if (it == textures.end()) {
-      return QString();
+      return QByteArray();
     } else {
-      return it->path;
+      return it->data;
     }
   }
   /// Lists the textures in the table.
@@ -172,11 +182,8 @@ public:
   /// @returns True on success, false on failure.
   bool open(const QString& path) override {
 
-    qDebug() << "here";
-
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-      qDebug() << "fail 1";
       return false;
     }
 
@@ -188,12 +195,10 @@ public:
       // In the future, we should find a way to display this.
       // For know, we just indicate some sort of failure
       // so that we don't open the project.
-      qDebug() << "fail 2";
       return false;
     }
 
     if (!doc.isObject()) {
-      qDebug() << "fail 3";
       return false;
     }
 

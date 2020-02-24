@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+class QByteArray;
 class QString;
 class QStringList;
 
@@ -25,11 +26,11 @@ public:
   /// @param path The path of the texture to add to the table.
   /// @returns The ID of the texture.
   virtual QString add(const QString& path) = 0;
-  /// Gets the path of a texture.
-  /// @param name The name of the texture to get the path of.
-  /// @returns The path of the specified texture.
-  /// If the texture doesn't exist, then an empty string is returned.
-  virtual QString get_path(const QString& name) const = 0;
+  /// Gets the image data of a texture.
+  /// @param name The name of the texture to get the image data of.
+  /// @returns The image data of the specified image.
+  /// If the texture isn't found, then an empty byte array is returned.
+  virtual QByteArray get_data(const QString& name) const = 0;
   /// Removes a texture from the texture table.
   /// @param name The name of the texture to remove.
   virtual void remove(const QString& name) = 0;
