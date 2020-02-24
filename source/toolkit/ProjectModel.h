@@ -45,20 +45,45 @@ public:
 
 /// A project's data model.
 class ProjectModel {
+  /// Whether or not the model has been modified.
+  bool modified;
 public:
   /// Creates a new project model instance.
   /// @returns A pointer to a new project model.
   static ScopedPtr<ProjectModel> make();
+  /// Constructs the base project model.
+  constexpr ProjectModel() noexcept : modified(false) {}
   /// Just a stub.
   virtual ~ProjectModel() {}
-  /// Accesses the model's texture table.
+  /// Gets a non-const pointer to the texture table.
   /// @returns A pointer to the model's texture table.
-  virtual TextureTable* get_texture_table()  = 0;
+  virtual TextureTable* modify_texture_table() = 0;
+  /// Accesses the texture table for reading only
+  /// This prevents the modification flag fron being set.
+  /// @returns A constant pointer to the texture table.
+  virtual const TextureTable* access_texture_table() const = 0;
+  /// Indicates whether or not the project has been modified.
+  /// @returns True if the project has been modified, false otherwise.
+  inline bool is_modified() const noexcept { return modified; }
   /// Opens a project model.
   /// @param path The path to the model to open.
   /// It's expected that this is a JSON file.
   /// @returns True on success, false on failure.
   virtual bool open(const QString& path) = 0;
+  /// Saves the project data.
+  /// The data is first saved to a swap file
+  /// before replacing the current file.
+  /// The modification flag is set to false
+  /// after calling this function.
+  /// @param path The path to save the data to.
+  /// @returns True on success, false on failure.
+  virtual bool save(const QString& path) = 0;
+protected:
+  /// Sets the model's modification flag.
+  /// @param value The value to set the modification flag to.
+  inline void set_modified_flag(bool value) noexcept {
+    modified = value;
+  }
 };
 
 } // namespace tk

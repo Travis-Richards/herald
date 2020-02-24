@@ -30,7 +30,7 @@ public:
   virtual void del(const QString& name) = 0;
   /// Lists the items labels in the table data.
   /// @returns The items labels table data.
-  virtual QStringList list() = 0;
+  virtual QStringList list() const = 0;
   /// Renames an item from the list.
   /// @param index The index of the item that was renamed.
   /// @param name The name given to the item.

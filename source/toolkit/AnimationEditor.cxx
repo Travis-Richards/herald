@@ -23,7 +23,7 @@ public:
   void del(const QString& name) override {
     (void)name;
   }
-  QStringList list() override {
+  QStringList list() const override {
     return QStringList();
   }
   void rename(std::size_t index, const QString& name) override {

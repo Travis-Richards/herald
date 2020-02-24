@@ -23,7 +23,7 @@ public:
 
     project_manager = ProjectManager::make();
 
-    if (!project_manager->open(game_path)) {
+    if (!project_manager->open_project(game_path)) {
       return false;
     }
 

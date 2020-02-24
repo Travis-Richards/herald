@@ -3,6 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "ProjectManager.h"
+#include "ProjectModel.h"
 #include "TableItemEditor.h"
 #include "TextureView.h"
 
@@ -19,8 +20,8 @@ namespace {
 /// Displays textures from the texture table
 /// and allows for simple effects and transformations.
 class TextureEditor final : public TableItemEditor {
-  /// A pointer to the project manager to get and put textures to.
-  ProjectManager* manager;
+  /// The project model containing the texture table.
+  ProjectModel* model;
   /// The widget displaying the texture.
   ScopedPtr<TextureView> texture_widget;
 public:
@@ -28,33 +29,33 @@ public:
   /// @param m A pointer to the project manager.
   /// This is used to load textures and to add
   /// textures to the project.
-  TextureEditor(ProjectManager* m) : manager(m) {}
+  TextureEditor(ProjectManager* m) : model(m->get_model()) {}
   /// Adds a new texture to the table.
   /// @returns The name to give the new texture.
   QString add() override {
 
     auto filename = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open a Texture"));
 
-    return manager->add_texture(filename);
+    return model->modify_texture_table()->add(filename);
   }
   /// Deletes a texture from the table.
   void del(const QString& name) override {
-    manager->delete_texture(name);
+    model->modify_texture_table()->remove(name);
   }
   /// Lists the existing textures in the model.
-  QStringList list() override {
-    return manager->list_textures();
+  QStringList list() const override {
+    return model->access_texture_table()->list();
   }
   /// Renames an item from the table.
   /// @param index The index of the item being renamed.
   /// @param name The name given to the item.
   void rename(std::size_t index, const QString& name) override {
-    manager->rename_texture(index, name);
+    model->modify_texture_table()->rename(index, name);
   }
   /// Selects the texture to edit.
   /// @param name The name of the selected texture.
   void select(const QString& name) override {
-    texture_widget->open_texture(manager->texture_path(name));
+    texture_widget->open_texture(model->access_texture_table()->get_path(name));
   }
   /// Sets up the widget used to view the textures.
   /// @param widget A pointer to the widget to setup.
