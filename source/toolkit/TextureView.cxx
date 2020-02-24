@@ -42,7 +42,6 @@ public:
     view = ScopedPtr<GraphicsView>(new GraphicsView(scene.get(), parent));
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setFrameStyle(QFrame::NoFrame);
 
     auto resize_functor = [this](const QSize& size) {
       handle_resize(size);
@@ -92,13 +91,16 @@ protected:
 
     auto offset = (max_size - min_size) / 2;
 
-    QRectF rect(0, 0, min_size, min_size);
+    auto x_offset = 0;
+    auto y_offset = 0;
 
     if (window_w > window_h) {
-      rect.setX(offset);
+      x_offset = offset;
     } else {
-      rect.setY(offset);
+      y_offset = offset;
     }
+
+    QRectF rect(x_offset, y_offset, min_size, min_size);
 
     QSize size(min_size, min_size);
 
