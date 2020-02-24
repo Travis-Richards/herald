@@ -1,5 +1,7 @@
 #include "TextureEditor.h"
 
+#if 0
+
 #include <herald/ScopedPtr.h>
 
 #include "ProjectManager.h"
@@ -14,10 +16,13 @@
 #include <QStringList>
 #include <QWidget>
 
+#endif
+
 namespace herald {
 
 namespace tk {
 
+#if 0
 namespace {
 
 class RoomEditor;
@@ -73,6 +78,7 @@ public:
 ScopedPtr<TableItemEditor> make_room_editor(ProjectManager* manager) {
   return new RoomEditor(manager);
 }
+#endif
 
 } // namespace tk
 

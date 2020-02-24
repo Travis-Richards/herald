@@ -35,6 +35,7 @@ public:
     scene->setBackgroundBrush(QBrush(QColor(128, 128, 128, 32)));
 
     texture_item = ScopedPtr<QGraphicsRectItem>(new QGraphicsRectItem);
+    texture_item->setPen(Qt::NoPen);
 
     scene->addItem(texture_item.get());
 
@@ -48,6 +49,11 @@ public:
     };
 
     QObject::connect(view.get(), &GraphicsView::resized, resize_functor);
+  }
+  /// Removes the texture from the display.
+  void clear() override {
+    texture = QPixmap();
+    texture_item->setBrush(texture);
   }
   /// Accesses a pointer to the graphics view widget.
   QWidget* get_widget() noexcept override {

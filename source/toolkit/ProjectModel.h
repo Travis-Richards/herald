@@ -4,7 +4,6 @@
 
 class QByteArray;
 class QString;
-class QStringList;
 
 namespace herald {
 
@@ -27,21 +26,27 @@ public:
   /// @returns The ID of the texture.
   virtual QString add(const QString& path) = 0;
   /// Gets the image data of a texture.
-  /// @param name The name of the texture to get the image data of.
+  /// @param index The index of the texture to get the data for.
   /// @returns The image data of the specified image.
   /// If the texture isn't found, then an empty byte array is returned.
-  virtual QByteArray get_data(const QString& name) const = 0;
+  virtual QByteArray get_data(std::size_t index) const = 0;
+  /// Gets the name of a texture.
+  /// @param index The index of the texture to get the name of.
+  /// @returns The name of the specified texture.
+  /// If the index is out of bounds, then an empty string is returned.
+  virtual QString get_name(std::size_t index) const = 0;
   /// Removes a texture from the texture table.
-  /// @param name The name of the texture to remove.
-  virtual void remove(const QString& name) = 0;
+  /// @param index The index of the item to remove.
+  /// @returns True on success, false on failure.
+  virtual bool remove(std::size_t index) = 0;
   /// Renames a texture.
   /// @param index The index of the texture to rename.
   /// @param name The new name to give the texture.
   /// @returns True on success, false on failure.
   virtual bool rename(std::size_t index, const QString& name) = 0;
-  /// Lists all the textures in the table.
-  /// @returns A list of all textures in the table.
-  virtual QStringList list() const = 0;
+  /// Indicates the size of the texture table.
+  /// @returns The size of the texture table.
+  virtual std::size_t size() const noexcept = 0;
 };
 
 /// A project's data model.

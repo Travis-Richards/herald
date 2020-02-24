@@ -71,29 +71,25 @@ public:
     textures.emplace_back(path);
     return textures[textures.size() - 1].name;
   }
-  /// Gets the full path of a texture.
-  /// @param name The name of the texture to get the path of.
-  /// @returns The path of the specified texture.
-  QByteArray get_data(const QString& name) const override {
-
-    auto it = find_texture(name);
-    if (it == textures.end()) {
+  /// Accesses the texture image data.
+  /// @param index The index of the texture to get the data for.
+  /// @returns The image data of the specified texture.
+  /// If the index is out of bounds, then an empty byte array is returned.
+  QByteArray get_data(std::size_t index) const override {
+    if (index >= textures.size()) {
       return QByteArray();
     } else {
-      return it->data;
+      return textures[index].data;
     }
   }
-  /// Lists the textures in the table.
-  /// @returns A list of texture names.
-  QStringList list() const override {
-
-    QStringList texture_names;
-
-    for (const auto& texture : textures) {
-      texture_names << texture.name;
+  /// Gets the name of a texture.
+  /// @param index The index of the texture to get the name of.
+  QString get_name(std::size_t index) const override {
+    if (index >= textures.size()) {
+      return QString();
+    } else {
+      return textures[index].name;
     }
-
-    return texture_names;
   }
   /// Reads a texture table from a JSON value.
   /// @param value The JSON value to read the textures from.
@@ -111,11 +107,14 @@ public:
     return true;
   }
   /// Removes a texture from the model.
-  /// @param name The name of the texture to remove.
-  void remove(const QString& name) override {
-    auto it = find_texture(name);
-    if (it != textures.end()) {
-      textures.erase(it);
+  /// @param index The index of the item to remove.
+  /// @returns True on success, false on failure.
+  bool remove(std::size_t index) override {
+    if (index >= textures.size()) {
+      return false;
+    } else {
+      textures.erase(textures.begin() + index);
+      return true;
     }
   }
   /// Renames a texture.
@@ -143,6 +142,10 @@ public:
     }
 
     return json_array;
+  }
+  /// Indicates the number of textures in the texture table.
+  std::size_t size() const noexcept override {
+    return textures.size();
   }
 protected:
   /// Locates a texture in the table.

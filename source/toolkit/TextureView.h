@@ -20,6 +20,8 @@ public:
   static ScopedPtr<TextureView> make(QWidget* parent);
   /// Just a stub.
   virtual ~TextureView() {}
+  /// Removes the texture from the display.
+  virtual void clear() = 0;
   /// Accesses a pointer to the widget
   /// being used to display the texture.
   virtual QWidget* get_widget() noexcept = 0;

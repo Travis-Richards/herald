@@ -1,13 +1,14 @@
 #include "TableEditor.h"
 
+#include "TableButton.h"
+#include "TableModel.h"
+#include "TableView.h"
+
 #include <herald/ScopedPtr.h>
 
-#include "TableItemEditor.h"
-
 #include <QHBoxLayout>
-#include <QListWidget>
 #include <QPushButton>
-#include <QWidget>
+#include <QSplitter>
 
 namespace herald {
 
@@ -17,131 +18,84 @@ namespace {
 
 /// Implements the table editor interface.
 class TableEditorImpl final : public TableEditor {
-  /// The root widget for the table editor.
+  /// The root widget of the table.
   ScopedPtr<QWidget> root_widget;
-  /// The table item editor.
-  ScopedPtr<TableItemEditor> item_editor;
-  /// The list containing the table items.
-  ScopedPtr<QListWidget> list_widget;
+  /// The table model being modified.
+  TableModel* model;
+  /// A view of the table being modified.
+  ScopedPtr<TableView> view;
+  /// The layout of the root widget.
+  ScopedPtr<QVBoxLayout> root_layout;
+  /// The widget containing the table buttons.
+  ScopedPtr<QWidget> button_widget;
+  /// The layout of the button widget.
+  ScopedPtr<QHBoxLayout> button_layout;
 public:
   /// Constructs a new table editor.
+  /// @param model_ The model to be modified.
   /// @param parent A pointer to the parent widget.
-  TableEditorImpl(ScopedPtr<TableItemEditor>&& item_editor_, QWidget* parent)
-    : root_widget(new QWidget(parent)), item_editor(std::move(item_editor_)) {
+  TableEditorImpl(TableModel* model_, QWidget* parent) : root_widget(new QWidget(parent)) {
 
-    auto* layout = new QHBoxLayout(root_widget.get());
-    make_l_widget(layout, root_widget.get());
-    make_r_widget(layout, root_widget.get());
-    fill_table();
+    root_layout = ScopedPtr<QVBoxLayout>(new QVBoxLayout(root_widget.get()));
+
+    model = model_;
+
+    view = ScopedPtr<TableView>(new TableView(model, root_widget.get()));
+
+    button_widget = ScopedPtr<QWidget>(new QWidget(root_widget.get()));
+    button_layout = ScopedPtr<QHBoxLayout>(new QHBoxLayout(button_widget.get()));
+
+    root_layout->addWidget(view.get());
+    root_layout->addWidget(button_widget.get());
+
+    connect(view.get(), &TableView::clicked, this, &TableEditorImpl::handle_item_clicked);
+
+    add_button("Add");
+    add_button("Remove");
+  }
+  /// Adds a button to the table editor.
+  /// @param name The name of the button to add.
+  void add_button(const QString& name) override {
+
+    auto* button = new TableButton(name, button_widget.get());
+
+    connect(button, &TableButton::clicked, this, &TableEditorImpl::handle_button_clicked);
+
+    button_layout->addWidget(button->get_widget());
   }
   /// Accesses a pointer to the editor widget.
   QWidget* get_widget() noexcept override {
     return root_widget.get();
   }
 protected:
-  /// Creates the left hand widget.
-  /// @param layout The layout to add the widget to.
-  /// @param parent The parent widget.
-  void make_l_widget(QLayout* layout, QWidget* parent) {
-
-    auto* left_widget = new QWidget(parent);
-
-    auto* left_layout = new QVBoxLayout(left_widget);
-
-    list_widget = ScopedPtr<QListWidget>(new QListWidget(left_widget));
-
-    list_widget->setEditTriggers(QAbstractItemView::DoubleClicked);
-
-    auto select_functor = [this](const QString& text) {
-      item_editor->select(text);
-    };
-
-    auto rename_functor = [this](QListWidgetItem* item) {
-      item_editor->rename(list_widget->row(item), item->text());
-    };
-
-    QObject::connect(list_widget.get(), &QListWidget::currentTextChanged, select_functor);
-    QObject::connect(list_widget.get(), &QListWidget::itemChanged, rename_functor);
-
-    left_layout->addWidget(list_widget.get());
-    left_layout->addWidget(make_buttons_widget(left_widget));
-
-    layout->addWidget(left_widget);
+  /// Handles a clicked item.
+  /// @param index The index of the item that was clicked.
+  void handle_item_clicked(const QModelIndex& index) {
+    emit selected((std::size_t) index.row());
   }
-  /// Creates the table modification buttons.
-  /// @param parent A pointer to the parent widget.
-  /// @returns A pointer to the new buttons widget.
-  QWidget* make_buttons_widget(QWidget* parent) {
+  /// Handles a button being clicked.
+  /// @param name The name of the button that was clicked.
+  void handle_button_clicked(const QString& name) {
 
-    auto* buttons_widget = new QWidget(parent);
+    if (name == "Remove") {
+      remove_selected_items();
+    }
 
-    auto* buttons_layout = new QHBoxLayout(buttons_widget);
-
-    auto* add_button = new QPushButton(QObject::tr("Add"),    buttons_widget);
-    auto* del_button = new QPushButton(QObject::tr("Delete"), buttons_widget);
-
-    auto del_functor = [this](bool) {
-      auto* current_item = list_widget->currentItem();
-      if (current_item) {
-        item_editor->del(current_item->text());
-        list_widget->takeItem(list_widget->row(current_item));
-      }
-    };
-
-    auto add_functor = [this](bool) {
-
-      auto item_name = item_editor->add();
-
-      auto* item_widget = new QListWidgetItem(list_widget.get());
-      item_widget->setText(item_name);
-      item_widget->setFlags(item_widget->flags() | Qt::ItemIsEditable);
-
-      list_widget->addItem(item_widget);
-    };
-
-    QObject::connect(del_button, &QPushButton::clicked, del_functor);
-    QObject::connect(add_button, &QPushButton::clicked, add_functor);
-
-    buttons_layout->addWidget(add_button);
-    buttons_layout->addWidget(del_button);
-
-    return buttons_widget;
+    emit button_clicked(name);
   }
-  /// Creates the right hand widget.
-  /// @param layout The layout to add the widget to.
-  /// @param parent A pointer to the parent widget.
-  void make_r_widget(QLayout* layout, QWidget* parent) {
-
-    auto* r_widget = new QWidget(parent);
-
-    r_widget->setLayout(new QVBoxLayout);
-
-    layout->addWidget(r_widget);
-
-    item_editor->setup_widget(r_widget);
-  }
-  /// Fills the table with previously existing items.
-  void fill_table() {
-
-    auto items = item_editor->list();
-
-    list_widget->clear();
-
-    for (const auto& item : items) {
-
-      auto* item_widget = new QListWidgetItem(list_widget.get());
-      item_widget->setText(item);
-      item_widget->setFlags(item_widget->flags() | Qt::ItemIsEditable);
-
-      list_widget->addItem(item_widget);
+  /// Removes the selected items from the table.
+  void remove_selected_items() {
+    auto indices = view->selectionModel()->selectedIndexes();
+    for (auto index : indices) {
+      model->removeRow(index.row());
     }
   }
 };
 
 } // namespace
 
-ScopedPtr<TableEditor> TableEditor::make(ScopedPtr<TableItemEditor>&& item_editor, QWidget* parent) {
-  return new TableEditorImpl(std::move(item_editor), parent);
+ScopedPtr<TableEditor> TableEditor::make(TableModel* model, QWidget* parent) {
+  return new TableEditorImpl(std::move(model), parent);
 }
 
 } // namespace tk

@@ -9,7 +9,6 @@
 #include "ProjectManager.h"
 #include "RoomEditor.h"
 #include "TableEditor.h"
-#include "TableItemEditor.h"
 #include "TextureEditor.h"
 
 #include <QCloseEvent>
@@ -87,14 +86,8 @@ class ProjectViewImpl final : public ProjectView {
   ScopedPtr<QTabWidget> tab_widget;
   /// A pointer to the code editor tab.
   ScopedPtr<CodeEditor> code_editor;
-  /// A pointer to the room editor.
-  ScopedPtr<TableEditor> room_editor;
-  /// A pointer to the action editor.
-  ScopedPtr<TableEditor> action_editor;
-  /// A pointer to the animation editor.
-  ScopedPtr<TableEditor> animation_editor;
   /// A pointer to the texture editor.
-  ScopedPtr<TableEditor> texture_editor;
+  ScopedPtr<TextureEditor> texture_editor;
 public:
   /// Constructs a new instance of the project view implementation.
   /// @param manager A pointer to the project manager.
@@ -131,21 +124,21 @@ protected:
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
   QWidget* make_rooms_tab(ProjectManager* manager, QWidget* parent) {
-    room_editor = TableEditor::make(make_room_editor(manager), parent);
-    return room_editor->get_widget();
+    (void)manager;
+    return new QWidget(parent);
   }
   /// Creates the actions tab.
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
   QWidget* make_actions_tab(ProjectManager* manager, QWidget* parent) {
-    action_editor = TableEditor::make(make_action_editor(manager), parent);
-    return action_editor->get_widget();
+    (void)manager;
+    return new QWidget(parent);
   }
   /// Creates the animations tab.
   /// @param parent A pointer to the parent widget.
   QWidget* make_animations_tab(ProjectManager* manager, QWidget* parent) {
-    animation_editor = TableEditor::make(make_animation_editor(manager), parent);
-    return animation_editor->get_widget();
+    (void)manager;
+    return new QWidget(parent);
   }
   /// Creates the textures tab.
   /// @param manager A pointer to the project manager
@@ -153,7 +146,7 @@ protected:
   /// @param parent A pointer to the parent widget.
   QWidget* make_textures_tab(ProjectManager* manager, QWidget* parent) {
 
-    texture_editor = TableEditor::make(make_texture_editor(manager), parent);
+    texture_editor = TextureEditor::make(manager->get_model(), parent);
 
     return texture_editor->get_widget();
   }
