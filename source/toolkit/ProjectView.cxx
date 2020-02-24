@@ -112,6 +112,9 @@ public:
     tab_widget->addTab(make_animations_tab(manager, tab_widget.get()), QObject::tr("Animations"));
     tab_widget->addTab(make_textures_tab(manager, tab_widget.get()),   QObject::tr("Textures"));
 
+    tab_widget->setTabEnabled(2, false);
+    tab_widget->setTabEnabled(3, false);
+
     main_window->setCentralWidget(tab_widget.get());
     main_window->setMinimumSize(640, 480);
   }
