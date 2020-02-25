@@ -1,13 +1,23 @@
 <!DOCTYPE RCC><RCC version="1.0">
-<qresource prefix="icons/">
-  <file>controller.svg</file>
-  <file>open.svg</file>
-  <file>pause.svg</file>
-  <file>play.svg</file>
-  <file>refresh.svg</file>
-  <file>save.svg</file>
-  <file>settings.svg</file>
-  <file>trash.svg</file>
-  <file>hammer.svg</file>
-</qresource>
+
+  <qresource prefix="icons/">
+    <file>controller.svg</file>
+    <file>open.svg</file>
+    <file>pause.svg</file>
+    <file>play.svg</file>
+    <file>refresh.svg</file>
+    <file>save.svg</file>
+    <file>settings.svg</file>
+    <file>trash.svg</file>
+    <file>hammer.svg</file>
+  </qresource>
+
+  <qresource prefix="icons/room-editor">
+    <file alias="stamp.svg">room-editor/stamp.svg</file>
+    <file alias="crop.svg">room-editor/crop.svg</file>
+    <file alias="eraser.svg">room-editor/eraser.svg</file>
+    <file alias="move.svg">room-editor/move.svg</file>
+    <file alias="rotate.svg">room-editor/rotate.svg</file>
+  </qresource>
+
 </RCC>

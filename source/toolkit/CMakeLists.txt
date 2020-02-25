@@ -11,6 +11,10 @@ if(NOT TARGET "herald-engine")
   add_subdirectory("../engine" "engine")
 endif(NOT TARGET "herald-engine")
 
+if(NOT TARGET "herald-icons")
+  add_subdirectory("../../icons" "icons")
+endif(NOT TARGET "herald-icons")
+
 if(NOT TARGET "herald-sysinfo")
   add_subdirectory("../sysinfo" "sysinfo")
 endif(NOT TARGET "herald-sysinfo")
@@ -72,6 +76,8 @@ add_executable("herald-toolkit" WIN32
   "RoomEditor.cxx"
   "RoomModel.h"
   "RoomModel.cxx"
+  "RoomToolPanel.h"
+  "RoomToolPanel.cxx"
   "RoomView.h"
   "RoomView.cxx"
   "SourceFile.h"
@@ -98,6 +104,7 @@ target_link_libraries("herald-toolkit" PRIVATE
   QCodeEditor
   "herald-common"
   "herald-engine"
+  "herald-icons"
   "herald-sysinfo")
 
 set_target_properties("herald-toolkit" PROPERTIES

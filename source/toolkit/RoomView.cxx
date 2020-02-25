@@ -4,17 +4,27 @@
 
 #include <herald/ScopedPtr.h>
 
+#include <QFrame>
 #include <QGridLayout>
 #include <QStackedLayout>
 #include <QWidget>
-
-#include <QDebug>
 
 namespace herald {
 
 namespace tk {
 
 namespace {
+
+/// Creates a new line widget.
+/// @param shape The shape of the line (vertical or horizontal.)
+/// @param parent A pointer to the parent widget.
+/// @returns A pointer to a new line widget.
+ScopedPtr<QFrame> make_line(QFrame::Shape shape, QWidget* parent) {
+  auto line = ScopedPtr<QFrame>::make(parent);
+  line->setFrameShape(shape);
+  line->setContentsMargins(0, 0, 0, 0);
+  return line;
+}
 
 /// A view of a single tile.
 class TileView final : public QWidget {
@@ -23,7 +33,11 @@ public:
   /// @param parent A pointer to the parent widget.
   /// This is expected to be a @ref TileRowView widget.
   TileView(QWidget* parent) : QWidget(parent) {
-    setStyleSheet("border: 1px solid blue");
+
+  }
+  void show_grid() {
+  }
+  void hide_grid() {
   }
 };
 
@@ -32,7 +46,9 @@ class TileRowView final : public QWidget {
   /// The layout of the row.
   QHBoxLayout layout;
   /// The columns within the row.
-  std::vector<ScopedPtr<TileView>> columns;
+  std::vector<ScopedPtr<TileView>> tiles;
+  /// The vertical lines separating the columns.
+  std::vector<ScopedPtr<QFrame>> lines;
 public:
   /// Constructs a new instance of a row view.
   /// @param parent A pointer to the parent widget.
@@ -40,35 +56,58 @@ public:
     layout.setSpacing(0);
     layout.setMargin(0);
   }
+  /// Ensures the grid lines are hidden.
+  void hide_grid() {
+  }
   /// Sets the width of the row.
   /// @param width The number of tiles
   /// to put into this row.
   void set_width(std::size_t width) {
-    if (width > columns.size()) {
-      expand_columns(width - columns.size());
-    } else if (width < columns.size()) {
-      shrink_columns(columns.size() - width);
+    if (width > tiles.size()) {
+      expand_columns(width - tiles.size());
+    } else if (width < tiles.size()) {
+      shrink_columns(tiles.size() - width);
     }
+  }
+  /// Ensures the grid lines are visible.
+  void show_grid() {
   }
 protected:
   /// Adds columns to the row.
   /// @param count The number of columns to add.
   void expand_columns(std::size_t count) {
-    for (std::size_t i = 0; i < count; i++) {
 
-      auto tile = ScopedPtr<TileView>::make(this);
-
-      layout.addWidget(tile.get());
-
-      columns.emplace_back(std::move(tile));
+    // Remove right most line, if there is one.
+    if (lines.size() == (tiles.size() + 1)) {
+      lines.pop_back();
     }
+
+    for (std::size_t i = 0; i < count; i++) {
+      add_line();
+      add_tile();
+    }
+
+    add_line();
   }
   /// Removes columns from the row.
   /// @param count The number of columns to remove.
   void shrink_columns(std::size_t count) {
     for (std::size_t i = 0; i < count; i++) {
-      columns.pop_back();
+      tiles.pop_back();
+      lines.pop_back();
     }
+  }
+  /// Adds a tile to the row.
+  void add_tile() {
+    auto tile = ScopedPtr<TileView>::make(this);
+    layout.addWidget(tile.get());
+    tiles.emplace_back(std::move(tile));
+  }
+  /// Adds a vertical line to the row.
+  void add_line() {
+    auto line = make_line(QFrame::VLine, this);
+    layout.addWidget(line.get());
+    lines.emplace_back(line);
   }
 };
 
@@ -76,6 +115,8 @@ protected:
 class TileMapView final : public QWidget {
   /// The rows of the tile map.
   std::vector<ScopedPtr<TileRowView>> rows;
+  /// The horizontal seperation lines.
+  std::vector<ScopedPtr<QFrame>> lines;
   /// The layout of the tile map view.
   /// This particular view is the
   /// vertical layout of the tile rows.
@@ -85,6 +126,18 @@ public:
   /// @param parent A pointer to the parent widget.
   TileMapView(QWidget* parent) : QWidget(parent), layout(this) {
     layout.setSpacing(0);
+  }
+  /// Shows the gridlines of the tile map.
+  void show_grid() {
+    for (auto& row : rows) {
+      row->show_grid();
+    }
+  }
+  /// Hides the gridlines of the tile map.
+  void hide_grid() {
+    for (auto& row : rows) {
+      row->hide_grid();
+    }
   }
   /// Sets the height of the tile map.
   /// @param height The height to set
@@ -105,20 +158,38 @@ public:
 protected:
   /// Adds rows to the tile map.
   void expand_rows(std::size_t count) {
-    for (std::size_t i = 0; i < count; i++) {
 
-      auto row = ScopedPtr<TileRowView>::make(this);
-
-      layout.addWidget(row.get());
-
-      rows.emplace_back(std::move(row));
+    // Remove bottom border if there is one.
+    if (lines.size() == (rows.size() + 1)) {
+      lines.pop_back();
     }
+
+    for (std::size_t i = 0; i < count; i++) {
+      add_horizontal_line();
+      add_tile_row();
+    }
+
+    // To close the whole border
+    add_horizontal_line();
   }
   /// Removes rows from the tile map.
   void shrink_rows(std::size_t count) {
     for (std::size_t i = 0; i < count; i++) {
       rows.pop_back();
+      lines.pop_back();
     }
+  }
+  /// Adds a horizontal line to the room view.
+  void add_horizontal_line() {
+    auto line = make_line(QFrame::HLine, this);
+    layout.addWidget(line.get());
+    lines.emplace_back(std::move(line));
+  }
+  /// Adds a tile row to the room view.
+  void add_tile_row() {
+    auto row = ScopedPtr<TileRowView>::make(this);
+    layout.addWidget(row.get());
+    rows.emplace_back(std::move(row));
   }
 };
 

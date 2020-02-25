@@ -4,12 +4,13 @@
 
 #include "ProjectModel.h"
 #include "RoomModel.h"
+#include "RoomToolPanel.h"
 #include "RoomView.h"
 #include "TableButton.h"
 #include "TableEditor.h"
 #include "TableModel.h"
 
-#include <QSplitter>
+#include <QGridLayout>
 
 namespace herald {
 
@@ -68,7 +69,7 @@ public:
 };
 
 /// A widget used for editing rooms.
-class RoomEditor final : public QSplitter {
+class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
   static constexpr std::size_t new_room_button_id = 0;
   /// The model for the room table.
@@ -79,10 +80,12 @@ class RoomEditor final : public QSplitter {
   ScopedPtr<RoomModel> room_model;
   /// A view of the room being edited.
   ScopedPtr<RoomView> room_view;
+  /// The tool panel for the room editor.
+  ScopedPtr<RoomToolPanel> tool_panel;
 public:
   /// Constructs a new room editor instance.
   /// @param parent A pointer to the parent widget.
-  RoomEditor(ProjectModel* m, QWidget* parent) : QSplitter(parent) {
+  RoomEditor(ProjectModel* m, QWidget* parent) : QWidget(parent) {
 
     room_table_model = ScopedPtr<RoomTableModel>::make(m);
 
@@ -93,12 +96,15 @@ public:
 
     room_view = RoomView::make(room_model.get(), this);
 
+    tool_panel = ScopedPtr<RoomToolPanel>::make(this);
+
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);
 
-    addWidget(room_table_editor->get_widget());
-    addWidget(room_view->get_widget());
-    setSizes(QList<int>({ INT_MAX, INT_MAX }));
+    auto* layout = new QGridLayout(this);
+    layout->addWidget(room_table_editor->get_widget(), 0,  0, 0, 4);
+    layout->addWidget(room_view->get_widget(),         0,  4, 0, 15);
+    layout->addWidget(tool_panel.get(),                0, 19, 0, 1);
   }
 protected:
   /// Handles a table button being clicked.
