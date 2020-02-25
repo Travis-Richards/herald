@@ -8,6 +8,7 @@
 #include <QStackedLayout>
 #include <QWidget>
 
+#include <QFrame>
 #include <QDebug>
 
 namespace herald {
@@ -17,12 +18,12 @@ namespace tk {
 namespace {
 
 /// A view of a single tile.
-class TileView final : public QWidget {
+class TileView final : public QFrame {
 public:
   /// Constructs a new instance of a tile view.
   /// @param parent A pointer to the parent widget.
   /// This is expected to be a @ref TileRowView widget.
-  TileView(QWidget* parent) : QWidget(parent) {
+  TileView(QWidget* parent) : QFrame(parent) {
 
   }
 };
@@ -34,6 +35,12 @@ class TileRowView final : public QWidget {
   /// The columns within the row.
   std::vector<ScopedPtr<TileView>> columns;
 public:
+  /// Sets the width of the row.
+  /// @param width The number of tiles
+  /// to put into this row.
+  void set_width(std::size_t width) {
+    columns.resize(width);
+  }
 };
 
 /// A view of the room's tiles.
@@ -55,6 +62,12 @@ public:
   /// the tile map to, in terms of tiles.
   void set_height(std::size_t height) {
     rows.resize(height);
+  }
+  /// Sets the width of the tile map.
+  void set_width(std::size_t width) {
+    for (auto& row : rows) {
+      row->set_width(width);
+    }
   }
 };
 
@@ -95,11 +108,27 @@ public:
     return root_widget.get();
   }
 protected:
+  /// Adjusts the tile height of the
+  /// view to the height of the model.
+  void adjust_height_to_model() {
+  }
+  /// Adjusts the tile width of the
+  /// view to the width of the model.
+  void adjust_width_to_model() {
+  }
+  /// Adjusts the width and height of
+  /// the view to the current data in
+  /// the room model.
+  void adjust_size_to_model() {
+    adjust_height_to_model();
+    adjust_width_to_model();
+  }
   /// Handles the case of a room being changed.
   /// A room change requires that all the current
   /// room data be discarded and the new room data
   /// to be mapped to the view.
   void on_room_changed() {
+    adjust_size_to_model();
     qDebug() << "ROOM CHANGED";
   }
 };
