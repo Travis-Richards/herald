@@ -96,9 +96,9 @@ public:
 
     auto room_change_functor = [this]() { on_room_changed(); };
 
-    QObject::connect(m, &RoomModel::room_changed, room_change_functor);
+    QObject::connect(model, &RoomModel::room_changed, room_change_functor);
 
-    if (m->is_valid()) {
+    if (model->is_valid()) {
       // Map data
     }
   }
