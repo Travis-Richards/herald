@@ -98,6 +98,7 @@ public:
 
     addWidget(room_table_editor->get_widget());
     addWidget(room_view->get_widget());
+    setSizes(QList<int>({ INT_MAX, INT_MAX }));
   }
 protected:
   /// Handles a table button being clicked.

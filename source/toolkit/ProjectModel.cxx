@@ -340,13 +340,13 @@ public:
   }
   /// Accesses a pointer to the room table.
   /// This function also sets the modification flag to true.
-  RoomTable* modify_room_table() override {
+  RoomTable* modify_room_table() noexcept override {
     set_modified_flag(true);
     return &room_table;
   }
   /// Accesses a pointer to the texture table.
   /// This function sets the modification flag to true.
-  TextureTable* modify_texture_table() override {
+  TextureTable* modify_texture_table() noexcept override {
     set_modified_flag(true);
     return &texture_table;
   }

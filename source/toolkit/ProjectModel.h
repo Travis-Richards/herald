@@ -124,17 +124,17 @@ public:
   virtual ~ProjectModel() {}
   /// Accesses a const-pointer to the room table.
   /// This prevents the modification flag from being set.
-  virtual const RoomTable* access_room_table() const = 0;
+  virtual const RoomTable* access_room_table() const noexcept = 0;
   /// Accesses the texture table for reading only
   /// This prevents the modification flag fron being set.
   /// @returns A constant pointer to the texture table.
-  virtual const TextureTable* access_texture_table() const = 0;
+  virtual const TextureTable* access_texture_table() const noexcept = 0;
   /// Gets a non-const pointer to the room table.
   /// @returns A non-const pointer to the room table.
-  virtual RoomTable* modify_room_table() = 0;
+  virtual RoomTable* modify_room_table() noexcept = 0;
   /// Gets a non-const pointer to the texture table.
   /// @returns A pointer to the model's texture table.
-  virtual TextureTable* modify_texture_table() = 0;
+  virtual TextureTable* modify_texture_table() noexcept = 0;
   /// Indicates whether or not the project has been modified.
   /// @returns True if the project has been modified, false otherwise.
   inline bool is_modified() const noexcept { return modified; }
