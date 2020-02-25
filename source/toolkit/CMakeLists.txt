@@ -70,6 +70,8 @@ add_executable("herald-toolkit" WIN32
   "PythonLanguage.cxx"
   "RoomEditor.h"
   "RoomEditor.cxx"
+  "RoomModel.h"
+  "RoomModel.cxx"
   "RoomView.h"
   "RoomView.cxx"
   "SourceFile.h"

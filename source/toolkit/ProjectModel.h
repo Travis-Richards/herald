@@ -49,6 +49,32 @@ public:
   virtual std::size_t size() const noexcept = 0;
 };
 
+/// This is the interface for a single room.
+class Room {
+  /// The width of the room, in terms of tiles.
+  std::size_t width;
+  /// The height of the room, in terms of tiles.
+  std::size_t height;
+public:
+  /// Constructs a new room base.
+  constexpr Room() noexcept
+    : width(5), height(5) {}
+  /// Just a stub.
+  virtual ~Room() {}
+  /// Accesses the height of the room, in terms of tiles.
+  virtual std::size_t get_height() const noexcept { return height; }
+  /// Accesses the name of the room.
+  virtual const QString& get_name() const noexcept = 0;
+  /// Accesses the width of the room, in terms of tiles.
+  std::size_t get_width() const noexcept { return width; }
+  /// Sets the height of the room.
+  virtual void set_height(std::size_t h) { height = h; }
+  /// Sets the name of the room.
+  virtual void set_name(const QString& name) = 0;
+  /// Sets the width of the room.
+  virtual void set_width(std::size_t w) { width = w; }
+};
+
 /// The room table contains all
 /// the rooms in the game. Each
 /// room is identified by its name.
@@ -56,12 +82,22 @@ class RoomTable {
 public:
   /// Just a stub.
   virtual ~RoomTable() {}
+  /// Gets a read-only pointer to a room.
+  /// @param index The index to the room to get a pointer of.
+  /// @returns On success, a room pointer is returned.
+  /// If the index is out of bounds, then a null pointer is returned instead.
+  virtual const Room* access_room(std::size_t index) const noexcept = 0;
   /// Creates a new room.
   /// @returns The name of the newly made room.
   virtual QString create_room() = 0;
   /// Gets the name of a room in the room table.
   /// @param index The index of the room to get the name of.
   virtual QString get_name(std::size_t index) const = 0;
+  /// Gets a read-write pointer to a room.
+  /// @param index The index to the room to get a pointer of.
+  /// @returns On success, a room pointer is returned.
+  /// If the index is out of bounds, then a null pointer is returned instead.
+  virtual Room* modify_room(std::size_t index) noexcept = 0;
   /// Removes a room from the room table.
   /// @param index The index of the room to remove.
   virtual bool remove(std::size_t index) = 0;

@@ -165,41 +165,57 @@ protected:
 };
 
 /// A single entry in the room table.
-struct Room final {
+class RoomImpl final : public Room {
+public:
   /// The name of the room.
   QString name;
-  /// The width of the room, in terms of tiles.
-  std::size_t width;
-  /// The height of the room, in terms of tiles.
-  std::size_t height;
-public:
   /// Constructs a new room instance.
   /// @param name_ The name to give the room.
-  Room(const QString& name_) : name(name_), width(10), height(10) {
+  RoomImpl(const QString& name_) : name(name_) {
   }
   /// Constructs a room from a JSON value.
   /// @param room The JSON room to get the data from.
-  Room(const QJsonValue& room) {
+  RoomImpl(const QJsonValue& room) {
+
     auto room_object = room.toObject();
-    name   = room_object["name"].toString();
-    width  = (std::size_t) room_object["width"].toInt(1);
-    height = (std::size_t) room_object["height"].toInt(1);
+
+    name = room_object["name"].toString();
+
+    set_width((std::size_t) room_object["width"].toInt(1));
+
+    set_height((std::size_t) room_object["height"].toInt(1));
+  }
+  /// Accesses the name of the room.
+  const QString& get_name() const noexcept override {
+    return name;
   }
   /// Converts the room to a JSON value.
   QJsonValue to_json() const {
     QJsonObject object;
     object["name"] = name;
-    object["width"] = (int) width;
-    object["height"] = (int) height;
+    object["width"] = (int) get_width();
+    object["height"] = (int) get_height();
     return object;
+  }
+  /// Modifies the name of the room.
+  void set_name(const QString& name_) override {
+    name = name_;
   }
 };
 
 /// This is the implementation for the room table.
 class RoomTableImpl final : public RoomTable {
   /// The rooms part of the room table.
-  std::vector<Room> rooms;
+  std::vector<RoomImpl> rooms;
 public:
+  /// Accesses a room for reading.
+  const Room* access_room(std::size_t index) const noexcept override {
+    if (index >= rooms.size()) {
+      return nullptr;
+    } else {
+      return &rooms[index];
+    }
+  }
   /// Creates a new room, with a unique name.
   /// @returns The name of the newly created room.
   QString create_room() override {
@@ -226,6 +242,14 @@ public:
       return QString();
     } else {
       return rooms[index].name;
+    }
+  }
+  /// Accesses a room for modification.
+  Room* modify_room(std::size_t index) noexcept override {
+    if (index >= rooms.size()) {
+      return nullptr;
+    } else {
+      return &rooms[index];
     }
   }
   /// Reads room table data from a JSON value.

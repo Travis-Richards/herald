@@ -3,6 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "ProjectModel.h"
+#include "RoomModel.h"
 #include "RoomView.h"
 #include "TableButton.h"
 #include "TableEditor.h"
@@ -74,6 +75,8 @@ class RoomEditor final : public QSplitter {
   ScopedPtr<RoomTableModel> room_table_model;
   /// The room table editor.
   ScopedPtr<TableEditor> room_table_editor;
+  /// The data model of the room being viewed.
+  ScopedPtr<RoomModel> room_model;
   /// A view of the room being edited.
   ScopedPtr<RoomView> room_view;
 public:
@@ -86,9 +89,15 @@ public:
     room_table_editor = TableEditor::make(room_table_model.get(), this);
     room_table_editor->add_button(new_room_button_id, tr("New Room"));
 
+    room_model = ScopedPtr<RoomModel>::make(m, this);
+
+    room_view = RoomView::make(room_model.get(), this);
+
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
+    connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);
 
     addWidget(room_table_editor->get_widget());
+    addWidget(room_view->get_widget());
   }
 protected:
   /// Handles a table button being clicked.
@@ -101,6 +110,11 @@ protected:
     } else if (button_id.has_id(new_room_button_id)) {
       room_table_model->create_room();
     }
+  }
+  /// This function is called when a room is selected from the room table.
+  /// @param index The index of the room that was selected.
+  void on_room_selected(std::size_t index) {
+    room_model->change_room(index);
   }
 };
 

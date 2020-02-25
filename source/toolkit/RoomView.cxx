@@ -1,11 +1,14 @@
 #include "RoomView.h"
 
+#include "RoomModel.h"
+
 #include <herald/ScopedPtr.h>
 
-#include "GraphicsView.h"
+#include <QGridLayout>
+#include <QStackedLayout>
+#include <QWidget>
 
-#include <QGraphicsScene>
-#include <QGraphicsRectItem>
+#include <QDebug>
 
 namespace herald {
 
@@ -13,109 +16,98 @@ namespace tk {
 
 namespace {
 
-/// A tile is a single square that's
-/// part of the room view.
-class Tile final {
-  /// The graphics item for the tile.
-  ScopedPtr<QGraphicsRectItem> item;
+/// A view of a single tile.
+class TileView final : public QWidget {
 public:
-  /// Constructs a new tile instance.
-  /// @param parent A pointer to the parent graphics item.
-  Tile(QGraphicsItem* parent = nullptr) : item(new QGraphicsRectItem(parent)) {
-    item->setRect(0, 0, 1, 1);
-    item->setPen(QPen(Qt::blue));
+  /// Constructs a new instance of a tile view.
+  /// @param parent A pointer to the parent widget.
+  /// This is expected to be a @ref TileRowView widget.
+  TileView(QWidget* parent) : QWidget(parent) {
+
   }
-  /// Accesses a pointer to the graphics item.
-  QGraphicsItem* get_item() noexcept {
-    return item.get();
+};
+
+/// A view of a row within a tile map.
+class TileRowView final : public QWidget {
+  /// The layout of the row.
+  QHBoxLayout layout;
+  /// The columns within the row.
+  std::vector<ScopedPtr<TileView>> columns;
+public:
+};
+
+/// A view of the room's tiles.
+class TileMapView final : public QWidget {
+  /// The rows of the tile map.
+  std::vector<ScopedPtr<TileRowView>> rows;
+  /// The layout of the tile map view.
+  /// This particular view is the
+  /// vertical layout of the tile rows.
+  QVBoxLayout layout;
+public:
+  /// Constructs an instance of the tile map view.
+  /// @param parent A pointer to the parent widget.
+  TileMapView(QWidget* parent) : QWidget(parent), layout(this) {
+
   }
-  /// Repositions the tile in case of either a window
-  /// resize event or a room resize event.
-  /// @param x The X coordinate to place the tile at,
-  /// in terms of tile positions.
-  /// @param y The Y coordinate to place the tile at,
-  /// in terms of tile positions.
-  /// @param w The width, in pixels, to make the tile.
-  /// @param h The height, in pixels, to make the tile.
-  void reposition(std::size_t x, std::size_t y,
-                  std::size_t w, std::size_t h) {
-    item->setRect(x * w, y * h, w, h);
+  /// Sets the height of the tile map.
+  /// @param height The height to set
+  /// the tile map to, in terms of tiles.
+  void set_height(std::size_t height) {
+    rows.resize(height);
   }
 };
 
 /// The implementation of the room view interface.
 class RoomViewImpl final : public RoomView {
-  /// The scene to be rendered.
-  ScopedPtr<QGraphicsScene> scene;
-  /// A view of the graph graphics scene.
-  ScopedPtr<GraphicsView> view;
-  /// Rectangles used to highlight the tiles.
-  std::vector<Tile> tiles;
-  /// The width of the room, in terms of tiles.
-  std::size_t w;
-  /// The height of the room, in terms of tiles.
-  std::size_t h;
+  /// A pointer to the widget containing the room view.
+  ScopedPtr<QWidget> root_widget;
+  /// The layout of the root widget.
+  /// A stacked layout allows for multiple
+  /// widgets to be stacked on top of each other.
+  /// This closely emulates what the game's appearance is.
+  ScopedPtr<QStackedLayout> root_layout;
+  /// A view of the tile map.
+  ScopedPtr<TileMapView> tile_map_view;
+  /// A pointer to the room model being modified.
+  RoomModel* model;
 public:
   /// Constructs a new instance of the room view.
   /// @param parent A pointer to the parent widget.
-  RoomViewImpl(QWidget* parent) : w(0), h(0) {
+  /// @param m The room model to be viewed.
+  RoomViewImpl(RoomModel* m, QWidget* parent) : model(m) {
 
-    scene = ScopedPtr<QGraphicsScene>(new QGraphicsScene());
+    root_widget = ScopedPtr<QWidget>::make(parent);
 
-    view = ScopedPtr<GraphicsView>(new GraphicsView(scene.get(), parent));
+    tile_map_view = ScopedPtr<TileMapView>::make(root_widget.get());
 
-    auto resize_functor = [this](const QSize& size) {
-      handle_widget_resize(size);
-    };
+    auto room_change_functor = [this]() { on_room_changed(); };
 
-    QObject::connect(view.get(), &GraphicsView::resized, resize_functor);
+    QObject::connect(m, &RoomModel::room_changed, room_change_functor);
+
+    if (m->is_valid()) {
+      // Map data
+    }
   }
-  /// Accesses a pointer to the widget.
+  /// Accesses a pointer to the widget containing the room view.
+  /// @returns A pointer to the room view widget.
   QWidget* get_widget() noexcept override {
-    return view.get();
+    return root_widget.get();
   }
-  /// Resizes the room.
-  /// @param width_ The width to resize to.
-  /// @param height_ The height to resize to.
-  void resize(std::size_t width_, std::size_t height_) override {
-
-    auto prev_size = w * h;
-    auto next_size = width_ * height_;
-
-    w = width_;
-    h = height_;
-
-    tiles.resize(w * h);
-
-    for (auto i = prev_size; i < next_size; i++) {
-      scene->addItem(tiles[i].get_item());
-    }
-
-    handle_widget_resize(view->size());
-  }
-protected slots:
-  /// Handles the resizing of the graphics view.
-  /// @param size The size of the graphics view.
-  void handle_widget_resize(const QSize& size) {
-
-    auto widget_w = (std::size_t) size.width();
-    auto widget_h = (std::size_t) size.height();
-
-    std::size_t tile_w = w ? (widget_w / w) : 0;
-    std::size_t tile_h = h ? (widget_h / h) : 0;
-
-    for (std::size_t y = 0; y < h; y++) {
-      for (std::size_t x = 0; x < w; x++) {
-        tiles[(y * w) + x].reposition(x, y, tile_w, tile_h);
-      }
-    }
+protected:
+  /// Handles the case of a room being changed.
+  /// A room change requires that all the current
+  /// room data be discarded and the new room data
+  /// to be mapped to the view.
+  void on_room_changed() {
+    qDebug() << "ROOM CHANGED";
   }
 };
 
 } // namespace
 
-ScopedPtr<RoomView> RoomView::make(QWidget* parent) {
-  return new RoomViewImpl(parent);
+ScopedPtr<RoomView> RoomView::make(RoomModel* model, QWidget* parent) {
+  return new RoomViewImpl(model, parent);
 }
 
 } // namespace tk
