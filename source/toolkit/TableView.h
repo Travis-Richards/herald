@@ -18,9 +18,6 @@ public:
   /// this table view is made for.
   /// @param parent A pointer to the parent widget.
   TableView(TableModel* m, QWidget* parent);
-private:
-  /// The model being viewed.
-  TableModel* model;
 };
 
 } // namespace tk

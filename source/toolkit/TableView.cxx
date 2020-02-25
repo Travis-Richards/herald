@@ -131,7 +131,7 @@ public:
 
 } // namespace
 
-TableView::TableView(TableModel* m, QWidget* parent) : QListView(parent), model(m) {
+TableView::TableView(TableModel* m, QWidget* parent) : QListView(parent) {
   setModel(m);
   setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
   setSelectionBehavior(QAbstractItemView::SelectRows);
