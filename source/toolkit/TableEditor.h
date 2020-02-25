@@ -11,6 +11,7 @@ class ScopedPtr;
 
 namespace tk {
 
+class TableButtonID;
 class TableModel;
 
 /// Used to edit the items
@@ -18,6 +19,8 @@ class TableModel;
 class TableEditor : public QObject {
   Q_OBJECT
 public:
+  /// This is the ID for the delete button.
+  static constexpr std::size_t remove_button_id = 0;
   /// Creates a new table editor.
   /// @param model The table model to be edited.
   /// @param parent A pointer to the parent widget.
@@ -26,15 +29,16 @@ public:
   /// Just a stub.
   virtual ~TableEditor() {}
   /// Adds a button to the table editor.
+  /// @param id The ID to assign the button.
   /// @param name The name to give the button.
-  virtual void add_button(const QString& name) = 0;
+  virtual void add_button(std::size_t id, const QString& name) = 0;
   /// Accesses a pointer to the root widget of the table editor.
   /// @returns A pointer to the root widget.
   virtual QWidget* get_widget() noexcept = 0;
 signals:
   /// Emitted when a table button is clicked.
-  /// @param button_name The name of the button that was clicked.
-  void button_clicked(const QString& button_name);
+  /// @param button_id The ID of the button that was clicked.
+  void button_clicked(const TableButtonID& button_id);
   /// This signal is emitted when
   /// an item from the table is selected
   /// for display (or editing.)

@@ -164,20 +164,166 @@ protected:
   }
 };
 
+/// A single entry in the room table.
+struct Room final {
+  /// The name of the room.
+  QString name;
+  /// The width of the room, in terms of tiles.
+  std::size_t width;
+  /// The height of the room, in terms of tiles.
+  std::size_t height;
+public:
+  /// Constructs a new room instance.
+  /// @param name_ The name to give the room.
+  Room(const QString& name_) : name(name_), width(10), height(10) {
+  }
+  /// Constructs a room from a JSON value.
+  /// @param room The JSON room to get the data from.
+  Room(const QJsonValue& room) {
+    auto room_object = room.toObject();
+    name   = room_object["name"].toString();
+    width  = (std::size_t) room_object["width"].toInt(1);
+    height = (std::size_t) room_object["height"].toInt(1);
+  }
+  /// Converts the room to a JSON value.
+  QJsonValue to_json() const {
+    QJsonObject object;
+    object["name"] = name;
+    object["width"] = (int) width;
+    object["height"] = (int) height;
+    return object;
+  }
+};
+
+/// This is the implementation for the room table.
+class RoomTableImpl final : public RoomTable {
+  /// The rooms part of the room table.
+  std::vector<Room> rooms;
+public:
+  /// Creates a new room, with a unique name.
+  /// @returns The name of the newly created room.
+  QString create_room() override {
+
+    QString basename = "New Room";
+
+    QString name = basename;
+
+    for (int i = 0; i < INT_MAX; i++) {
+      if (is_unique(name)) {
+        rooms.emplace_back(name);
+        return name;
+      } else {
+        name = basename + " (" + QString::number(i) + ")";
+      }
+    }
+
+    return QString();
+  }
+  /// Gets the name of a room in the room table.
+  /// @param index The index of the room to get the name of.
+  QString get_name(std::size_t index) const override {
+    if (index >= rooms.size()) {
+      return QString();
+    } else {
+      return rooms[index].name;
+    }
+  }
+  /// Reads room table data from a JSON value.
+  /// @param json_value The JSON value to read the data from.
+  /// @returns True on success, false on failure.
+  bool read(const QJsonValue& json_value) {
+
+    if (!json_value.isArray()) {
+      return false;
+    }
+
+    for (auto json_room : json_value.toArray()) {
+      if (!json_room.isObject()) {
+        return false;
+      } else {
+        rooms.emplace_back(json_room);
+      }
+    }
+
+    return true;
+  }
+  /// Removes a room from the room table.
+  bool remove(std::size_t index) override {
+    if (index >= rooms.size()) {
+      return false;
+    } else {
+      rooms.erase(rooms.begin() + index);
+      return true;
+    }
+  }
+  /// Renames a room.
+  bool rename(std::size_t index, const QString& name) override {
+    if (index >= rooms.size()) {
+      return false;
+    } else {
+      rooms[index].name = name;
+      return true;
+    }
+  }
+  /// Gets the size of the room table.
+  /// @returns The number of rooms in the table.
+  std::size_t size() const noexcept override {
+    return rooms.size();
+  }
+  /// Converts the room table to a JSON value.
+  QJsonValue to_json() const {
+
+    QJsonArray json_array;
+
+    for (const auto& room : rooms) {
+      json_array.append(room.to_json());
+    }
+
+    return json_array;
+  }
+protected:
+  /// Indicates if a name is unique or not.
+  /// @param name The name to check for.
+  /// @returns True if any of the rooms
+  /// have a name equal to @p name, false otherwise
+  bool is_unique(const QString& name) {
+
+    for (const auto& room : rooms) {
+      if (room.name == name) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+};
+
 /// The implementation of the project model.
 /// Uses JSON to store project values.
 class ProjectModelImpl final : public ProjectModel {
+  /// The room table for the model.
+  RoomTableImpl room_table;
   /// The texture table for the model.
   TextureTableImpl texture_table;
 public:
+  /// Accesses a const-pointer to the room table.
+  const RoomTable* access_room_table() const noexcept override {
+    return &room_table;
+  }
+  /// Accesses a const-pointer to the texture table.
+  const TextureTable* access_texture_table() const noexcept override {
+    return &texture_table;
+  }
+  /// Accesses a pointer to the room table.
+  /// This function also sets the modification flag to true.
+  RoomTable* modify_room_table() override {
+    set_modified_flag(true);
+    return &room_table;
+  }
   /// Accesses a pointer to the texture table.
   /// This function sets the modification flag to true.
   TextureTable* modify_texture_table() override {
     set_modified_flag(true);
-    return &texture_table;
-  }
-  /// Accesses a const-pointer to the texture table.
-  const TextureTable* access_texture_table() const noexcept override {
     return &texture_table;
   }
   /// Opens a project model.
@@ -207,11 +353,8 @@ public:
 
     auto root = doc.object();
 
-    if (!texture_table.read(root["textures"])) {
-      return false;
-    }
-
-    return true;
+    return texture_table.read(root["textures"])
+        && room_table.read(root["rooms"]);
   }
   /// Saves the model to a file.
   /// @param path The path to save the model to.
@@ -223,6 +366,7 @@ public:
     }
 
     QJsonObject root;
+    root["rooms"] = room_table.to_json();
     root["textures"] = texture_table.to_json();
 
     QJsonDocument doc(root);

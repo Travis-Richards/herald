@@ -50,14 +50,20 @@ public:
 
     connect(view.get(), &TableView::clicked, this, &TableEditorImpl::handle_item_clicked);
 
-    add_button("Add");
-    add_button("Remove");
+    add_button_by_id(TableButtonID::make_predefined(remove_button_id), "Remove");
   }
   /// Adds a button to the table editor.
-  /// @param name The name of the button to add.
-  void add_button(const QString& name) override {
+  /// @param id The ID of the button to add.
+  /// @param name The name to assign the button.
+  void add_button(std::size_t id, const QString& name) override {
+    add_button_by_id(TableButtonID::make(id), name);
+  }
+  /// Adds a button to the table editor.
+  /// @param id The ID of the button to add.
+  /// @param name The name to assign the button.
+  void add_button_by_id(const TableButtonID& id, const QString& name) {
 
-    auto* button = new TableButton(name, button_widget.get());
+    auto* button = new TableButton(id, name, button_widget.get());
 
     connect(button, &TableButton::clicked, this, &TableEditorImpl::handle_button_clicked);
 
@@ -74,14 +80,15 @@ protected:
     emit selected((std::size_t) index.row());
   }
   /// Handles a button being clicked.
-  /// @param name The name of the button that was clicked.
-  void handle_button_clicked(const QString& name) {
+  /// @param button_id The ID of the button that was clicked.
+  void handle_button_clicked(const TableButtonID& button_id) {
 
-    if (name == "Remove") {
+    if (button_id.is_predefined()
+     && button_id.has_id(TableEditor::remove_button_id)) {
       remove_selected_items();
     }
 
-    emit button_clicked(name);
+    emit button_clicked(button_id);
   }
   /// Removes the selected items from the table.
   void remove_selected_items() {

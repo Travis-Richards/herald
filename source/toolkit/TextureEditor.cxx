@@ -3,6 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "ProjectModel.h"
+#include "TableButton.h"
 #include "TableEditor.h"
 #include "TableModel.h"
 #include "TextureView.h"
@@ -63,10 +64,10 @@ protected:
   }
   /// Sets the name of an texture.
   /// @param index The index of the texture to set.
-  /// @param value The value to assign the texture name.
+  /// @param name The name to give the texture.
   /// @returns True on success, false on failure.
-  bool set_data(std::size_t index, const QVariant& value) override {
-    return model->modify_texture_table()->rename(index, value.toString());
+  bool rename(std::size_t index, const QString& name) override {
+    return model->modify_texture_table()->rename(index, name);
   }
 };
 
@@ -74,6 +75,8 @@ protected:
 /// Displays textures from the texture table
 /// and allows for simple effects and transformations.
 class TextureEditorImpl final : public TextureEditor {
+  /// Identifies the "Import" button.
+  static constexpr std::size_t import_button_id = 0;
   /// The root widget.
   ScopedPtr<QSplitter> root_widget;
   /// The model for the texture table.
@@ -93,6 +96,7 @@ public:
     table_model = ScopedPtr<TextureTableModel>(new TextureTableModel(model));
 
     table_editor = TableEditor::make(table_model.get(), root_widget.get());
+    table_editor->add_button(import_button_id, QObject::tr("Import"));
 
     texture_widget = TextureView::make(root_widget.get());
 
@@ -100,7 +104,7 @@ public:
     root_widget->addWidget(texture_widget->get_widget());
     root_widget->setSizes(QList<int>({ INT_MAX, INT_MAX }));
 
-    auto button_functor = [this](const QString& name) { handle_button(name); };
+    auto button_functor = [this](const TableButtonID& id) { handle_button(id); };
 
     auto display_functor = [this](std::size_t index) { display(index); };
 
@@ -120,12 +124,14 @@ protected:
   /// Handles a button being clicked.
   /// @param name The name of the button that was clicked.
   /// @returns True on success, false on failure.
-  bool handle_button(const QString& name) {
+  bool handle_button(const TableButtonID& button_id) {
 
-    if (name == "Add") {
+    if (button_id.is_predefined()) {
+      if (button_id.has_id(TableEditor::remove_button_id)) {
+        texture_widget->clear();
+      }
+    } else if (button_id.has_id(import_button_id)) {
       return add_texture();
-    } else if (name == "Remove") {
-      texture_widget->clear();
     }
 
     return true;

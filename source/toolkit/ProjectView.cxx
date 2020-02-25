@@ -124,8 +124,7 @@ protected:
   /// @param manager A pointer to the project manager.
   /// @param parent A pointer to the parent widget.
   QWidget* make_rooms_tab(ProjectManager* manager, QWidget* parent) {
-    (void)manager;
-    return new QWidget(parent);
+    return make_room_editor(manager->get_model(), parent).release();
   }
   /// Creates the actions tab.
   /// @param manager A pointer to the project manager.

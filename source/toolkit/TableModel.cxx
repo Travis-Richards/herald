@@ -39,7 +39,7 @@ int TableModel::rowCount(const QModelIndex&) const {
 bool TableModel::setData(const QModelIndex& index, const QVariant& value, int role) {
 
   if (role == Qt::EditRole) {
-    set_data((std::size_t) index.row(), value);
+    rename((std::size_t) index.row(), value.toString());
   }
 
   return true;

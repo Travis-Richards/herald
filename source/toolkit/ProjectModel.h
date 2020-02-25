@@ -49,6 +49,31 @@ public:
   virtual std::size_t size() const noexcept = 0;
 };
 
+/// The room table contains all
+/// the rooms in the game. Each
+/// room is identified by its name.
+class RoomTable {
+public:
+  /// Just a stub.
+  virtual ~RoomTable() {}
+  /// Creates a new room.
+  /// @returns The name of the newly made room.
+  virtual QString create_room() = 0;
+  /// Gets the name of a room in the room table.
+  /// @param index The index of the room to get the name of.
+  virtual QString get_name(std::size_t index) const = 0;
+  /// Removes a room from the room table.
+  /// @param index The index of the room to remove.
+  virtual bool remove(std::size_t index) = 0;
+  /// Renames a room in the room table.
+  /// @param index The index of the room to rename.
+  /// @param name The name to give the room.
+  /// @returns True on success, false on failure.
+  virtual bool rename(std::size_t index, const QString& name) = 0;
+  /// Gets the number of rooms in the table.
+  virtual std::size_t size() const noexcept = 0;
+};
+
 /// A project's data model.
 class ProjectModel {
   /// Whether or not the model has been modified.
@@ -61,13 +86,19 @@ public:
   constexpr ProjectModel() noexcept : modified(false) {}
   /// Just a stub.
   virtual ~ProjectModel() {}
-  /// Gets a non-const pointer to the texture table.
-  /// @returns A pointer to the model's texture table.
-  virtual TextureTable* modify_texture_table() = 0;
+  /// Accesses a const-pointer to the room table.
+  /// This prevents the modification flag from being set.
+  virtual const RoomTable* access_room_table() const = 0;
   /// Accesses the texture table for reading only
   /// This prevents the modification flag fron being set.
   /// @returns A constant pointer to the texture table.
   virtual const TextureTable* access_texture_table() const = 0;
+  /// Gets a non-const pointer to the room table.
+  /// @returns A non-const pointer to the room table.
+  virtual RoomTable* modify_room_table() = 0;
+  /// Gets a non-const pointer to the texture table.
+  /// @returns A pointer to the model's texture table.
+  virtual TextureTable* modify_texture_table() = 0;
   /// Indicates whether or not the project has been modified.
   /// @returns True if the project has been modified, false otherwise.
   inline bool is_modified() const noexcept { return modified; }

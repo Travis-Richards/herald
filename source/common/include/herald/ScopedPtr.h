@@ -13,6 +13,13 @@ class ScopedPtr final {
   /// This will get deleted by the deconstructor.
   Object* object;
 public:
+  /// Constructs a scoped pointer object.
+  /// @tparam args The arguments to forward to the constructor.
+  /// @returns A new instance of a scoped pointer object.
+  template <typename... Args>
+  static ScopedPtr<Object> make(Args... args) {
+    return ScopedPtr<Object>(new Object(args...));
+  }
   /// Constructs the scoped pointer.
   /// @param o The object to contain.
   constexpr ScopedPtr(Object* o = nullptr) noexcept : object(o) {}

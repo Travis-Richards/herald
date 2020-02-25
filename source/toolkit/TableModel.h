@@ -48,10 +48,11 @@ protected:
   /// @param index The index of the item to remove.
   /// @returns True on success, false on failure.
   virtual bool remove(std::size_t index) = 0;
-  /// Sets a data item in the table.
-  /// @param index The index of the item to set.
-  /// @param value The value to assign the item.
-  virtual bool set_data(std::size_t index, const QVariant& value) = 0;
+  /// Renames an item in the table.
+  /// @param index The index of the item to rename.
+  /// @param name The name to assign the item.
+  /// @returns True on success, false on failure.
+  virtual bool rename(std::size_t index, const QString& name) = 0;
 };
 
 } // namespace tk

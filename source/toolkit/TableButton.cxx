@@ -6,7 +6,7 @@ namespace herald {
 
 namespace tk {
 
-TableButton::TableButton(const QString& name, QWidget* parent) : QObject(parent) {
+TableButton::TableButton(const TableButtonID& id_, const QString& name, QWidget* parent) : QObject(parent), id(id_) {
 
   button = new QPushButton(name, parent);
 
@@ -18,7 +18,7 @@ QWidget* TableButton::get_widget() noexcept {
 }
 
 void TableButton::handle_clicked(bool) {
-  emit clicked(button->text());
+  emit clicked(id);
 }
 
 } // namespace tk

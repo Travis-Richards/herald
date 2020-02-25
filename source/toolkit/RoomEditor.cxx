@@ -1,84 +1,114 @@
-#include "TextureEditor.h"
-
-#if 0
+#include "RoomEditor.h"
 
 #include <herald/ScopedPtr.h>
 
-#include "ProjectManager.h"
+#include "ProjectModel.h"
 #include "RoomView.h"
-#include "TableItemEditor.h"
+#include "TableButton.h"
+#include "TableEditor.h"
+#include "TableModel.h"
 
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QSpinBox>
-#include <QString>
-#include <QStringList>
-#include <QWidget>
-
-#endif
+#include <QSplitter>
 
 namespace herald {
 
 namespace tk {
 
-#if 0
 namespace {
 
-class RoomEditor;
-
-/// Used for editing the size of the room.
-class SizeEditor final : public QWidget {
+/// An implementation of the table model for the room table.
+class RoomTableModel final : public TableModel {
+  /// The project model to get the room table from.
+  ProjectModel* model;
 public:
-  SizeEditor(RoomEditor* room_editor, QWidget* parent) : QWidget(parent) {
-    (void)room_editor;
-    auto* layout = new QGridLayout(this);
-    layout->addWidget(new QLabel(tr("Width"), this), 0, 0, Qt::AlignRight);
-    layout->addWidget(new QLabel(tr("Height"), this), 1, 0, Qt::AlignRight);
-    layout->addWidget(new QSpinBox(this), 0, 1);
-    layout->addWidget(new QSpinBox(this), 1, 1);
-    layout->addWidget(new QCheckBox(tr("Lock Size"), this), 0, 2, 2, 1);
+  /// Constructs a new instance of the room table.
+  /// @param m The model containing the room table.
+  RoomTableModel(ProjectModel* m) : model(m) {
+  }
+  /// Creates a new room.
+  /// @returns The name of the newly created room.
+  QString create_room() {
+
+    auto table_size = model->access_room_table()->size();
+
+    auto last_index = index(table_size, 0);
+
+    beginInsertRows(last_index, table_size, table_size + 1);
+
+    auto name = model->modify_room_table()->create_room();
+
+    endInsertRows();
+
+    return name;
+  }
+  /// Gets the name of an item in the table.
+  /// @param index The index of the item to get the name of.
+  /// @returns the name of the item.
+  QString get_name(std::size_t index) const override {
+    return model->access_room_table()->get_name(index);
+  }
+  /// Gets the size of the room table.
+  std::size_t get_size() const override {
+    return model->access_room_table()->size();
+  }
+  /// Removes a room from the table.
+  /// @param index The index of the room to remove.
+  /// @returns True on success, false on failure.
+  bool remove(std::size_t index) override {
+    return model->modify_room_table()->remove(index);
+  }
+  /// Renames a room.
+  /// @param index The index of the room to rename.
+  /// @param name The name to assign the item.
+  /// @returns True on success, false on failure.
+  bool rename(std::size_t index, const QString& name) override {
+    return model->modify_room_table()->rename(index, name);
   }
 };
 
-class RoomEditor final : public TableItemEditor {
+/// A widget used for editing rooms.
+class RoomEditor final : public QSplitter {
+  /// Identifies the "New Room" button.
+  static constexpr std::size_t new_room_button_id = 0;
+  /// The model for the room table.
+  ScopedPtr<RoomTableModel> room_table_model;
+  /// The room table editor.
+  ScopedPtr<TableEditor> room_table_editor;
   /// A view of the room being edited.
   ScopedPtr<RoomView> room_view;
 public:
-  RoomEditor(ProjectManager*) {}
-  QString add() override {
-    return "";
-  }
-  void del(const QString& name) override {
-    (void)name;
-  }
-  QStringList list() const override {
-    return QStringList();
-  }
-  void rename(std::size_t index, const QString& name) override {
-    (void)index;
-    (void)name;
-  }
-  void select(const QString& name) override {
-    (void)name;
-  }
-  void setup_widget(QWidget* parent) override {
+  /// Constructs a new room editor instance.
+  /// @param parent A pointer to the parent widget.
+  RoomEditor(ProjectModel* m, QWidget* parent) : QSplitter(parent) {
 
-    room_view = RoomView::make(parent);
+    room_table_model = ScopedPtr<RoomTableModel>::make(m);
 
-    room_view->resize(5, 5);
+    room_table_editor = TableEditor::make(room_table_model.get(), this);
+    room_table_editor->add_button(new_room_button_id, tr("New Room"));
 
-    parent->layout()->addWidget(room_view->get_widget());
-    parent->layout()->addWidget(new SizeEditor(this, parent));
+    connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
+
+    addWidget(room_table_editor->get_widget());
+  }
+protected:
+  /// Handles a table button being clicked.
+  /// @param id The ID of the button that was clicked.
+  void on_table_button(const TableButtonID& button_id) {
+    if (button_id.is_predefined()) {
+      if (button_id.has_id(TableEditor::remove_button_id)) {
+        // Remove
+      }
+    } else if (button_id.has_id(new_room_button_id)) {
+      room_table_model->create_room();
+    }
   }
 };
 
 } // namespace
 
-ScopedPtr<TableItemEditor> make_room_editor(ProjectManager* manager) {
-  return new RoomEditor(manager);
+ScopedPtr<QWidget> make_room_editor(ProjectModel* model, QWidget* parent) {
+  return new RoomEditor(model, parent);
 }
-#endif
 
 } // namespace tk
 
