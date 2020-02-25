@@ -229,7 +229,7 @@ public:
         rooms.emplace_back(name);
         return name;
       } else {
-        name = basename + " (" + QString::number(i) + ")";
+        name = basename + " (" + QString::number(i + 1) + ")";
       }
     }
 
