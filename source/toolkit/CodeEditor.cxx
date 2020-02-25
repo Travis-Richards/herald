@@ -490,6 +490,10 @@ protected:
   /// @returns True on success, false on failure.
   bool open_source_file(const QModelIndex& index) {
 
+    if (source_tree->isDir(index)) {
+      return false;
+    }
+
     auto source_file = source_tree->open(index);
 
     if (source_file->get_type() == SourceFileType::Binary) {
