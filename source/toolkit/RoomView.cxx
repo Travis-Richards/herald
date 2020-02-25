@@ -38,6 +38,7 @@ public:
   /// @param parent A pointer to the parent widget.
   TileRowView(QWidget* parent) : QWidget(parent), layout(this) {
     layout.setSpacing(0);
+    layout.setMargin(0);
   }
   /// Sets the width of the row.
   /// @param width The number of tiles
@@ -84,7 +85,6 @@ public:
   /// @param parent A pointer to the parent widget.
   TileMapView(QWidget* parent) : QWidget(parent), layout(this) {
     layout.setSpacing(0);
-    layout.setMargin(0);
   }
   /// Sets the height of the tile map.
   /// @param height The height to set
