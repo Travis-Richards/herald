@@ -6,6 +6,7 @@
 #include "RoomModel.h"
 #include "RoomToolModel.h"
 #include "RoomToolPanel.h"
+#include "RoomToolView.h"
 #include "RoomView.h"
 #include "TableButton.h"
 #include "TableEditor.h"
@@ -142,11 +143,23 @@ protected:
 class ToolControl final : public QTabWidget {
 public:
   /// Constructs a new instance of the tool control widget.
-  /// @param m A pointer to the room model.
+  /// @param room_model A pointer to the room model.
+  /// @param room_tool_model A pointer to the room tool model.
   /// @param parent A pointer to the parent widget.
-  ToolControl(RoomModel* m, QWidget* parent) : QTabWidget(parent) {
-    addTab(new RoomPropertiesView(m, this), tr("Room Properties"));
-    addTab(new QWidget(this), tr("Tool"));
+  ToolControl(RoomModel* room_model,
+              RoomToolModel* room_tool_model,
+              QWidget* parent) : QTabWidget(parent) {
+
+    addTab(new RoomPropertiesView(room_model, this), tr("Room Properties"));
+    addTab(new RoomToolView(room_tool_model, this), tr("Tool Properties"));
+
+    connect(room_tool_model, &RoomToolModel::tool_changed, this, &ToolControl::on_tool_changed);
+  }
+protected:
+  /// Handles a tool being changed by
+  /// switching over to the tool properties widget.
+  void on_tool_changed(RoomToolID) {
+    setCurrentIndex(1);
   }
 };
 
@@ -184,7 +197,7 @@ public:
 
     tool_panel = ScopedPtr<RoomToolPanel>::make(&room_tool_model, this);
 
-    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), this);
+    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), &room_tool_model, this);
 
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);

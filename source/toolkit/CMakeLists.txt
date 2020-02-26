@@ -80,6 +80,8 @@ add_executable("herald-toolkit" WIN32
   "RoomToolModel.cxx"
   "RoomToolPanel.h"
   "RoomToolPanel.cxx"
+  "RoomToolView.h"
+  "RoomToolView.cxx"
   "RoomView.h"
   "RoomView.cxx"
   "SourceFile.h"

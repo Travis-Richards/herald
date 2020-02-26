@@ -21,9 +21,6 @@ RoomToolPanel::RoomToolPanel(RoomToolModel* m, QWidget* parent) : QToolBar(paren
     model->set_tool(RoomToolID::Stamp);
   });
 
-  addAction(QIcon(":/icons/room-editor/crop.svg"), tr("Set Background"), [this]() {
-  });
-
   move = addAction(QIcon(":/icons/room-editor/move.svg"), tr("Move"), [this]() {
     model->set_tool(RoomToolID::Move);
   });
