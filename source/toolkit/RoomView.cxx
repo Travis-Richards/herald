@@ -116,11 +116,12 @@ public:
     layout.setMargin(0);
   }
   /// Sets the height of the tile map.
+  /// @param width The width to view the new rows.
   /// @param height The height to set
   /// the tile map to, in terms of tiles.
-  void set_height(std::size_t height) {
+  void set_height(std::size_t width, std::size_t height) {
     if (height > rows.size()) {
-      expand_rows(height - rows.size());
+      expand_rows(height - rows.size(), width);
     } else if (height < rows.size()) {
       shrink_rows(rows.size() - height);
     }
@@ -133,9 +134,9 @@ public:
   }
 protected:
   /// Adds rows to the tile map.
-  void expand_rows(std::size_t count) {
+  void expand_rows(std::size_t count, std::size_t width) {
     for (std::size_t i = 0; i < count; i++) {
-      add_tile_row();
+      add_tile_row(width);
     }
   }
   /// Removes rows from the tile map.
@@ -145,9 +146,15 @@ protected:
     }
   }
   /// Adds a tile row to the room view.
-  void add_tile_row() {
+  /// @param width The width to give the new rows.
+  void add_tile_row(std::size_t width) {
+
     auto row = ScopedPtr<TileRowView>::make(this);
+
+    row->set_width(width);
+
     layout.addWidget(row.get());
+
     rows.emplace_back(std::move(row));
   }
 };
@@ -314,8 +321,11 @@ protected:
   /// Adjusts the tile height of the
   /// view to the height of the model.
   void adjust_height_to_model() {
+
     auto height = model->get_height();
-    tile_map_view->set_height(height);
+
+    tile_map_view->set_height(model->get_width(), height);
+
     grid_view->set_height(height);
   }
   /// Adjusts the tile width of the
