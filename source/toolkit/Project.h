@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QObject>
+
 #include <cstddef>
 
 class QByteArray;
@@ -16,7 +18,8 @@ namespace tk {
 /// of images being used by the project.
 /// Textures are indexed by name and
 /// loaded by path.
-class TextureTable {
+class TextureTable : public QObject {
+  Q_OBJECT
 public:
   /// Just a stub.
   virtual ~TextureTable() { }
@@ -47,6 +50,14 @@ public:
   /// Indicates the size of the texture table.
   /// @returns The size of the texture table.
   virtual std::size_t size() const noexcept = 0;
+protected:
+  /// Constructs the base of the object table.
+  /// @param parent A pointer to the parent object.
+  inline TextureTable(QObject* parent) : QObject(parent) {}
+signals:
+  /// This signal is emitted when a item in the table is renamed.
+  /// @param index The index of the item that was renamed.
+  void renamed(std::size_t index);
 };
 
 /// This is the interface for a single
@@ -141,15 +152,13 @@ public:
 
 /// A project's data, without any of
 /// the extra stuff from the model/view paradigm.
-class Project {
-  /// Whether or not the model has been modified.
-  bool modified;
+class Project : public QObject {
+  Q_OBJECT
 public:
   /// Creates a new project model instance.
+  /// @param parent A pointer to the parent object.
   /// @returns A pointer to a new project model.
-  static ScopedPtr<Project> make();
-  /// Constructs the base project model.
-  constexpr Project() noexcept : modified(false) {}
+  static ScopedPtr<Project> make(QObject* parent = nullptr);
   /// Just a stub.
   virtual ~Project() {}
   /// Accesses a const-pointer to the room table.
@@ -187,6 +196,12 @@ protected:
   inline void set_modified_flag(bool value) noexcept {
     modified = value;
   }
+  /// Constructs the base project instance.
+  /// @param parent A pointer to the parent object.
+  Project(QObject* parent) : QObject(parent), modified(false) {}
+private:
+  /// Whether or not the model has been modified.
+  bool modified;
 };
 
 } // namespace tk

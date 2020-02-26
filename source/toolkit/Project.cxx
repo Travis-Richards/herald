@@ -64,6 +64,9 @@ class TextureTableImpl final : public TextureTable {
   /// The entries made into the texture table.
   std::vector<Texture> textures;
 public:
+  /// Constructs a new instance of the texture table.
+  /// @param parent A pointer to the parent object.
+  TextureTableImpl(QObject* parent) : TextureTable(parent) {}
   /// Adds a texture to the table.
   /// @param path The path of the texture to add.
   /// @returns The name assigned to the texture.
@@ -410,6 +413,13 @@ class ProjectImpl final : public Project {
   /// The texture table for the model.
   TextureTableImpl texture_table;
 public:
+  /// Constructs a new project instance.
+  /// @param parent A pointer to the parent object.
+  ProjectImpl(QObject* parent)
+    : Project(parent),
+      texture_table(this) {
+
+  }
   /// Accesses a const-pointer to the room table.
   const RoomTable* access_room_table() const noexcept override {
     return &room_table;
@@ -494,8 +504,8 @@ public:
 
 } // namespace
 
-ScopedPtr<Project> Project::make() {
-  return new ProjectImpl;
+ScopedPtr<Project> Project::make(QObject* parent) {
+  return new ProjectImpl(parent);
 }
 
 } // namespace tk

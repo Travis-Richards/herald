@@ -72,7 +72,6 @@ public:
   }
 };
 
-
 } // namespace
 
 ScopedPtr<RoomToolModel> RoomToolModel::make(const Project* project, QObject* parent) {
