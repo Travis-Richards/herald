@@ -1,6 +1,8 @@
 #include "RoomView.h"
 
 #include "RoomModel.h"
+#include "RoomToolModel.h"
+#include "TileModel.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -26,15 +28,20 @@ class TileView final : public QWidget {
   QLabel texture;
   /// The highlighter widget.
   QWidget highlight;
+  /// A pointer to the tool model,
+  /// for when this tile view is clicked.
+  RoomToolModel* tool_model;
 public:
   /// Constructs a new instance of a tile view.
+  /// @param tm A pointer to the tool model for this tile view.
   /// @param parent A pointer to the parent widget.
   /// This is expected to be a @ref TileRowView widget.
-  TileView(QWidget* parent)
+  TileView(RoomToolModel* tm, QWidget* parent)
     : QWidget(parent),
       layout(this),
       texture(this),
-      highlight(this) {
+      highlight(this),
+      tool_model(tm) {
 
     layout.setStackingMode(QStackedLayout::StackAll);
     layout.addWidget(&texture);
@@ -52,6 +59,12 @@ protected:
     highlight.setStyleSheet("");
     QWidget::leaveEvent(event);
   }
+  /// Overrides the mouse press event in
+  /// order to perform a tool action.
+  void mousePressEvent(QMouseEvent* event) override {
+
+    QWidget::mousePressEvent(event);
+  }
 };
 
 /// A view of a row within a tile map.
@@ -67,36 +80,22 @@ public:
     layout.setSpacing(0);
     layout.setMargin(0);
   }
-  /// Sets the width of the row.
-  /// @param width The number of tiles
-  /// to put into this row.
-  void set_width(std::size_t width) {
-    if (width > tiles.size()) {
-      expand_columns(width - tiles.size());
-    } else if (width < tiles.size()) {
-      shrink_columns(tiles.size() - width);
-    }
+  /// Adds a tile to the row.
+  /// @param tile The tile to add to the row.
+  void add_tile(ScopedPtr<TileView>&& tile) {
+    layout.addWidget(tile.get());
+    tiles.emplace_back(std::move(tile));
   }
-protected:
-  /// Adds columns to the row.
-  /// @param count The number of columns to add.
-  void expand_columns(std::size_t count) {
-    for (std::size_t i = 0; i < count; i++) {
-      add_tile();
-    }
-  }
-  /// Removes columns from the row.
-  /// @param count The number of columns to remove.
-  void shrink_columns(std::size_t count) {
-    for (std::size_t i = 0; i < count; i++) {
+  /// Shrinks the row to a certain size.
+  /// @param count The number of columns to shrink to.
+  void shrink(std::size_t count) {
+    for (auto i = tiles.size(); i > count; i--) {
       tiles.pop_back();
     }
   }
-  /// Adds a tile to the row.
-  void add_tile() {
-    auto tile = ScopedPtr<TileView>::make(this);
-    layout.addWidget(tile.get());
-    tiles.emplace_back(std::move(tile));
+  /// Indicates the number of tiles in the row.
+  std::size_t tile_count() const noexcept {
+    return tiles.size();
   }
 };
 
@@ -109,53 +108,39 @@ class TileMapView final : public QWidget {
   /// vertical layout of the tile rows.
   QVBoxLayout layout;
 public:
+  /// The type used for non-const iterators.
+  using Iterator = std::vector<ScopedPtr<TileRowView>>::iterator;
   /// Constructs an instance of the tile map view.
   /// @param parent A pointer to the parent widget.
   TileMapView(QWidget* parent) : QWidget(parent), layout(this) {
     layout.setSpacing(0);
     layout.setMargin(0);
   }
-  /// Sets the height of the tile map.
-  /// @param width The width to view the new rows.
-  /// @param height The height to set
-  /// the tile map to, in terms of tiles.
-  void set_height(std::size_t width, std::size_t height) {
-    if (height > rows.size()) {
-      expand_rows(height - rows.size(), width);
-    } else if (height < rows.size()) {
-      shrink_rows(rows.size() - height);
-    }
+  /// Adds a row to the tile map.
+  /// @param row The row to add.
+  void add_row(ScopedPtr<TileRowView>&& row) {
+    layout.addWidget(row.get());
+    rows.emplace_back(std::move(row));
   }
-  /// Sets the width of the tile map.
-  void set_width(std::size_t width) {
-    for (auto& row : rows) {
-      row->set_width(width);
-    }
+  /// Indicates the number of rows in the tile map view.
+  /// @returns The number of rows in the tile map view.
+  std::size_t row_count() const noexcept {
+    return rows.size();
   }
-protected:
-  /// Adds rows to the tile map.
-  void expand_rows(std::size_t count, std::size_t width) {
-    for (std::size_t i = 0; i < count; i++) {
-      add_tile_row(width);
-    }
-  }
-  /// Removes rows from the tile map.
-  void shrink_rows(std::size_t count) {
-    for (std::size_t i = 0; i < count; i++) {
+  /// Shrinks the name to a certain number of rows.
+  /// @param count The number of rows to shrink to.
+  void shrink(std::size_t count) {
+    for (std::size_t i = rows.size(); i > count; i--) {
       rows.pop_back();
     }
   }
-  /// Adds a tile row to the room view.
-  /// @param width The width to give the new rows.
-  void add_tile_row(std::size_t width) {
-
-    auto row = ScopedPtr<TileRowView>::make(this);
-
-    row->set_width(width);
-
-    layout.addWidget(row.get());
-
-    rows.emplace_back(std::move(row));
+  /// Gets a beginning iterator.
+  inline Iterator begin() {
+    return rows.begin();
+  }
+  /// Gets an ending iterator.
+  inline Iterator end() {
+    return rows.end();
   }
 };
 
@@ -273,11 +258,14 @@ class RoomViewImpl final : public RoomView {
   ScopedPtr<GridView> grid_view;
   /// A pointer to the room model being modified.
   RoomModel* model;
+  /// A model of the room tools.
+  RoomToolModel* tool_model;
 public:
   /// Constructs a new instance of the room view.
   /// @param parent A pointer to the parent widget.
   /// @param m The room model to be viewed.
-  RoomViewImpl(RoomModel* m, QWidget* parent) : model(m) {
+  /// @param tm The room tool model, used for editing.
+  RoomViewImpl(RoomModel* m, RoomToolModel* tm, QWidget* parent) : model(m), tool_model(tm) {
 
     root_widget = ScopedPtr<QWidget>::make(parent);
 
@@ -324,15 +312,62 @@ protected:
 
     auto height = model->get_height();
 
-    tile_map_view->set_height(model->get_width(), height);
-
     grid_view->set_height(height);
+
+    if (height < tile_map_view->row_count()) {
+      tile_map_view->shrink(height);
+    } else {
+      add_rows(height - tile_map_view->row_count());
+    }
+  }
+  /// Adds rows to the tile map view.
+  void add_rows(std::size_t count) {
+    for (std::size_t i = 0; i < count; i++) {
+      tile_map_view->add_row(make_row());
+    }
+  }
+  /// Creates a new row for the tile map view.
+  ScopedPtr<TileRowView> make_row() {
+
+    auto w = model->get_width();
+
+    auto row = ScopedPtr<TileRowView>::make(tile_map_view.get());
+
+    for (std::size_t x = 0; x < w; x++) {
+      row->add_tile(make_tile(row.get()));
+    }
+
+    return row;
+  }
+  /// Creates a new tile instance.
+  /// @param parent A pointer to the parent widget.
+  /// @returns A new tile view instance.
+  ScopedPtr<TileView> make_tile(QWidget* parent) {
+    return new TileView(tool_model, parent);
   }
   /// Adjusts the tile width of the
   /// view to the width of the model.
   void adjust_width_to_model() {
-    tile_map_view->set_width(model->get_width());
-    grid_view->set_width(model->get_width());
+
+    auto width = model->get_width();
+
+    grid_view->set_width(width);
+
+    for (auto& row : *tile_map_view) {
+      if (row->tile_count() > width) {
+        row->shrink(width);
+      } else {
+        add_tiles(row.get(), width - row->tile_count());
+      }
+    }
+  }
+  /// Adds tiles to a row.
+  /// @param row The row to add tiles to.
+  /// @param count The number of tiles to add to the row.
+  void add_tiles(TileRowView* row, std::size_t count) {
+    for (std::size_t i = 0; i < count; i++) {
+      row->add_tile(make_tile(row));
+    }
   }
   /// Adjusts the width and height of
   /// the view to the current data in
@@ -352,8 +387,8 @@ protected:
 
 } // namespace
 
-ScopedPtr<RoomView> RoomView::make(RoomModel* model, QWidget* parent) {
-  return new RoomViewImpl(model, parent);
+ScopedPtr<RoomView> RoomView::make(RoomModel* model, RoomToolModel* tool_model, QWidget* parent) {
+  return new RoomViewImpl(model, tool_model, parent);
 }
 
 } // namespace tk

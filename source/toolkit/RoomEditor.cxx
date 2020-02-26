@@ -168,7 +168,7 @@ class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
   static constexpr std::size_t new_room_button_id = 0;
   /// The data model for the room tools.
-  RoomToolModel room_tool_model;
+  ScopedPtr<RoomToolModel> room_tool_model;
   /// The model for the room table.
   ScopedPtr<RoomTableModel> room_table_model;
   /// The room table editor.
@@ -186,6 +186,8 @@ public:
   /// @param parent A pointer to the parent widget.
   RoomEditor(ProjectModel* m, QWidget* parent) : QWidget(parent) {
 
+    room_tool_model = RoomToolModel::make(m, this);
+
     room_table_model = ScopedPtr<RoomTableModel>::make(m);
 
     room_table_editor = TableEditor::make(room_table_model.get(), this);
@@ -193,11 +195,11 @@ public:
 
     room_model = ScopedPtr<RoomModel>::make(m, this);
 
-    room_view = RoomView::make(room_model.get(), this);
+    room_view = RoomView::make(room_model.get(), room_tool_model.get(), this);
 
-    tool_panel = ScopedPtr<RoomToolPanel>::make(&room_tool_model, this);
+    tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_model.get(), this);
 
-    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), &room_tool_model, this);
+    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), room_tool_model.get(), this);
 
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);

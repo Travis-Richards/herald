@@ -101,7 +101,9 @@ add_executable("herald-toolkit" WIN32
   "TextureEditor.h"
   "TextureEditor.cxx"
   "TextureView.h"
-  "TextureView.cxx")
+  "TextureView.cxx"
+  "TileModel.h"
+  "TileModel.cxx")
 
 target_link_libraries("herald-toolkit" PRIVATE
   Qt5::Widgets

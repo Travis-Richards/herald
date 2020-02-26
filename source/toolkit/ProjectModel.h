@@ -49,6 +49,21 @@ public:
   virtual std::size_t size() const noexcept = 0;
 };
 
+/// This is the interface for a single
+/// tile within a room.
+class Tile {
+public:
+  /// Just a stub.
+  virtual ~Tile() {}
+  /// Gets the name of the texture being displayed.
+  /// If the tile does not currently have a texture,
+  /// then an empty string is returned instead.
+  virtual const QString& get_texture() const noexcept = 0;
+  /// Sets the texture to be displayed by the tile.
+  /// @param name The name of the texture to display.
+  virtual void set_texture(const QString& name) = 0;
+};
+
 /// This is the interface for a single room.
 class Room {
   /// The width of the room, in terms of tiles.
@@ -61,12 +76,26 @@ public:
     : width(5), height(5) {}
   /// Just a stub.
   virtual ~Room() {}
+  /// Accesses a certain tile from the room.
+  /// @param x The X coordinate of the tile to access.
+  /// @param y The Y coordinate of the tile to access.
+  /// @returns A pointer to the specified tile.
+  /// If the tile doesn't exist, then a null pointer is returned.
+  virtual const Tile* access_tile(std::size_t x, std::size_t y) const noexcept = 0;
   /// Accesses the height of the room, in terms of tiles.
   virtual std::size_t get_height() const noexcept { return height; }
   /// Accesses the name of the room.
   virtual const QString& get_name() const noexcept = 0;
   /// Accesses the width of the room, in terms of tiles.
   std::size_t get_width() const noexcept { return width; }
+  /// Gets a tile for modification.
+  /// If the tile doesn't exist, then it is made.
+  /// @param x The X coordinate of the tile to get.
+  /// @param y The Y coordinate of the tile to get.
+  /// @returns A pointer to the specified tile.
+  /// This function never returns null because it
+  /// always makes the tile if it doesn't exist.
+  virtual Tile* modify_tile(std::size_t x, std::size_t y) = 0;
   /// Sets the height of the room.
   virtual void set_height(std::size_t h) { height = h; }
   /// Sets the name of the room.

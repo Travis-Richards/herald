@@ -2,9 +2,17 @@
 
 #include <QObject>
 
+class QByteArray;
+class QString;
+
 namespace herald {
 
+template <typename T>
+class ScopedPtr;
+
 namespace tk {
+
+class ProjectModel;
 
 /// Identifies the several types of room tools.
 enum class RoomToolID : int {
@@ -23,23 +31,84 @@ enum class RoomToolID : int {
   Stamp
 };
 
+class NullRoomTool;
+class StampTool;
+
+/// Used for accessing tool-specific information.
+class RoomToolVisitor {
+public:
+  /// Just a stub.
+  virtual ~RoomToolVisitor() {}
+  /// Visits a null tool.
+  /// In most cases, nothing needs to be done here.
+  virtual void visit(NullRoomTool&) { }
+  /// Visits the stamp tool.
+  /// @param stamp_tool The stamp tool to visit.
+  virtual void visit(StampTool& stamp_tool) = 0;
+};
+
+/// The base class of a room tool.
+class RoomTool {
+public:
+  /// Just a stub.
+  virtual ~RoomTool() {}
+  /// Accepts a room tool visitor.
+  /// @param visitor The visitor to accept.
+  virtual void accept(RoomToolVisitor& visitor) = 0;
+};
+
+/// This is either a room tool with
+/// no associated data or a placeholder
+/// until a room tool is selected.
+class NullRoomTool final : public RoomTool {
+public:
+  /// Accepts a visitor.
+  void accept(RoomToolVisitor& visitor) override {
+    visitor.visit(*this);
+  }
+};
+
+/// The tile stamp tool.
+class StampTool : public RoomTool {
+public:
+  /// Just a stub.
+  virtual ~StampTool() {}
+  /// Accepts a room tool visitor.
+  /// @param visitor The visitor to accept.
+  void accept(RoomToolVisitor& visitor) override {
+    visitor.visit(*this);
+  }
+  /// Gets the data of the texture that
+  /// the stamp tool is applying.
+  virtual QByteArray get_texture_data() const = 0;
+  /// Gets the name of the texture that
+  /// the stamp tool is applying.
+  virtual QString get_texture_name() const = 0;
+};
+
 /// This is the data model for the room tools.
-class RoomToolModel final : public QObject {
+class RoomToolModel : public QObject {
   Q_OBJECT
 public:
-  /// Constructs a new room tool model instance.
+  /// Creates a new room tool model instance.
+  /// @param project_model A pointer to the project model.
+  /// This is used to access texture and animation info for the room tools.
   /// @param parent A pointer to the parent object.
-  RoomToolModel(QObject* parent = nullptr) : QObject(parent), tool_id(RoomToolID::None) {}
+  static ScopedPtr<RoomToolModel> make(const ProjectModel* project_model, QObject* parent);
   /// Sets the current room tool being used.
   /// @param id The ID of the tool to assign.
-  void set_tool(RoomToolID id);
+  virtual void set_current_tool(RoomToolID id) = 0;
+  /// Accesses the current room tool.
+  /// @returns A pointer to the current room tool.
+  virtual RoomTool* get_current_tool() = 0;
 signals:
   /// This signal is emitted whenever a tool gets selected.
   /// @param id The ID of the selected tool.
   void tool_changed(RoomToolID id);
-private:
-  /// The ID of the currently used tool.
-  RoomToolID tool_id;
+protected:
+  /// Constructs teh base of the room tool model.
+  /// @param parent A pointer to the parent object.
+  RoomToolModel(QObject* parent) : QObject(parent) {}
 };
 
 } // namespace tk

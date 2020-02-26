@@ -8,6 +8,8 @@ namespace tk {
 
 class ProjectModel;
 class Room;
+class Tile;
+class TileModel;
 
 /// This is a wrapper around the room class
 /// so that a single room can fit into the
@@ -15,6 +17,8 @@ class Room;
 class RoomModel final : public QObject {
   Q_OBJECT
 public:
+  /// Used to get a pointer to tile data.
+  friend TileModel;
   /// Constructs a new instance of the room model.
   /// @param model A pointer to the project model
   /// to get the room information from.
@@ -26,6 +30,11 @@ public:
   bool change_room(std::size_t index);
   /// Gets the height of the current room, in terms of tiles.
   std::size_t get_height() const noexcept;
+  /// Gets a tile model.
+  /// @param x The X coordinate of the tile to get the model of.
+  /// @param y The Y coordinate of the tile to get the model of.
+  /// @returns A model for the specified tile.
+  TileModel get_tile_model(std::size_t x, std::size_t y);
   /// Gets the width of the current room, in terms of tiles.
   std::size_t get_width() const noexcept;
   /// Indicates if the room model is valid or not
@@ -64,6 +73,10 @@ protected:
   /// @returns A const-pointer to the current room.
   /// If no room is currently selected, then a null point is returned.
   Room* modify_room() noexcept;
+  /// Accesses a tile pointer for reading.
+  const Tile* access_tile(std::size_t x, std::size_t y) const noexcept;
+  /// Gets a tile pointer for modification.
+  Tile* modify_tile(std::size_t x, std::size_t y);
   /// Indicates if a room has a certain height value.
   bool has_height(std::size_t h) const noexcept;
   /// Indicates if a room has a certain width value.

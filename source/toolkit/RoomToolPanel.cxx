@@ -18,19 +18,19 @@ RoomToolPanel::RoomToolPanel(RoomToolModel* m, QWidget* parent) : QToolBar(paren
   connect(model, &RoomToolModel::tool_changed, this, &RoomToolPanel::change_selected_icon);
 
   stamp = addAction(QIcon(":/icons/room-editor/stamp.svg"), tr("Tile Stamp"), [this]() {
-    model->set_tool(RoomToolID::Stamp);
+    model->set_current_tool(RoomToolID::Stamp);
   });
 
   move = addAction(QIcon(":/icons/room-editor/move.svg"), tr("Move"), [this]() {
-    model->set_tool(RoomToolID::Move);
+    model->set_current_tool(RoomToolID::Move);
   });
 
   rotate = addAction(QIcon(":/icons/room-editor/rotate.svg"), tr("Rotate"), [this]() {
-    model->set_tool(RoomToolID::Rotate);
+    model->set_current_tool(RoomToolID::Rotate);
   });
 
   eraser = addAction(QIcon(":/icons/room-editor/eraser.svg"), tr("Eraser"), [this]() {
-    model->set_tool(RoomToolID::Eraser);
+    model->set_current_tool(RoomToolID::Eraser);
   });
 
   eraser->setCheckable(true);

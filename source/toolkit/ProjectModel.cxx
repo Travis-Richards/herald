@@ -164,8 +164,52 @@ protected:
   }
 };
 
+/// The implementation of the tile interface.
+class TileImpl final : public Tile {
+  /// The name of the texture being displayed.
+  QString texture_name;
+  /// The X coordinate of this tile.
+  std::size_t x;
+  /// The Y coordinate of this tile.
+  std::size_t y;
+public:
+  /// Constructs a new tile instance.
+  /// @param x_ The X coordinate to assign the tile.
+  /// @param y_ The Y coordinate to assign the tile.
+  TileImpl(std::size_t x_, std::size_t y_) : x(x_), y(y_) {}
+  /// Accesses the name of the texture being displayed.
+  /// @returns The name of the texture.
+  const QString& get_texture() const noexcept override {
+    return texture_name;
+  }
+  /// Indicates if this tile has a certain set of coordinates.
+  /// @param x_ The X coordinate to check for.
+  /// @param y_ The Y coordinate to check for.
+  /// @returns True if this tile has the specified coordinates, false otherwise.
+  bool has_coordinates(std::size_t x_, std::size_t y_) const noexcept {
+    return (x == x_)
+        && (y == y_);
+  }
+  /// Sets the name of the texture being displayed.
+  /// @param name The name to assign.
+  void set_texture(const QString& name) override {
+    texture_name = name;
+  }
+  /// Converts the tile to a JSON value.
+  /// @returns The JSON data for this tile.
+  QJsonValue to_json() const {
+    QJsonObject json_object;
+    json_object["texture"] = texture_name;
+    json_object["x"] = (int) x;
+    json_object["y"] = (int) y;
+    return json_object;
+  }
+};
+
 /// A single entry in the room table.
 class RoomImpl final : public Room {
+  /// The room tiles.
+  std::vector<ScopedPtr<TileImpl>> tiles;
 public:
   /// The name of the room.
   QString name;
@@ -185,16 +229,52 @@ public:
 
     set_height((std::size_t) room_object["height"].toInt(1));
   }
+  /// Accesses a tile for reading.
+  /// @param x The X coordinate of the tile.
+  /// @param y The Y coordinate of the tile.
+  const Tile* access_tile(std::size_t x, std::size_t y) const noexcept override {
+    for (const auto& tile : tiles) {
+      if (tile->has_coordinates(x, y)) {
+        return tile.get();
+      }
+    }
+    return nullptr;
+  }
   /// Accesses the name of the room.
   const QString& get_name() const noexcept override {
     return name;
   }
+  /// Gets a tile for modification.
+  /// @param x The X coordinate of the tile to get.
+  /// @param y The Y coordinate of the tile to get.
+  /// @returns A pointer to the specified tile.
+  Tile* modify_tile(std::size_t x, std::size_t y) override {
+
+    for (auto& tile : tiles) {
+      if (tile->has_coordinates(x, y)) {
+        return tile.get();
+      }
+    }
+
+    tiles.emplace_back(new TileImpl(x, y));
+
+    return tiles[tiles.size() - 1].get();
+  }
   /// Converts the room to a JSON value.
   QJsonValue to_json() const {
+
+    QJsonArray json_tiles;
+
+    for (const auto& tile : tiles) {
+      json_tiles.append(tile->to_json());
+    }
+
     QJsonObject object;
     object["name"] = name;
     object["width"] = (int) get_width();
     object["height"] = (int) get_height();
+    object["tiles"] = json_tiles;
+
     return object;
   }
   /// Modifies the name of the room.

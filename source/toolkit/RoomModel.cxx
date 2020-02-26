@@ -1,6 +1,7 @@
 #include "RoomModel.h"
 
 #include "ProjectModel.h"
+#include "TileModel.h"
 
 namespace herald {
 
@@ -27,6 +28,10 @@ bool RoomModel::change_room(std::size_t index) {
 std::size_t RoomModel::get_height() const noexcept {
   const auto* room = access_room();
   return room ? room->get_height() : 1;
+}
+
+TileModel RoomModel::get_tile_model(std::size_t x, std::size_t y) {
+  return TileModel(this, x, y);
 }
 
 std::size_t RoomModel::get_width() const noexcept {
@@ -81,6 +86,26 @@ const Room* RoomModel::access_room() const noexcept {
 
 Room* RoomModel::modify_room() noexcept {
   return model->modify_room_table()->modify_room(room_index);
+}
+
+const Tile* RoomModel::access_tile(std::size_t x, std::size_t y) const noexcept {
+
+  const auto* room = access_room();
+  if (!room) {
+    return nullptr;
+  }
+
+  return room->access_tile(x, y);
+}
+
+Tile* RoomModel::modify_tile(std::size_t x, std::size_t y) {
+
+  auto* room = modify_room();
+  if (!room) {
+    return nullptr;
+  }
+
+  return room->modify_tile(x, y);
 }
 
 bool RoomModel::has_height(std::size_t h) const noexcept {

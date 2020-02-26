@@ -2,6 +2,8 @@
 
 #include "RoomToolModel.h"
 
+#include <herald/ScopedPtr.h>
+
 #include <QComboBox>
 #include <QFormLayout>
 
@@ -21,19 +23,40 @@ public:
   }
 };
 
+/// Used for modifying properties of the stamp tool.
+template <typename Mutator>
+class StampToolModifier final : public RoomToolVisitor {
+  /// The mutator function that modifies the stamp tool.
+  Mutator mutator;
+public:
+  /// Constructs a new stamp tool modifier.
+  /// @param m The mutator method to call.
+  StampToolModifier(Mutator m) : mutator(m) { }
+protected:
+  /// Visits and modifies the stamp tool.
+  /// @param stamp_tool The stamp tool to be modified.
+  void visit(StampTool& stamp_tool) override {
+    mutator(stamp_tool);
+  }
+};
+
 /// A view of the stamp tool settings.
 class StampToolView final : public QWidget {
   /// The layout of the stamp tool.
   QFormLayout layout;
   /// A pointer to the room tool data model.
   RoomToolModel* tool_model;
+  /// The combo box for selecting a texture.
+  ScopedPtr<QComboBox> texture_combo_box;
 public:
   /// Constructs a new instance of the stamp tool view.
   /// @param m A pointer to the room tool data model.
   /// @param parent A pointer to the parent widget.
   StampToolView(RoomToolModel* m, QWidget* parent) : QWidget(parent), layout(this), tool_model(m) {
 
-    layout.addRow(tr("Texture"), new QComboBox(this));
+    texture_combo_box = ScopedPtr<QComboBox>::make(this);
+
+    layout.addRow(tr("Texture"), texture_combo_box.get());
   }
 };
 
