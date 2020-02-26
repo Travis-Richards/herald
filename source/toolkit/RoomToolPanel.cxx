@@ -1,67 +1,81 @@
 #include "RoomToolPanel.h"
 
+#include "RoomToolModel.h"
+
 #include <QIcon>
 
 namespace herald {
 
 namespace tk {
 
-#if 0
-class ToolButton final : public QPushButton {
-public:
-  ToolButton(const QString& icon_path, QWidget* parent) : QPushButton(parent) {
-
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-
-    auto* layout = new QHBoxLayout(this);
-
-    layout->addWidget(make_label(icon_path, this));
-  }
-protected:
-  static QWidget* make_label(const QString& icon_path, QWidget* parent) {
-    QLabel* label = new QLabel(parent);
-    label->setPixmap(QPixmap(icon_path));
-    label->setScaledContents(true);
-    return label;
-  }
-};
-#endif
-
-RoomToolPanel::RoomToolPanel(QWidget* parent) : QToolBar(parent) {
+RoomToolPanel::RoomToolPanel(RoomToolModel* m, QWidget* parent) : QToolBar(parent), model(m) {
 
   setMovable(true);
   setFloatable(true);
   setOrientation(Qt::Vertical);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-  addAction(QIcon(":/icons/room-editor/stamp.svg"), tr("Tile Brush"), [this]() {
+  connect(model, &RoomToolModel::tool_changed, this, &RoomToolPanel::change_selected_icon);
 
+  stamp = addAction(QIcon(":/icons/room-editor/stamp.svg"), tr("Tile Stamp"), [this]() {
+    model->set_tool(RoomToolID::Stamp);
   });
 
   addAction(QIcon(":/icons/room-editor/crop.svg"), tr("Set Background"), [this]() {
-
   });
 
-  addAction(QIcon(":/icons/room-editor/move.svg"), tr("Move"), [this]() {
-
+  move = addAction(QIcon(":/icons/room-editor/move.svg"), tr("Move"), [this]() {
+    model->set_tool(RoomToolID::Move);
   });
 
-  addAction(QIcon(":/icons/room-editor/rotate.svg"), tr("Rotate"), [this]() {
-
+  rotate = addAction(QIcon(":/icons/room-editor/rotate.svg"), tr("Rotate"), [this]() {
+    model->set_tool(RoomToolID::Rotate);
   });
 
-  addAction(QIcon(":/icons/room-editor/eraser.svg"), tr("Eraser"), [this]() {
-
+  eraser = addAction(QIcon(":/icons/room-editor/eraser.svg"), tr("Eraser"), [this]() {
+    model->set_tool(RoomToolID::Eraser);
   });
 
-#if 0
-  auto* layout = new QVBoxLayout(this);
-  layout->addWidget(new ToolButton(":/icons/room-editor/stamp.svg", this));
-  layout->addWidget(new ToolButton(":/icons/room-editor/crop.svg",  this));
-  layout->addWidget(new ToolButton(":/icons/room-editor/move.svg",  this));
-  layout->addWidget(new ToolButton(":/icons/room-editor/rotate.svg",  this));
-  layout->addWidget(new ToolButton(":/icons/room-editor/eraser.svg",  this));
-#endif
+  eraser->setCheckable(true);
+  move->setCheckable(true);
+  rotate->setCheckable(true);
+  stamp->setCheckable(true);
+}
+
+void RoomToolPanel::change_selected_icon(RoomToolID tool_id) {
+
+  switch (tool_id) {
+    case RoomToolID::None:
+      eraser->setChecked(false);
+      move->setChecked(false);
+      rotate->setChecked(false);
+      stamp->setChecked(false);
+      break;
+    case RoomToolID::Eraser:
+      eraser->setChecked(true);
+      move->setChecked(false);
+      rotate->setChecked(false);
+      stamp->setChecked(false);
+      break;
+    case RoomToolID::Move:
+      eraser->setChecked(false);
+      move->setChecked(true);
+      rotate->setChecked(false);
+      stamp->setChecked(false);
+      break;
+    case RoomToolID::Rotate:
+      eraser->setChecked(false);
+      move->setChecked(false);
+      rotate->setChecked(true);
+      stamp->setChecked(false);
+      break;
+    case RoomToolID::Stamp:
+      eraser->setChecked(false);
+      move->setChecked(false);
+      rotate->setChecked(false);
+      stamp->setChecked(true);
+      break;
+  }
 }
 
 } // namespace tk

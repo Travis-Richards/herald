@@ -4,6 +4,7 @@
 
 #include "ProjectModel.h"
 #include "RoomModel.h"
+#include "RoomToolModel.h"
 #include "RoomToolPanel.h"
 #include "RoomView.h"
 #include "TableButton.h"
@@ -153,6 +154,8 @@ public:
 class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
   static constexpr std::size_t new_room_button_id = 0;
+  /// The data model for the room tools.
+  RoomToolModel room_tool_model;
   /// The model for the room table.
   ScopedPtr<RoomTableModel> room_table_model;
   /// The room table editor.
@@ -179,7 +182,7 @@ public:
 
     room_view = RoomView::make(room_model.get(), this);
 
-    tool_panel = ScopedPtr<RoomToolPanel>::make(this);
+    tool_panel = ScopedPtr<RoomToolPanel>::make(&room_tool_model, this);
 
     tool_control = ScopedPtr<ToolControl>::make(room_model.get(), this);
 
