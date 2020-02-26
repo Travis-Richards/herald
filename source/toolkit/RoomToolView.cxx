@@ -23,23 +23,6 @@ public:
   }
 };
 
-/// Used for modifying properties of the stamp tool.
-template <typename Mutator>
-class StampToolModifier final : public RoomToolVisitor {
-  /// The mutator function that modifies the stamp tool.
-  Mutator mutator;
-public:
-  /// Constructs a new stamp tool modifier.
-  /// @param m The mutator method to call.
-  StampToolModifier(Mutator m) : mutator(m) { }
-protected:
-  /// Visits and modifies the stamp tool.
-  /// @param stamp_tool The stamp tool to be modified.
-  void visit(StampTool& stamp_tool) override {
-    mutator(stamp_tool);
-  }
-};
-
 /// A view of the stamp tool settings.
 class StampToolView final : public QWidget {
   /// The layout of the stamp tool.
@@ -57,6 +40,20 @@ public:
     texture_combo_box = ScopedPtr<QComboBox>::make(this);
 
     layout.addRow(tr("Texture"), texture_combo_box.get());
+
+    fill_texture_options();
+  }
+protected:
+  /// Fills the texture combo box with the texture options.
+  void fill_texture_options() {
+
+    auto* stamp_tool = tool_model->get_stamp_tool();
+
+    auto textures = stamp_tool->list_textures();
+
+    for (auto texture : textures) {
+      texture_combo_box->addItem(texture);
+    }
   }
 };
 

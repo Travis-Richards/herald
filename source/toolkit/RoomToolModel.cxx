@@ -2,6 +2,8 @@
 
 #include <herald/ScopedPtr.h>
 
+#include "Project.h"
+
 namespace herald {
 
 namespace tk {
@@ -10,9 +12,13 @@ namespace {
 
 /// The implementation of the stamp tool.
 class StampToolImpl final : public StampTool {
+  /// A pointer to the project.
+  const Project* project;
 public:
-  StampToolImpl(const Project* project) {
-    (void)project;
+  /// Constructs a new instance of the stamp tool.
+  /// @param p A pointer to the project.
+  StampToolImpl(const Project* p) : project(p) {
+
   }
   /// Accesses the current texture data.
   QByteArray get_texture_data() const override {
@@ -21,6 +27,22 @@ public:
   /// Accesses the name of the texture currently used.
   QString get_texture_name() const override {
     return QString();
+  }
+  /// Lists the available textures for the stamp tool.
+  /// @returns A list of texture names for the tool.
+  QStringList list_textures() const override {
+
+    const auto* texture_table = project->access_texture_table();
+
+    auto count = texture_table->size();
+
+    QStringList texture_names;
+
+    for (std::size_t i = 0; i < count; i++) {
+      texture_names << texture_table->get_name(i);
+    }
+
+    return texture_names;
   }
 };
 
@@ -52,7 +74,6 @@ public:
     current_tool_id = id;
   }
   /// Accesses a pointer to the current room tool.
-  /// @returns A pointer to the current room tool.
   RoomTool* get_current_tool() override {
 
     switch (current_tool_id) {
@@ -69,6 +90,10 @@ public:
     }
 
     return &null_tool;
+  }
+  /// Accesses a pointer to the stamp tool.
+  StampTool* get_stamp_tool() override {
+    return &stamp_tool;
   }
 };
 

@@ -4,6 +4,7 @@
 
 class QByteArray;
 class QString;
+class QStringList;
 
 namespace herald {
 
@@ -84,6 +85,9 @@ public:
   /// Gets the name of the texture that
   /// the stamp tool is applying.
   virtual QString get_texture_name() const = 0;
+  /// Lists the available textures for the stamp tool.
+  /// @returns A list of available textures.
+  virtual QStringList list_textures() const = 0;
 };
 
 /// This is the data model for the room tools.
@@ -101,6 +105,9 @@ public:
   /// Accesses the current room tool.
   /// @returns A pointer to the current room tool.
   virtual RoomTool* get_current_tool() = 0;
+  /// Gets a pointer to the stamp tool.
+  /// @returns A pointer to the stamp tool.
+  virtual StampTool* get_stamp_tool() = 0;
 signals:
   /// This signal is emitted whenever a tool gets selected.
   /// @param id The ID of the selected tool.
