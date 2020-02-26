@@ -2,7 +2,7 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "ProjectModel.h"
+#include "Project.h"
 #include "TableButton.h"
 #include "TableEditor.h"
 #include "TableModel.h"
@@ -22,22 +22,22 @@ namespace {
 /// table to act as a table model for the table editor.
 class TextureTableModel final : public TableModel {
   /// The project model containing the textures.
-  ProjectModel* model;
+  Project* project;
 public:
   /// Constructs a new instance of the texture table model.
   /// @param m The project model containing the textures.
-  TextureTableModel(ProjectModel* m) : model(m) {}
+  TextureTableModel(Project* m) : project(m) {}
   /// Adds a texture to the model.
   /// @param path The path of the texture to add.
   void add_texture(const QString& path) {
 
-    auto table_size = model->access_texture_table()->size();
+    auto table_size = project->access_texture_table()->size();
 
     auto last_index = index(table_size, 0);
 
     beginInsertRows(last_index, table_size, table_size + 1);
 
-    model->modify_texture_table()->add(path);
+    project->modify_texture_table()->add(path);
 
     endInsertRows();
   }
@@ -45,29 +45,29 @@ public:
   /// @param index The index of the texture to get the data of.
   /// @returns The data for the specified texture.
   QByteArray get_data(std::size_t index) const {
-    return model->access_texture_table()->get_data(index);
+    return project->access_texture_table()->get_data(index);
   }
 protected:
   /// Removes a texture from the model.
   /// @param index The index of the texture to remove.
   /// @returns True on success, false on failure.
   bool remove(std::size_t index) override {
-    return model->modify_texture_table()->remove(index);
+    return project->modify_texture_table()->remove(index);
   }
   /// Gets the name of a texture.
   QString get_name(std::size_t index) const override {
-    return model->access_texture_table()->get_name(index);
+    return project->access_texture_table()->get_name(index);
   }
   /// Gets the number of textures in the texture table.
   std::size_t get_size() const override {
-    return model->access_texture_table()->size();
+    return project->access_texture_table()->size();
   }
   /// Sets the name of an texture.
   /// @param index The index of the texture to set.
   /// @param name The name to give the texture.
   /// @returns True on success, false on failure.
   bool rename(std::size_t index, const QString& name) override {
-    return model->modify_texture_table()->rename(index, name);
+    return project->modify_texture_table()->rename(index, name);
   }
 };
 
@@ -87,13 +87,13 @@ class TextureEditorImpl final : public TextureEditor {
   ScopedPtr<TextureView> texture_widget;
 public:
   /// Constructs a new texture editor instance.
-  /// @param model The project model to get the textures from.
+  /// @param project The project data to get the textures from.
   /// @param parent A pointer to the parent widget.
-  TextureEditorImpl(ProjectModel* model, QWidget* parent) {
+  TextureEditorImpl(Project* project, QWidget* parent) {
 
     root_widget = ScopedPtr<QSplitter>(new QSplitter(Qt::Horizontal, parent));
 
-    table_model = ScopedPtr<TextureTableModel>(new TextureTableModel(model));
+    table_model = ScopedPtr<TextureTableModel>(new TextureTableModel(project));
 
     table_editor = TableEditor::make(table_model.get(), root_widget.get());
     table_editor->add_button(import_button_id, QObject::tr("Import"));
@@ -150,8 +150,8 @@ protected:
 
 } // namespace
 
-ScopedPtr<TextureEditor> TextureEditor::make(ProjectModel* model, QWidget* parent) {
-  return new TextureEditorImpl(model, parent);
+ScopedPtr<TextureEditor> TextureEditor::make(Project* project, QWidget* parent) {
+  return new TextureEditorImpl(project, parent);
 }
 
 } // namespace tk

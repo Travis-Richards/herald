@@ -1,20 +1,20 @@
 #include "RoomModel.h"
 
-#include "ProjectModel.h"
+#include "Project.h"
 #include "TileModel.h"
 
 namespace herald {
 
 namespace tk {
 
-RoomModel::RoomModel(ProjectModel* m, QObject* parent) : QObject(parent) {
-  model = m;
+RoomModel::RoomModel(Project* m, QObject* parent) : QObject(parent) {
+  project = m;
   room_index = SIZE_MAX;
 }
 
 bool RoomModel::change_room(std::size_t index) {
 
-  if (index >= model->access_room_table()->size()) {
+  if (index >= project->access_room_table()->size()) {
     return false;
   }
 
@@ -41,7 +41,7 @@ std::size_t RoomModel::get_width() const noexcept {
 
 bool RoomModel::is_valid() const noexcept {
 
-  const auto* room_table = model->access_room_table();
+  const auto* room_table = project->access_room_table();
 
   const auto* room = room_table->access_room(room_index);
 
@@ -81,11 +81,11 @@ bool RoomModel::set_height(std::size_t height) {
 }
 
 const Room* RoomModel::access_room() const noexcept {
-  return model->access_room_table()->access_room(room_index);
+  return project->access_room_table()->access_room(room_index);
 }
 
 Room* RoomModel::modify_room() noexcept {
-  return model->modify_room_table()->modify_room(room_index);
+  return project->modify_room_table()->modify_room(room_index);
 }
 
 const Tile* RoomModel::access_tile(std::size_t x, std::size_t y) const noexcept {

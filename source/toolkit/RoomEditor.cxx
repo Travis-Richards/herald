@@ -2,7 +2,7 @@
 
 #include <herald/ScopedPtr.h>
 
-#include "ProjectModel.h"
+#include "Project.h"
 #include "RoomModel.h"
 #include "RoomToolModel.h"
 #include "RoomToolPanel.h"
@@ -27,24 +27,24 @@ namespace {
 
 /// An implementation of the table model for the room table.
 class RoomTableModel final : public TableModel {
-  /// The project model to get the room table from.
-  ProjectModel* model;
+  /// The project data to get the room table from.
+  Project* project;
 public:
   /// Constructs a new instance of the room table.
   /// @param m The model containing the room table.
-  RoomTableModel(ProjectModel* m) : model(m) {
+  RoomTableModel(Project* m) : project(m) {
   }
   /// Creates a new room.
   /// @returns The name of the newly created room.
   QString create_room() {
 
-    auto table_size = model->access_room_table()->size();
+    auto table_size = project->access_room_table()->size();
 
     auto last_index = index(table_size, 0);
 
     beginInsertRows(last_index, table_size, table_size + 1);
 
-    auto name = model->modify_room_table()->create_room();
+    auto name = project->modify_room_table()->create_room();
 
     endInsertRows();
 
@@ -54,24 +54,24 @@ public:
   /// @param index The index of the item to get the name of.
   /// @returns the name of the item.
   QString get_name(std::size_t index) const override {
-    return model->access_room_table()->get_name(index);
+    return project->access_room_table()->get_name(index);
   }
   /// Gets the size of the room table.
   std::size_t get_size() const override {
-    return model->access_room_table()->size();
+    return project->access_room_table()->size();
   }
   /// Removes a room from the table.
   /// @param index The index of the room to remove.
   /// @returns True on success, false on failure.
   bool remove(std::size_t index) override {
-    return model->modify_room_table()->remove(index);
+    return project->modify_room_table()->remove(index);
   }
   /// Renames a room.
   /// @param index The index of the room to rename.
   /// @param name The name to assign the item.
   /// @returns True on success, false on failure.
   bool rename(std::size_t index, const QString& name) override {
-    return model->modify_room_table()->rename(index, name);
+    return project->modify_room_table()->rename(index, name);
   }
 };
 
@@ -184,7 +184,7 @@ class RoomEditor final : public QWidget {
 public:
   /// Constructs a new room editor instance.
   /// @param parent A pointer to the parent widget.
-  RoomEditor(ProjectModel* m, QWidget* parent) : QWidget(parent) {
+  RoomEditor(Project* m, QWidget* parent) : QWidget(parent) {
 
     room_tool_model = RoomToolModel::make(m, this);
 
@@ -231,8 +231,8 @@ protected:
 
 } // namespace
 
-ScopedPtr<QWidget> make_room_editor(ProjectModel* model, QWidget* parent) {
-  return new RoomEditor(model, parent);
+ScopedPtr<QWidget> make_room_editor(Project* project, QWidget* parent) {
+  return new RoomEditor(project, parent);
 }
 
 } // namespace tk

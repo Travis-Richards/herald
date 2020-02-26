@@ -1,6 +1,6 @@
 #include "TileModel.h"
 
-#include "ProjectModel.h"
+#include "Project.h"
 #include "RoomModel.h"
 
 namespace herald {

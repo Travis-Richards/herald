@@ -12,7 +12,7 @@ class ScopedPtr;
 
 namespace tk {
 
-class ProjectModel;
+class Project;
 
 /// Identifies the several types of room tools.
 enum class RoomToolID : int {
@@ -91,10 +91,10 @@ class RoomToolModel : public QObject {
   Q_OBJECT
 public:
   /// Creates a new room tool model instance.
-  /// @param project_model A pointer to the project model.
+  /// @param project A pointer to the project data.
   /// This is used to access texture and animation info for the room tools.
   /// @param parent A pointer to the parent object.
-  static ScopedPtr<RoomToolModel> make(const ProjectModel* project_model, QObject* parent);
+  static ScopedPtr<RoomToolModel> make(const Project* project, QObject* parent);
   /// Sets the current room tool being used.
   /// @param id The ID of the tool to assign.
   virtual void set_current_tool(RoomToolID id) = 0;

@@ -6,7 +6,7 @@ namespace herald {
 
 namespace tk {
 
-class ProjectModel;
+class Project;
 class Room;
 class Tile;
 class TileModel;
@@ -20,9 +20,9 @@ public:
   /// Used to get a pointer to tile data.
   friend TileModel;
   /// Constructs a new instance of the room model.
-  /// @param model A pointer to the project model
+  /// @param project A pointer to the project data.
   /// to get the room information from.
-  RoomModel(ProjectModel* model, QObject* parent);
+  RoomModel(Project* project, QObject* parent);
   /// Changes the room being modeled.
   /// @param index The index of the room to change to.
   /// @returns True on success, false on failure.
@@ -82,8 +82,8 @@ protected:
   /// Indicates if a room has a certain width value.
   bool has_width(std::size_t w) const noexcept;
 private:
-  /// The project model to get the room information from.
-  ProjectModel* model;
+  /// The project data to get the room information from.
+  Project* project;
   /// The index of the room within the room table.
   std::size_t room_index;
 };

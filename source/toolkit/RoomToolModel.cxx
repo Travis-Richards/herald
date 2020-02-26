@@ -11,8 +11,8 @@ namespace {
 /// The implementation of the stamp tool.
 class StampToolImpl final : public StampTool {
 public:
-  StampToolImpl(const ProjectModel* project_model) {
-    (void)project_model;
+  StampToolImpl(const Project* project) {
+    (void)project;
   }
   /// Accesses the current texture data.
   QByteArray get_texture_data() const override {
@@ -34,10 +34,10 @@ class RoomToolModelImpl final : public RoomToolModel {
   NullRoomTool null_tool;
 public:
   /// Constructs a new room tool model.
-  /// @param project_model The project model to read tool data from.
-  RoomToolModelImpl(const ProjectModel* project_model, QObject* parent)
+  /// @param project_model The project data to read tool data from.
+  RoomToolModelImpl(const Project* project, QObject* parent)
     : RoomToolModel(parent),
-      stamp_tool(project_model) {
+      stamp_tool(project) {
 
     current_tool_id = RoomToolID::None;
   }
@@ -75,8 +75,8 @@ public:
 
 } // namespace
 
-ScopedPtr<RoomToolModel> RoomToolModel::make(const ProjectModel* project_model, QObject* parent) {
-  return new RoomToolModelImpl(project_model, parent);
+ScopedPtr<RoomToolModel> RoomToolModel::make(const Project* project, QObject* parent) {
+  return new RoomToolModelImpl(project, parent);
 }
 
 } // namespace tk

@@ -16,7 +16,7 @@ namespace tk {
 
 class GameInfo;
 class Language;
-class ProjectModel;
+class Project;
 class SourceTreeModel;
 
 /// Used to manage the data of a project.
@@ -29,8 +29,8 @@ public:
   virtual ~ProjectManager() {}
   /// Accesses a pointer to the language used for the project.
   virtual Language* get_language() noexcept = 0;
-  /// Accesses a pointer to the project data model.
-  virtual ProjectModel* get_model() noexcept = 0;
+  /// Accesses a pointer to the project data.
+  virtual Project* get_project() noexcept = 0;
   /// Accesses the source tree model.
   /// @returns A pointer to the source tree model.
   virtual SourceTreeModel* get_source_tree_model() noexcept = 0;

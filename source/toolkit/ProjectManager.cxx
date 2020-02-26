@@ -4,7 +4,7 @@
 
 #include "GameInfo.h"
 #include "Language.h"
-#include "ProjectModel.h"
+#include "Project.h"
 #include "SourceTreeModel.h"
 
 #include <QDir>
@@ -27,22 +27,22 @@ class ProjectManagerImpl final : public ProjectManager {
   QDir game_dir;
   /// The model for the project's source tree.
   ScopedPtr<SourceTreeModel> source_tree;
-  /// The data model for the project.
-  ScopedPtr<ProjectModel> project_model;
+  /// The data for the project.
+  ScopedPtr<Project> project;
   /// The language used by the project.
   ScopedPtr<Language> language;
 public:
   /// Constructs a new instance of the project manager.
   ProjectManagerImpl() {
-    project_model = ProjectModel::make();
+    project = Project::make();
   }
   /// Accesses a pointer to the project language.
   Language* get_language() noexcept override {
     return language.get();
   }
   /// Accesses a pointer to the project model.
-  ProjectModel* get_model() noexcept override {
-    return project_model.get();
+  Project* get_project() noexcept override {
+    return project.get();
   }
   /// Accesses a pointer to the source manager.
   /// @returns A pointer to the source tree manager.
@@ -52,7 +52,7 @@ public:
   /// Indicates whether or not there are unsaved changes in the project.
   /// @returns True if there's unsaved changes, false otherwise.
   bool has_unsaved_changes() const override {
-    return project_model->is_modified();
+    return project->is_modified();
   }
   /// Opens a project at a certain path.
   /// @param path The path of the project to open.
@@ -68,7 +68,7 @@ public:
 
     QFileInfo model_info(model_path);
 
-    if (model_info.exists() && !project_model->open(model_path)) {
+    if (model_info.exists() && !project->open(model_path)) {
       return false;
     }
 
@@ -87,7 +87,7 @@ public:
   /// Saves all project data.
   /// @returns True on success, false on failure.
   bool save_all() override {
-    return project_model->save(game_dir.filePath("model.json"));
+    return project->save(game_dir.filePath("model.json"));
   }
 };
 

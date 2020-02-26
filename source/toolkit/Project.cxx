@@ -1,4 +1,4 @@
-#include "ProjectModel.h"
+#include "Project.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -404,7 +404,7 @@ protected:
 
 /// The implementation of the project model.
 /// Uses JSON to store project values.
-class ProjectModelImpl final : public ProjectModel {
+class ProjectImpl final : public Project {
   /// The room table for the model.
   RoomTableImpl room_table;
   /// The texture table for the model.
@@ -494,8 +494,8 @@ public:
 
 } // namespace
 
-ScopedPtr<ProjectModel> ProjectModel::make() {
-  return new ProjectModelImpl;
+ScopedPtr<Project> Project::make() {
+  return new ProjectImpl;
 }
 
 } // namespace tk

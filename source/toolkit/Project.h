@@ -139,18 +139,19 @@ public:
   virtual std::size_t size() const noexcept = 0;
 };
 
-/// A project's data model.
-class ProjectModel {
+/// A project's data, without any of
+/// the extra stuff from the model/view paradigm.
+class Project {
   /// Whether or not the model has been modified.
   bool modified;
 public:
   /// Creates a new project model instance.
   /// @returns A pointer to a new project model.
-  static ScopedPtr<ProjectModel> make();
+  static ScopedPtr<Project> make();
   /// Constructs the base project model.
-  constexpr ProjectModel() noexcept : modified(false) {}
+  constexpr Project() noexcept : modified(false) {}
   /// Just a stub.
-  virtual ~ProjectModel() {}
+  virtual ~Project() {}
   /// Accesses a const-pointer to the room table.
   /// This prevents the modification flag from being set.
   virtual const RoomTable* access_room_table() const noexcept = 0;
