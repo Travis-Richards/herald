@@ -132,10 +132,24 @@ public:
 } // namespace
 
 TableView::TableView(TableModel* m, QWidget* parent) : QListView(parent) {
+
   setModel(m);
-  setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
+
+  setEditTriggers(QAbstractItemView::DoubleClicked
+                | QAbstractItemView::SelectedClicked
+                | QAbstractItemView::EditKeyPressed);
+
   setSelectionBehavior(QAbstractItemView::SelectRows);
+
   setItemDelegate(new TableItemDelegate(m));
+}
+
+void TableView::currentChanged(const QModelIndex& selected_index,
+                               const QModelIndex& deselected_index) {
+
+  emit selected(selected_index);
+
+  QListView::currentChanged(selected_index, deselected_index);
 }
 
 } // namespace tk

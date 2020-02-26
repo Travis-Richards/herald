@@ -10,7 +10,12 @@
 #include "TableEditor.h"
 #include "TableModel.h"
 
+#include <QFormLayout>
 #include <QGridLayout>
+#include <QSpinBox>
+#include <QTabWidget>
+
+#include <climits>
 
 namespace herald {
 
@@ -68,6 +73,82 @@ public:
   }
 };
 
+/// Used for viewing and modifying the room properties.
+class RoomPropertiesView final : public QWidget {
+  /// A pointer to the room model.
+  RoomModel* model;
+  /// The form layout of the room properties.
+  ScopedPtr<QFormLayout> layout;
+  /// The room width spin box.
+  ScopedPtr<QSpinBox> w_spin_box;
+  /// The room height spin box.
+  ScopedPtr<QSpinBox> h_spin_box;
+public:
+  /// Constructs a new instance of the room properties view.
+  /// @param m A pointer to the room data model.
+  /// @param parent A pointer to the parent widget.
+  RoomPropertiesView(RoomModel* m, QWidget* parent) : QWidget(parent), model(m) {
+
+    layout = ScopedPtr<QFormLayout>::make(this);
+
+    setup();
+
+    connect(model, &RoomModel::room_changed, this, &RoomPropertiesView::update_room);
+  }
+protected:
+  /// Constructs the properties view.
+  void setup() {
+
+    w_spin_box = ScopedPtr<QSpinBox>::make(this);
+    h_spin_box = ScopedPtr<QSpinBox>::make(this);
+
+    w_spin_box->setMinimum(1);
+    h_spin_box->setMinimum(1);
+
+    // This is just a safe bet, since
+    // the product of these two values
+    // is less than or equal to the max
+    // of a 32-bit integer.
+    w_spin_box->setMaximum(0xffff);
+    h_spin_box->setMaximum(0x7fff);
+
+    layout->addRow(tr("Width"), w_spin_box.get());
+    layout->addRow(tr("Height"), h_spin_box.get());
+
+    using valueChanged = void(QSpinBox::*)(int);
+
+    connect(w_spin_box.get(), static_cast<valueChanged>(&QSpinBox::valueChanged), this, &RoomPropertiesView::update_room_width);
+    connect(h_spin_box.get(), static_cast<valueChanged>(&QSpinBox::valueChanged), this, &RoomPropertiesView::update_room_height);
+  }
+  /// Updates the data for the current room.
+  void update_room() {
+    w_spin_box->setValue(model->get_width());
+    h_spin_box->setValue(model->get_height());
+  }
+  /// Sets the width of the room.
+  /// @param width The width to assign the room.
+  void update_room_width(int width) {
+    model->set_width((std::size_t) width);
+  }
+  /// Sets the height of the room.
+  /// @param height The height to assign the room.
+  void update_room_height(int height) {
+    model->set_height((std::size_t) height);
+  }
+};
+
+/// Used for controlling the currently selected tool.
+class ToolControl final : public QTabWidget {
+public:
+  /// Constructs a new instance of the tool control widget.
+  /// @param m A pointer to the room model.
+  /// @param parent A pointer to the parent widget.
+  ToolControl(RoomModel* m, QWidget* parent) : QTabWidget(parent) {
+    addTab(new RoomPropertiesView(m, this), tr("Room Properties"));
+    addTab(new QWidget(this), tr("Tool"));
+  }
+};
+
 /// A widget used for editing rooms.
 class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
@@ -82,6 +163,8 @@ class RoomEditor final : public QWidget {
   ScopedPtr<RoomView> room_view;
   /// The tool panel for the room editor.
   ScopedPtr<RoomToolPanel> tool_panel;
+  /// The widget used for controlling tool behavior.
+  ScopedPtr<ToolControl> tool_control;
 public:
   /// Constructs a new room editor instance.
   /// @param parent A pointer to the parent widget.
@@ -98,13 +181,16 @@ public:
 
     tool_panel = ScopedPtr<RoomToolPanel>::make(this);
 
+    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), this);
+
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);
 
     auto* layout = new QGridLayout(this);
-    layout->addWidget(room_table_editor->get_widget(), 0,  0, 0, 4);
-    layout->addWidget(room_view->get_widget(),         0,  4, 0, 15);
-    layout->addWidget(tool_panel.get(),                0, 19, 0, 1);
+    layout->addWidget(room_table_editor->get_widget(), 0,  0, 1,  4);
+    layout->addWidget(tool_control.get(),              1,  0, 1,  4);
+    layout->addWidget(room_view->get_widget(),         0,  4, 2, 15);
+    layout->addWidget(tool_panel.get(),                0, 19, 2,  1);
   }
 protected:
   /// Handles a table button being clicked.

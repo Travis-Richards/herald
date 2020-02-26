@@ -43,12 +43,58 @@ bool RoomModel::is_valid() const noexcept {
   return room != nullptr;
 }
 
+bool RoomModel::set_width(std::size_t width) {
+
+  if (has_width(width)) {
+    return true;
+  }
+
+  auto* room = modify_room();
+  if (room) {
+    room->set_width(width);
+    emit width_changed();
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool RoomModel::set_height(std::size_t height) {
+
+  if (has_height(height)) {
+    return true;
+  }
+
+  auto* room = modify_room();
+  if (room) {
+    room->set_height(height);
+    emit height_changed();
+    return true;
+  } else {
+    return false;
+  }
+}
+
 const Room* RoomModel::access_room() const noexcept {
   return model->access_room_table()->access_room(room_index);
 }
 
 Room* RoomModel::modify_room() noexcept {
   return model->modify_room_table()->modify_room(room_index);
+}
+
+bool RoomModel::has_height(std::size_t h) const noexcept {
+
+  const auto* room = access_room();
+
+  return room ? (room->get_height() == h) : false;
+}
+
+bool RoomModel::has_width(std::size_t w) const noexcept {
+
+  const auto* room = access_room();
+
+  return room ? (room->get_width() == w) : false;
 }
 
 } // namespace tk

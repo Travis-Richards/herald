@@ -48,7 +48,7 @@ public:
     root_layout->addWidget(view.get());
     root_layout->addWidget(button_widget.get());
 
-    connect(view.get(), &TableView::clicked, this, &TableEditorImpl::handle_item_clicked);
+    connect(view.get(), &TableView::selected, this, &TableEditorImpl::handle_item_selected);
 
     add_button_by_id(TableButtonID::make_predefined(remove_button_id), "Remove");
   }
@@ -76,7 +76,7 @@ public:
 protected:
   /// Handles a clicked item.
   /// @param index The index of the item that was clicked.
-  void handle_item_clicked(const QModelIndex& index) {
+  void handle_item_selected(const QModelIndex& index) {
     emit selected((std::size_t) index.row());
   }
   /// Handles a button being clicked.

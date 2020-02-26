@@ -25,6 +25,10 @@ public:
   virtual ~RoomView() {}
   /// Accesses a pointer to the widget for the room view.
   virtual QWidget* get_widget() noexcept = 0;
+  /// Hides the grid of the room.
+  virtual void hide_grid() = 0;
+  /// Shows the grid of the room.
+  virtual void show_grid() = 0;
 };
 
 } // namespace tk
