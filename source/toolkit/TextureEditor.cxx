@@ -140,9 +140,11 @@ protected:
   /// @returns True on success, false on failure.
   bool add_texture() {
 
-    auto filename = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open a Texture"));
+    auto filenames = QFileDialog::getOpenFileNames(nullptr, QObject::tr("Open a Texture"));
 
-    table_model->add_texture(filename);
+    for (auto filename : filenames) {
+      table_model->add_texture(filename);
+    }
 
     return true;
   }
