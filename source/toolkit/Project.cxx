@@ -176,6 +176,15 @@ class TileImpl final : public Tile {
   /// The Y coordinate of this tile.
   std::size_t y;
 public:
+  /// Reads a tile from a JSON value.
+  /// @param json_value The JSON value to read the tile data from.
+  /// @param parent A pointer to the parent object.
+  TileImpl(const QJsonValue& json_value, QObject* parent) : Tile(parent) {
+    auto json_object = json_value.toObject();
+    texture_name = json_object["name"].toString();
+    x = (std::size_t) json_object["x"].toInt(1);
+    y = (std::size_t) json_object["y"].toInt(1);
+  }
   /// Constructs a new tile instance.
   /// @param x_ The X coordinate to assign the tile.
   /// @param y_ The Y coordinate to assign the tile.
@@ -228,10 +237,13 @@ public:
     auto room_object = room.toObject();
 
     name = room_object["name"].toString();
-
     set_width((std::size_t) room_object["width"].toInt(1));
-
     set_height((std::size_t) room_object["height"].toInt(1));
+
+    auto json_tiles = room_object["tiles"].toArray();
+    for (auto json_tile : json_tiles) {
+      tiles.emplace_back(ScopedPtr<TileImpl>::make(json_tile, this));
+    }
   }
   /// Accesses a tile for reading.
   /// @param x The X coordinate of the tile.
@@ -478,7 +490,7 @@ public:
     auto root = doc.object();
 
     return texture_table.read(root["textures"])
-        && room_table.read(root["rooms"]);
+           && room_table.read(root["rooms"]);
   }
   /// Saves the model to a file.
   /// @param path The path to save the model to.
