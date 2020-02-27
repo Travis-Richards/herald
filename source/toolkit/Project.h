@@ -62,7 +62,7 @@ signals:
 
 /// This is the interface for a single
 /// tile within a room.
-class Tile {
+class Tile : public QObject {
 public:
   /// Just a stub.
   virtual ~Tile() {}
@@ -73,18 +73,19 @@ public:
   /// Sets the texture to be displayed by the tile.
   /// @param name The name of the texture to display.
   virtual void set_texture(const QString& name) = 0;
+protected:
+  /// Constructs a new instance of a tile base.
+  /// @param parent A pointer to the parent object.
+  Tile(QObject* parent) : QObject(parent) {}
 };
 
 /// This is the interface for a single room.
-class Room {
+class Room : public QObject {
   /// The width of the room, in terms of tiles.
   std::size_t width;
   /// The height of the room, in terms of tiles.
   std::size_t height;
 public:
-  /// Constructs a new room base.
-  constexpr Room() noexcept
-    : width(5), height(5) {}
   /// Just a stub.
   virtual ~Room() {}
   /// Accesses a certain tile from the room.
@@ -113,12 +114,16 @@ public:
   virtual void set_name(const QString& name) = 0;
   /// Sets the width of the room.
   virtual void set_width(std::size_t w) { width = w; }
+protected:
+  /// Constructs a new room base.
+  /// @param parent A pointer to the parent object.
+  Room(QObject* parent) : QObject(parent), width(5), height(5) {}
 };
 
 /// The room table contains all
 /// the rooms in the game. Each
 /// room is identified by its name.
-class RoomTable {
+class RoomTable : public QObject {
 public:
   /// Just a stub.
   virtual ~RoomTable() {}
@@ -148,6 +153,10 @@ public:
   virtual bool rename(std::size_t index, const QString& name) = 0;
   /// Gets the number of rooms in the table.
   virtual std::size_t size() const noexcept = 0;
+protected:
+  /// Constructs the base room table.
+  /// @param parent A pointer to the parent object.
+  RoomTable(QObject* parent) : QObject(parent) {}
 };
 
 /// A project's data, without any of

@@ -179,7 +179,8 @@ public:
   /// Constructs a new tile instance.
   /// @param x_ The X coordinate to assign the tile.
   /// @param y_ The Y coordinate to assign the tile.
-  TileImpl(std::size_t x_, std::size_t y_) : x(x_), y(y_) {}
+  /// @param parent A pointer to the parent object.
+  TileImpl(std::size_t x_, std::size_t y_, QObject* parent) : Tile(parent), x(x_), y(y_) {}
   /// Accesses the name of the texture being displayed.
   /// @returns The name of the texture.
   const QString& get_texture() const noexcept override {
@@ -213,16 +214,16 @@ public:
 class RoomImpl final : public Room {
   /// The room tiles.
   std::vector<ScopedPtr<TileImpl>> tiles;
-public:
   /// The name of the room.
   QString name;
+public:
   /// Constructs a new room instance.
   /// @param name_ The name to give the room.
-  RoomImpl(const QString& name_) : name(name_) {
-  }
+  /// @param parent A pointer to the parent object.
+  RoomImpl(const QString& name_, QObject* parent) : Room(parent), name(name_) { }
   /// Constructs a room from a JSON value.
   /// @param room The JSON room to get the data from.
-  RoomImpl(const QJsonValue& room) {
+  RoomImpl(const QJsonValue& room, QObject* parent) : Room(parent) {
 
     auto room_object = room.toObject();
 
@@ -247,6 +248,11 @@ public:
   const QString& get_name() const noexcept override {
     return name;
   }
+  /// Indicates if the room has a certain name.
+  /// @param other_name The name to check for.
+  bool has_name(const QString& other_name) const {
+    return name == other_name;
+  }
   /// Gets a tile for modification.
   /// @param x The X coordinate of the tile to get.
   /// @param y The Y coordinate of the tile to get.
@@ -259,7 +265,7 @@ public:
       }
     }
 
-    tiles.emplace_back(new TileImpl(x, y));
+    tiles.emplace_back(new TileImpl(x, y, this));
 
     return tiles[tiles.size() - 1].get();
   }
@@ -289,14 +295,17 @@ public:
 /// This is the implementation for the room table.
 class RoomTableImpl final : public RoomTable {
   /// The rooms part of the room table.
-  std::vector<RoomImpl> rooms;
+  std::vector<ScopedPtr<RoomImpl>> rooms;
 public:
+  /// Constructs a new instance of the room table.
+  /// @param parent A pointer to the parent object.
+  RoomTableImpl(QObject* parent) : RoomTable(parent) {}
   /// Accesses a room for reading.
   const Room* access_room(std::size_t index) const noexcept override {
     if (index >= rooms.size()) {
       return nullptr;
     } else {
-      return &rooms[index];
+      return rooms[index].get();
     }
   }
   /// Creates a new room, with a unique name.
@@ -309,7 +318,7 @@ public:
 
     for (int i = 0; i < INT_MAX; i++) {
       if (is_unique(name)) {
-        rooms.emplace_back(name);
+        rooms.emplace_back(ScopedPtr<RoomImpl>::make(name, this));
         return name;
       } else {
         name = basename + " (" + QString::number(i + 1) + ")";
@@ -324,7 +333,7 @@ public:
     if (index >= rooms.size()) {
       return QString();
     } else {
-      return rooms[index].name;
+      return rooms[index]->get_name();
     }
   }
   /// Accesses a room for modification.
@@ -332,7 +341,7 @@ public:
     if (index >= rooms.size()) {
       return nullptr;
     } else {
-      return &rooms[index];
+      return rooms[index].get();
     }
   }
   /// Reads room table data from a JSON value.
@@ -348,7 +357,7 @@ public:
       if (!json_room.isObject()) {
         return false;
       } else {
-        rooms.emplace_back(json_room);
+        rooms.emplace_back(ScopedPtr<RoomImpl>::make(json_room, this));
       }
     }
 
@@ -368,7 +377,7 @@ public:
     if (index >= rooms.size()) {
       return false;
     } else {
-      rooms[index].name = name;
+      rooms[index]->set_name(name);
       return true;
     }
   }
@@ -383,7 +392,7 @@ public:
     QJsonArray json_array;
 
     for (const auto& room : rooms) {
-      json_array.append(room.to_json());
+      json_array.append(room->to_json());
     }
 
     return json_array;
@@ -396,7 +405,7 @@ protected:
   bool is_unique(const QString& name) {
 
     for (const auto& room : rooms) {
-      if (room.name == name) {
+      if (room->has_name(name)) {
         return false;
       }
     }
@@ -417,6 +426,7 @@ public:
   /// @param parent A pointer to the parent object.
   ProjectImpl(QObject* parent)
     : Project(parent),
+      room_table(this),
       texture_table(this) {
 
   }
