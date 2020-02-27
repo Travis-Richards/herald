@@ -45,8 +45,6 @@ protected:
 class TileImage final : public QWidget {
   /// The original pixmap to display.
   QPixmap pixmap;
-  /// The scaled pixmap to display.
-  QPixmap scaled_pixmap;
 public:
   /// Constructs a new tile image instance.
   /// @param parent A pointer to the parent widget.
