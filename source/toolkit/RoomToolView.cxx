@@ -42,6 +42,8 @@ public:
     layout.addRow(tr("Texture"), texture_combo_box.get());
 
     fill_texture_options();
+
+    connect(texture_combo_box.get(), QOverload<int>::of(&QComboBox::activated), this, &StampToolView::select_texture);
   }
 protected:
   /// Fills the texture combo box with the texture options.
@@ -54,6 +56,14 @@ protected:
     for (auto texture : textures) {
       texture_combo_box->addItem(texture);
     }
+  }
+  /// Sets the currently used texture.
+  /// @param index The index of the texture to use.
+  void select_texture(int index) {
+
+    auto* stamp_tool = tool_model->get_stamp_tool();
+
+    stamp_tool->set_current_texture((std::size_t) index);
   }
 };
 

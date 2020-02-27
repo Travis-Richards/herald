@@ -9,10 +9,9 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPainter>
+#include <QResizeEvent>
 #include <QStackedLayout>
 #include <QWidget>
-
-#include <QDebug>
 
 namespace herald {
 
@@ -20,12 +19,74 @@ namespace tk {
 
 namespace {
 
+class TileView;
+
+/// Used for modifying a tile based off of a room tool.
+class TileViewModifier final : public RoomToolVisitor {
+  /// The tile being modified.
+  TileView& tile_view;
+public:
+  /// Constructs an instance of the modifier.
+  /// @param t A reference to the tile view being modified.
+  TileViewModifier(TileView& t) : tile_view(t) {}
+protected:
+  /// Applies the stamp to the tile view.
+  /// @param stamp_tool The stamp tool containing the texture data.
+  void apply_stamp(const StampTool& stamp_tool);
+  /// Visits a stamp tool.
+  /// This function will stamp the tile with the
+  /// current texture assigned to the stamp tool.
+  void visit(const StampTool& stamp_tool) override {
+    apply_stamp(stamp_tool);
+  }
+};
+
+/// The image displayed by the tile.
+class TileImage final : public QWidget {
+  /// The original pixmap to display.
+  QPixmap pixmap;
+  /// The scaled pixmap to display.
+  QPixmap scaled_pixmap;
+public:
+  /// Constructs a new tile image instance.
+  /// @param parent A pointer to the parent widget.
+  TileImage(QWidget* parent) : QWidget(parent) { }
+  /// Loads the image data for the tile.
+  /// @param data The image data to assign.
+  /// @returns True on success, false on failure.
+  bool load_data(const QByteArray& data) {
+    auto success = pixmap.loadFromData(data);
+    update();
+    return success;
+  }
+protected:
+  /// Overrides the paint event to draw the texture image
+  /// onto the tile.
+  void paintEvent(QPaintEvent* event) override {
+
+    QPainter painter(this);
+
+    if (!pixmap.isNull()) {
+      painter.drawPixmap(0, 0, scale_pixmap(pixmap, size()));
+    }
+
+    QWidget::paintEvent(event);
+  }
+  /// Scales a tile pixmap to the appropriate size.
+  /// @param in The pixmap to scale.
+  /// @param out_size The size to scale the pixmap to.
+  /// @returns The scaled pixmap.
+  QPixmap scale_pixmap(const QPixmap& in, const QSize& out_size) {
+    return in.scaled(out_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+  }
+};
+
 /// A view of a single tile.
 class TileView final : public QWidget {
   /// The layout of the tile view.
   QStackedLayout layout;
-  /// The tile texture being displayed.
-  QLabel texture;
+  /// The texture being displayed.
+  TileImage image;
   /// The highlighter widget.
   QWidget highlight;
   /// A pointer to the tool model,
@@ -39,33 +100,51 @@ public:
   TileView(RoomToolModel* tm, QWidget* parent)
     : QWidget(parent),
       layout(this),
-      texture(this),
+      image(this),
       highlight(this),
       tool_model(tm) {
 
     layout.setStackingMode(QStackedLayout::StackAll);
-    layout.addWidget(&texture);
     layout.addWidget(&highlight);
+    layout.addWidget(&image);
+  }
+  /// Sets the pixmap data.
+  /// @param data The pixmap data to assign the tile.
+  /// @returns True on success, false on failure.
+  bool load_pixmap_data(const QByteArray& data) {
+    return image.load_data(data);
   }
 protected:
   /// Overrides the mouse over event to highlight the tile.
   void enterEvent(QEvent* event) override {
+
     highlight.setStyleSheet("background-color: rgba(0, 0, 255, 32)");
+
     QWidget::enterEvent(event);
   }
   /// Overrides the mouse leave event to
   /// remove the highlight from the tile.
   void leaveEvent(QEvent* event) override {
+
     highlight.setStyleSheet("");
+
     QWidget::leaveEvent(event);
   }
   /// Overrides the mouse press event in
   /// order to perform a tool action.
   void mousePressEvent(QMouseEvent* event) override {
 
+    TileViewModifier modifier(*this);
+
+    tool_model->get_current_tool()->accept(modifier);
+
     QWidget::mousePressEvent(event);
   }
 };
+
+void TileViewModifier::apply_stamp(const StampTool& stamp_tool) {
+  tile_view.load_pixmap_data(stamp_tool.get_texture_data());
+}
 
 /// A view of a row within a tile map.
 class TileRowView final : public QWidget {

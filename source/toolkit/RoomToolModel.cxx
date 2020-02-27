@@ -14,19 +14,21 @@ namespace {
 class StampToolImpl final : public StampTool {
   /// A pointer to the project.
   const Project* project;
+  /// The index of the texture currently being used.
+  std::size_t texture_index;
 public:
   /// Constructs a new instance of the stamp tool.
   /// @param p A pointer to the project.
-  StampToolImpl(const Project* p) : project(p) {
+  StampToolImpl(const Project* p) : project(p), texture_index(0) {
 
   }
   /// Accesses the current texture data.
   QByteArray get_texture_data() const override {
-    return QByteArray();
+    return project->access_texture_table()->get_data(texture_index);
   }
   /// Accesses the name of the texture currently used.
   QString get_texture_name() const override {
-    return QString();
+    return project->access_texture_table()->get_name(texture_index);
   }
   /// Lists the available textures for the stamp tool.
   /// @returns A list of texture names for the tool.
@@ -43,6 +45,11 @@ public:
     }
 
     return texture_names;
+  }
+  /// Sets the currently used texture.
+  /// @param index The index of the texture to use.
+  void set_current_texture(std::size_t index) override {
+    texture_index = index;
   }
 };
 

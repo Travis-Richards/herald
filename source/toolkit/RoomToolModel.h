@@ -42,10 +42,10 @@ public:
   virtual ~RoomToolVisitor() {}
   /// Visits a null tool.
   /// In most cases, nothing needs to be done here.
-  virtual void visit(NullRoomTool&) { }
+  virtual void visit(const NullRoomTool&) { }
   /// Visits the stamp tool.
   /// @param stamp_tool The stamp tool to visit.
-  virtual void visit(StampTool& stamp_tool) = 0;
+  virtual void visit(const StampTool& stamp_tool) = 0;
 };
 
 /// The base class of a room tool.
@@ -55,7 +55,7 @@ public:
   virtual ~RoomTool() {}
   /// Accepts a room tool visitor.
   /// @param visitor The visitor to accept.
-  virtual void accept(RoomToolVisitor& visitor) = 0;
+  virtual void accept(RoomToolVisitor& visitor) const = 0;
 };
 
 /// This is either a room tool with
@@ -64,7 +64,7 @@ public:
 class NullRoomTool final : public RoomTool {
 public:
   /// Accepts a visitor.
-  void accept(RoomToolVisitor& visitor) override {
+  void accept(RoomToolVisitor& visitor) const override {
     visitor.visit(*this);
   }
 };
@@ -76,7 +76,7 @@ public:
   virtual ~StampTool() {}
   /// Accepts a room tool visitor.
   /// @param visitor The visitor to accept.
-  void accept(RoomToolVisitor& visitor) override {
+  void accept(RoomToolVisitor& visitor) const override {
     visitor.visit(*this);
   }
   /// Gets the data of the texture that
@@ -88,6 +88,9 @@ public:
   /// Lists the available textures for the stamp tool.
   /// @returns A list of available textures.
   virtual QStringList list_textures() const = 0;
+  /// Sets the index of the texture currently used texture.
+  /// @param index The index of the texture to use.
+  virtual void set_current_texture(std::size_t index) = 0;
 };
 
 /// This is the data model for the room tools.
