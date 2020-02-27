@@ -23,12 +23,15 @@ class TileView;
 
 /// Used for modifying a tile based off of a room tool.
 class TileViewModifier final : public RoomToolVisitor {
+  /// The tile model to assign the texture to.
+  TileModel& tile_model;
   /// The tile being modified.
   TileView& tile_view;
 public:
   /// Constructs an instance of the modifier.
   /// @param t A reference to the tile view being modified.
-  TileViewModifier(TileView& t) : tile_view(t) {}
+  TileViewModifier(TileModel& m, TileView& t)
+    : tile_model(m), tile_view(t) {}
 protected:
   /// Applies the stamp to the tile view.
   /// @param stamp_tool The stamp tool containing the texture data.
@@ -87,19 +90,23 @@ class TileView final : public QWidget {
   TileImage image;
   /// The highlighter widget.
   QWidget highlight;
+  /// A reference to the tile data.
+  TileModel model;
   /// A pointer to the tool model,
   /// for when this tile view is clicked.
   RoomToolModel* tool_model;
 public:
   /// Constructs a new instance of a tile view.
+  /// @param m A reference to a model for this tile.
   /// @param tm A pointer to the tool model for this tile view.
   /// @param parent A pointer to the parent widget.
   /// This is expected to be a @ref TileRowView widget.
-  TileView(RoomToolModel* tm, QWidget* parent)
+  TileView(const TileModel& m, RoomToolModel* tm, QWidget* parent)
     : QWidget(parent),
       layout(this),
       image(this),
       highlight(this),
+      model(m),
       tool_model(tm) {
 
     layout.setStackingMode(QStackedLayout::StackAll);
@@ -132,7 +139,7 @@ protected:
   /// order to perform a tool action.
   void mousePressEvent(QMouseEvent* event) override {
 
-    TileViewModifier modifier(*this);
+    TileViewModifier modifier(model, *this);
 
     tool_model->get_current_tool()->accept(modifier);
 
@@ -141,6 +148,7 @@ protected:
 };
 
 void TileViewModifier::apply_stamp(const StampTool& stamp_tool) {
+  tile_model.set_texture(stamp_tool.get_texture_name());
   tile_view.load_pixmap_data(stamp_tool.get_texture_data());
 }
 
@@ -199,6 +207,12 @@ public:
     layout.addWidget(row.get());
     rows.emplace_back(std::move(row));
   }
+  /// Gets a row at a certain index.
+  /// @param y The index of the row to get.
+  /// @returns A pointer to the specified row.
+  TileRowView* get_row(std::size_t y) noexcept {
+    return (y < rows.size()) ? rows[y].get() : nullptr;
+  }
   /// Indicates the number of rows in the tile map view.
   /// @returns The number of rows in the tile map view.
   std::size_t row_count() const noexcept {
@@ -210,14 +224,6 @@ public:
     for (std::size_t i = rows.size(); i > count; i--) {
       rows.pop_back();
     }
-  }
-  /// Gets a beginning iterator.
-  inline Iterator begin() {
-    return rows.begin();
-  }
-  /// Gets an ending iterator.
-  inline Iterator end() {
-    return rows.end();
   }
 };
 
@@ -399,28 +405,36 @@ protected:
   }
   /// Adds rows to the tile map view.
   void add_rows(std::size_t count) {
+
+    auto y = tile_map_view->row_count();
+
     for (std::size_t i = 0; i < count; i++) {
-      tile_map_view->add_row(make_row());
+      tile_map_view->add_row(make_row(y + i));
     }
   }
   /// Creates a new row for the tile map view.
-  ScopedPtr<TileRowView> make_row() {
+  /// @param y The index of the row to be made.
+  ScopedPtr<TileRowView> make_row(std::size_t y) {
 
     auto w = model->get_width();
 
     auto row = ScopedPtr<TileRowView>::make(tile_map_view.get());
 
-    for (std::size_t x = 0; x < w; x++) {
-      row->add_tile(make_tile(row.get()));
+    auto x = row->tile_count();
+
+    for (std::size_t i = 0; i < w; i++) {
+      row->add_tile(make_tile(x + i, y, row.get()));
     }
 
     return row;
   }
   /// Creates a new tile instance.
+  /// @param x The X coordinate of the tile to be made.
+  /// @param y The Y coordinate of the tile to be made.
   /// @param parent A pointer to the parent widget.
   /// @returns A new tile view instance.
-  ScopedPtr<TileView> make_tile(QWidget* parent) {
-    return new TileView(tool_model, parent);
+  ScopedPtr<TileView> make_tile(std::size_t x, std::size_t y, QWidget* parent) {
+    return new TileView(TileModel(model, x, y), tool_model, parent);
   }
   /// Adjusts the tile width of the
   /// view to the width of the model.
@@ -430,20 +444,25 @@ protected:
 
     grid_view->set_width(width);
 
-    for (auto& row : *tile_map_view) {
+    for (std::size_t y = 0; y < tile_map_view->row_count(); y++) {
+      auto* row = tile_map_view->get_row(y);
       if (row->tile_count() > width) {
         row->shrink(width);
       } else {
-        add_tiles(row.get(), width - row->tile_count());
+        add_tiles(row, y, width - row->tile_count());
       }
     }
   }
   /// Adds tiles to a row.
   /// @param row The row to add tiles to.
+  /// @param y The index of the row.
   /// @param count The number of tiles to add to the row.
-  void add_tiles(TileRowView* row, std::size_t count) {
+  void add_tiles(TileRowView* row, std::size_t y, std::size_t count) {
+
+    auto x = row->tile_count();
+
     for (std::size_t i = 0; i < count; i++) {
-      row->add_tile(make_tile(row));
+      row->add_tile(make_tile(x + i, y, row));
     }
   }
   /// Adjusts the width and height of
