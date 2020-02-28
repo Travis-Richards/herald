@@ -3,7 +3,7 @@
 #include <herald/ScopedPtr.h>
 
 #include "Project.h"
-#include "RoomModel.h"
+#include "RoomMediator.h"
 #include "RoomToolMediator.h"
 #include "RoomToolPanel.h"
 #include "RoomToolView.h"
@@ -81,8 +81,8 @@ public:
 
 /// Used for viewing and modifying the room properties.
 class RoomPropertiesView final : public QWidget {
-  /// A pointer to the room model.
-  RoomModel* model;
+  /// A pointer to the room mediator.
+  RoomMediator* mediator;
   /// The form layout of the room properties.
   ScopedPtr<QFormLayout> layout;
   /// The room width spin box.
@@ -93,13 +93,13 @@ public:
   /// Constructs a new instance of the room properties view.
   /// @param m A pointer to the room data model.
   /// @param parent A pointer to the parent widget.
-  RoomPropertiesView(RoomModel* m, QWidget* parent) : QWidget(parent), model(m) {
+  RoomPropertiesView(RoomMediator* m, QWidget* parent) : QWidget(parent), mediator(m) {
 
     layout = ScopedPtr<QFormLayout>::make(this);
 
     setup();
 
-    connect(model, &RoomModel::room_changed, this, &RoomPropertiesView::update_room);
+    connect(mediator, &RoomMediator::room_changed, this, &RoomPropertiesView::update_room);
   }
 protected:
   /// Constructs the properties view.
@@ -128,18 +128,27 @@ protected:
   }
   /// Updates the data for the current room.
   void update_room() {
-    w_spin_box->setValue(model->get_width());
-    h_spin_box->setValue(model->get_height());
+    const auto* room = mediator->access_room();
+    if (room) {
+      w_spin_box->setValue(room->get_width());
+      h_spin_box->setValue(room->get_height());
+    }
   }
   /// Sets the width of the room.
   /// @param width The width to assign the room.
   void update_room_width(int width) {
-    model->set_width((std::size_t) width);
+    auto* room = mediator->modify_room();
+    if (room) {
+      room->set_width((std::size_t) width);
+    }
   }
   /// Sets the height of the room.
   /// @param height The height to assign the room.
   void update_room_height(int height) {
-    model->set_height((std::size_t) height);
+    auto* room = mediator->modify_room();
+    if (room) {
+      room->set_height((std::size_t) height);
+    }
   }
 };
 
@@ -150,7 +159,7 @@ public:
   /// @param room_model A pointer to the room model.
   /// @param room_tool_mediator A pointer to the room tool model.
   /// @param parent A pointer to the parent widget.
-  ToolControl(RoomModel* room_model,
+  ToolControl(RoomMediator* room_model,
               RoomToolMediator* room_tool_mediator,
               QWidget* parent) : QTabWidget(parent) {
 
@@ -198,7 +207,7 @@ class RoomEditor final : public QWidget {
   /// The room table editor.
   ScopedPtr<TableEditor> room_table_editor;
   /// The data model of the room being viewed.
-  ScopedPtr<RoomModel> room_model;
+  ScopedPtr<RoomMediator> room_model;
   /// Contains all of the opened rooms.
   ScopedPtr<OpenedRoomManager> opened_room_manager;
   /// The tool panel for the room editor.
@@ -217,7 +226,7 @@ public:
     room_table_editor = TableEditor::make(room_table_model.get(), this);
     room_table_editor->add_button(new_room_button_id, tr("New Room"));
 
-    room_model = ScopedPtr<RoomModel>::make(project, this);
+    room_model = ScopedPtr<RoomMediator>::make(project, this);
 
     opened_room_manager = ScopedPtr<OpenedRoomManager>::make(this);
 

@@ -74,8 +74,8 @@ add_executable("herald-toolkit" WIN32
   "PythonLanguage.cxx"
   "RoomEditor.h"
   "RoomEditor.cxx"
-  "RoomModel.h"
-  "RoomModel.cxx"
+  "RoomMediator.h"
+  "RoomMediator.cxx"
   "RoomToolMediator.h"
   "RoomToolMediator.cxx"
   "RoomToolPanel.h"
@@ -101,9 +101,7 @@ add_executable("herald-toolkit" WIN32
   "TextureEditor.h"
   "TextureEditor.cxx"
   "TextureView.h"
-  "TextureView.cxx"
-  "TileModel.h"
-  "TileModel.cxx")
+  "TextureView.cxx")
 
 target_link_libraries("herald-toolkit" PRIVATE
   Qt5::Widgets
