@@ -17,21 +17,44 @@ namespace tk {
 
 namespace {
 
+/// A simple wrapper class around a boolean
+/// value that indicates whether or not the project
+/// has been modified in any way.
+class ModifyFlag final {
+  /// Wether or not the project has been modified.
+  bool state;
+public:
+  /// Constructs the mod flag.
+  /// The initial value is false.
+  constexpr ModifyFlag() noexcept : state(false) {}
+  /// Sets the modification state.
+  /// @param s The state to assign the modification flag.
+  void set(bool s) noexcept {
+    state = s;
+  }
+  /// Indicates whether or not there has been modification.
+  operator bool () const noexcept {
+    return state;
+  }
+};
+
 /// A single entry in the texture table.
 struct Texture final {
   /// The name given to the texture.
   QString name;
   /// The image data of the texture.
   QByteArray data;
+  /// The modification flag.
+  ModifyFlag& mod_flag;
   /// Constructs a new entry instance.
   /// @param path The path of the entry.
-  Texture(const QString& path) : name(QFileInfo(path).baseName()) {
+  Texture(const QString& path, ModifyFlag& mf) : name(QFileInfo(path).baseName()), mod_flag(mf) {
     read_data(path);
   }
   /// Constructs the texture from a JSON value.
   /// @param json_value The JSON value to get the from.
   /// This should be an object value.
-  Texture(const QJsonValue& json_value) {
+  Texture(const QJsonValue& json_value, ModifyFlag& mf) : mod_flag(mf) {
     auto obj = json_value.toObject();
     name = obj["name"].toString();
     data = QByteArray::fromBase64(obj["data"].toString().toUtf8());
@@ -62,17 +85,24 @@ protected:
 /// The implementation of the texture table.
 class TextureTableImpl final : public TextureTable {
   /// The entries made into the texture table.
-  std::vector<Texture> textures;
+  std::vector<ScopedPtr<Texture>> textures;
+  /// The project modification flag.
+  ModifyFlag& mod_flag;
 public:
   /// Constructs a new instance of the texture table.
+  /// @param mf The project modification flag.
   /// @param parent A pointer to the parent object.
-  TextureTableImpl(QObject* parent) : TextureTable(parent) {}
+  TextureTableImpl(ModifyFlag& mf, QObject* parent) : TextureTable(parent), mod_flag(mf) {}
   /// Adds a texture to the table.
   /// @param path The path of the texture to add.
   /// @returns The name assigned to the texture.
   QString add(const QString& path) override {
-    textures.emplace_back(path);
-    return textures[textures.size() - 1].name;
+
+    mod_flag.set(true);
+
+    textures.emplace_back(ScopedPtr<Texture>::make(path, mod_flag));
+
+    return textures[textures.size() - 1]->name;
   }
   /// Accesses the texture image data.
   /// @param index The index of the texture to get the data for.
@@ -82,7 +112,7 @@ public:
     if (index >= textures.size()) {
       return QByteArray();
     } else {
-      return textures[index].data;
+      return textures[index]->data;
     }
   }
   /// Gets the name of a texture.
@@ -91,7 +121,7 @@ public:
     if (index >= textures.size()) {
       return QString();
     } else {
-      return textures[index].name;
+      return textures[index]->name;
     }
   }
   /// Reads a texture table from a JSON value.
@@ -104,7 +134,7 @@ public:
     }
 
     for (auto texture : value.toArray()) {
-      textures.emplace_back(texture);
+      textures.emplace_back(ScopedPtr<Texture>::make(texture, mod_flag));
     }
 
     return true;
@@ -116,6 +146,7 @@ public:
     if (index >= textures.size()) {
       return false;
     } else {
+      mod_flag.set(true);
       textures.erase(textures.begin() + index);
       return true;
     }
@@ -130,7 +161,9 @@ public:
       return false;
     }
 
-    textures[index].name = name;
+    mod_flag.set(true);
+
+    textures[index]->name = name;
 
     return true;
   }
@@ -141,7 +174,7 @@ public:
     QJsonArray json_array;
 
     for (const auto& texture : textures) {
-      json_array.append(texture.to_json());
+      json_array.append(texture->to_json());
     }
 
     return json_array;
@@ -149,21 +182,6 @@ public:
   /// Indicates the number of textures in the texture table.
   std::size_t size() const noexcept override {
     return textures.size();
-  }
-protected:
-  /// Locates a texture in the table.
-  /// @param name The name of the texture to search for.
-  /// @returns The index of the texture.
-  /// If the texture wasn't found, then a negative one is returned.
-  std::vector<Texture>::const_iterator find_texture(const QString& name) const {
-
-    for (auto it = textures.begin(); it != textures.end(); it++) {
-      if (it->name == name) {
-        return it;
-      }
-    }
-
-    return textures.end();
   }
 };
 
@@ -175,11 +193,13 @@ class TileImpl final : public Tile {
   std::size_t x;
   /// The Y coordinate of this tile.
   std::size_t y;
+  /// The project modification flag.
+  ModifyFlag& mod_flag;
 public:
   /// Reads a tile from a JSON value.
   /// @param json_value The JSON value to read the tile data from.
   /// @param parent A pointer to the parent object.
-  TileImpl(const QJsonValue& json_value, QObject* parent) : Tile(parent) {
+  TileImpl(const QJsonValue& json_value, ModifyFlag& mf, QObject* parent) : Tile(parent), mod_flag(mf) {
     auto json_object = json_value.toObject();
     texture_name = json_object["name"].toString();
     x = (std::size_t) json_object["x"].toInt(1);
@@ -189,7 +209,8 @@ public:
   /// @param x_ The X coordinate to assign the tile.
   /// @param y_ The Y coordinate to assign the tile.
   /// @param parent A pointer to the parent object.
-  TileImpl(std::size_t x_, std::size_t y_, QObject* parent) : Tile(parent), x(x_), y(y_) {}
+  TileImpl(std::size_t x_, std::size_t y_, ModifyFlag& mf, QObject* parent)
+    : Tile(parent), x(x_), y(y_), mod_flag(mf) {}
   /// Accesses the name of the texture being displayed.
   /// @returns The name of the texture.
   const QString& get_texture() const noexcept override {
@@ -207,6 +228,7 @@ public:
   /// @param name The name to assign.
   void set_texture(const QString& name) override {
     texture_name = name;
+    mod_flag.set(true);
   }
   /// Converts the tile to a JSON value.
   /// @returns The JSON data for this tile.
@@ -225,14 +247,18 @@ class RoomImpl final : public Room {
   std::vector<ScopedPtr<TileImpl>> tiles;
   /// The name of the room.
   QString name;
+  /// The project modification flag.
+  ModifyFlag& mod_flag;
 public:
   /// Constructs a new room instance.
   /// @param name_ The name to give the room.
+  /// @param mf The project modification flag.
   /// @param parent A pointer to the parent object.
-  RoomImpl(const QString& name_, QObject* parent) : Room(parent), name(name_) { }
+  RoomImpl(const QString& name_, ModifyFlag& mf, QObject* parent) : Room(parent), name(name_), mod_flag(mf) { }
   /// Constructs a room from a JSON value.
+  /// @param mf The project modification flag.
   /// @param room The JSON room to get the data from.
-  RoomImpl(const QJsonValue& room, QObject* parent) : Room(parent) {
+  RoomImpl(const QJsonValue& room, ModifyFlag& mf, QObject* parent) : Room(parent), mod_flag(mf) {
 
     auto room_object = room.toObject();
 
@@ -242,7 +268,7 @@ public:
 
     auto json_tiles = room_object["tiles"].toArray();
     for (auto json_tile : json_tiles) {
-      tiles.emplace_back(ScopedPtr<TileImpl>::make(json_tile, this));
+      tiles.emplace_back(ScopedPtr<TileImpl>::make(json_tile, mod_flag, this));
     }
   }
   /// Accesses a tile for reading.
@@ -277,7 +303,7 @@ public:
       }
     }
 
-    tiles.emplace_back(new TileImpl(x, y, this));
+    tiles.emplace_back(new TileImpl(x, y, mod_flag, this));
 
     return tiles[tiles.size() - 1].get();
   }
@@ -300,6 +326,7 @@ public:
   }
   /// Modifies the name of the room.
   void set_name(const QString& name_) override {
+    mod_flag.set(true);
     name = name_;
   }
 };
@@ -308,10 +335,13 @@ public:
 class RoomTableImpl final : public RoomTable {
   /// The rooms part of the room table.
   std::vector<ScopedPtr<RoomImpl>> rooms;
+  /// The project modification flag.
+  ModifyFlag& mod_flag;
 public:
   /// Constructs a new instance of the room table.
+  /// @param mf The project modification flag.
   /// @param parent A pointer to the parent object.
-  RoomTableImpl(QObject* parent) : RoomTable(parent) {}
+  RoomTableImpl(ModifyFlag& mf, QObject* parent) : RoomTable(parent), mod_flag(mf) {}
   /// Accesses a room for reading.
   const Room* access_room(std::size_t index) const noexcept override {
     if (index >= rooms.size()) {
@@ -324,13 +354,15 @@ public:
   /// @returns The name of the newly created room.
   QString create_room() override {
 
+    mod_flag.set(true);
+
     QString basename = "New Room";
 
     QString name = basename;
 
     for (int i = 0; i < INT_MAX; i++) {
       if (is_unique(name)) {
-        rooms.emplace_back(ScopedPtr<RoomImpl>::make(name, this));
+        rooms.emplace_back(ScopedPtr<RoomImpl>::make(name, mod_flag, this));
         return name;
       } else {
         name = basename + " (" + QString::number(i + 1) + ")";
@@ -369,7 +401,7 @@ public:
       if (!json_room.isObject()) {
         return false;
       } else {
-        rooms.emplace_back(ScopedPtr<RoomImpl>::make(json_room, this));
+        rooms.emplace_back(ScopedPtr<RoomImpl>::make(json_room, mod_flag, this));
       }
     }
 
@@ -380,6 +412,7 @@ public:
     if (index >= rooms.size()) {
       return false;
     } else {
+      mod_flag.set(true);
       rooms.erase(rooms.begin() + index);
       return true;
     }
@@ -389,6 +422,7 @@ public:
     if (index >= rooms.size()) {
       return false;
     } else {
+      mod_flag.set(true);
       rooms[index]->set_name(name);
       return true;
     }
@@ -433,13 +467,15 @@ class ProjectImpl final : public Project {
   RoomTableImpl room_table;
   /// The texture table for the model.
   TextureTableImpl texture_table;
+  /// The project modification flag.
+  ModifyFlag mod_flag;
 public:
   /// Constructs a new project instance.
   /// @param parent A pointer to the parent object.
   ProjectImpl(QObject* parent)
     : Project(parent),
-      room_table(this),
-      texture_table(this) {
+      room_table(mod_flag, this),
+      texture_table(mod_flag, this) {
 
   }
   /// Accesses a const-pointer to the room table.
@@ -450,16 +486,19 @@ public:
   const TextureTable* access_texture_table() const noexcept override {
     return &texture_table;
   }
+  /// Indicates whether or not the project has been modified.
+  /// @returns True if there's been modification, false otherwise.
+  bool is_modified() const noexcept override {
+    return mod_flag;
+  }
   /// Accesses a pointer to the room table.
   /// This function also sets the modification flag to true.
   RoomTable* modify_room_table() noexcept override {
-    set_modified_flag(true);
     return &room_table;
   }
   /// Accesses a pointer to the texture table.
   /// This function sets the modification flag to true.
   TextureTable* modify_texture_table() noexcept override {
-    set_modified_flag(true);
     return &texture_table;
   }
   /// Opens a project model.
@@ -516,7 +555,7 @@ public:
     file.write(doc.toJson());
 
     if (file.commit()) {
-      set_modified_flag(false);
+      mod_flag.set(false);
       return true;
     } else {
       return false;

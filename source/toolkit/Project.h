@@ -94,12 +94,6 @@ public:
   /// @returns A pointer to the specified tile.
   /// If the tile doesn't exist, then a null pointer is returned.
   virtual const Tile* access_tile(std::size_t x, std::size_t y) const noexcept = 0;
-  /// Accesses the height of the room, in terms of tiles.
-  virtual std::size_t get_height() const noexcept { return height; }
-  /// Accesses the name of the room.
-  virtual const QString& get_name() const noexcept = 0;
-  /// Accesses the width of the room, in terms of tiles.
-  std::size_t get_width() const noexcept { return width; }
   /// Gets a tile for modification.
   /// If the tile doesn't exist, then it is made.
   /// @param x The X coordinate of the tile to get.
@@ -108,6 +102,12 @@ public:
   /// This function never returns null because it
   /// always makes the tile if it doesn't exist.
   virtual Tile* modify_tile(std::size_t x, std::size_t y) = 0;
+  /// Accesses the height of the room, in terms of tiles.
+  virtual std::size_t get_height() const noexcept { return height; }
+  /// Accesses the name of the room.
+  virtual const QString& get_name() const noexcept = 0;
+  /// Accesses the width of the room, in terms of tiles.
+  std::size_t get_width() const noexcept { return width; }
   /// Sets the height of the room.
   virtual void set_height(std::size_t h) { height = h; }
   /// Sets the name of the room.
@@ -185,7 +185,7 @@ public:
   virtual TextureTable* modify_texture_table() noexcept = 0;
   /// Indicates whether or not the project has been modified.
   /// @returns True if the project has been modified, false otherwise.
-  inline bool is_modified() const noexcept { return modified; }
+  virtual bool is_modified() const noexcept = 0;
   /// Opens a project model.
   /// @param path The path to the model to open.
   /// It's expected that this is a JSON file.
@@ -200,17 +200,9 @@ public:
   /// @returns True on success, false on failure.
   virtual bool save(const QString& path) = 0;
 protected:
-  /// Sets the model's modification flag.
-  /// @param value The value to set the modification flag to.
-  inline void set_modified_flag(bool value) noexcept {
-    modified = value;
-  }
   /// Constructs the base project instance.
   /// @param parent A pointer to the parent object.
-  Project(QObject* parent) : QObject(parent), modified(false) {}
-private:
-  /// Whether or not the model has been modified.
-  bool modified;
+  Project(QObject* parent) : QObject(parent) {}
 };
 
 } // namespace tk
