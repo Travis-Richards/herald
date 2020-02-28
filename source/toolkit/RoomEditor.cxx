@@ -17,7 +17,11 @@
 #include <QSpinBox>
 #include <QTabWidget>
 
+#include <vector>
+
 #include <climits>
+
+#include <QDebug>
 
 namespace herald {
 
@@ -163,10 +167,30 @@ protected:
   }
 };
 
+/// Manages all opened rooms.
+class OpenedRoomManager final : public QTabWidget {
+  /// The list of opened rooms.
+  std::vector<ScopedPtr<RoomView>> opened_rooms;
+public:
+  /// Constructs a new instance of the opened room manager.
+  /// @param parent A pointer to the parent widget.
+  OpenedRoomManager(QWidget* parent) : QTabWidget(parent) { }
+  /// Adds a room view to the opened room manager.
+  /// @param room_view The room view to add.
+  void add(ScopedPtr<RoomView>&& room_view) {
+
+    addTab(room_view.get(), "");
+
+    opened_rooms.emplace_back(std::move(room_view));
+  }
+};
+
 /// A widget used for editing rooms.
 class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
   static constexpr std::size_t new_room_button_id = 0;
+  /// A pointer to the project data.
+  Project* project;
   /// The data model for the room tools.
   ScopedPtr<RoomToolMediator> room_tool_mediator;
   /// The model for the room table.
@@ -175,8 +199,8 @@ class RoomEditor final : public QWidget {
   ScopedPtr<TableEditor> room_table_editor;
   /// The data model of the room being viewed.
   ScopedPtr<RoomModel> room_model;
-  /// A view of the room being edited.
-  ScopedPtr<RoomView> room_view;
+  /// Contains all of the opened rooms.
+  ScopedPtr<OpenedRoomManager> opened_room_manager;
   /// The tool panel for the room editor.
   ScopedPtr<RoomToolPanel> tool_panel;
   /// The widget used for controlling tool behavior.
@@ -184,18 +208,18 @@ class RoomEditor final : public QWidget {
 public:
   /// Constructs a new room editor instance.
   /// @param parent A pointer to the parent widget.
-  RoomEditor(Project* m, QWidget* parent) : QWidget(parent) {
+  RoomEditor(Project* p, QWidget* parent) : QWidget(parent), project(p) {
 
-    room_tool_mediator = RoomToolMediator::make(m, this);
+    room_tool_mediator = RoomToolMediator::make(project, this);
 
-    room_table_model = ScopedPtr<RoomTableModel>::make(m);
+    room_table_model = ScopedPtr<RoomTableModel>::make(project);
 
     room_table_editor = TableEditor::make(room_table_model.get(), this);
     room_table_editor->add_button(new_room_button_id, tr("New Room"));
 
-    room_model = ScopedPtr<RoomModel>::make(m, this);
+    room_model = ScopedPtr<RoomModel>::make(project, this);
 
-    room_view = RoomView::make(room_model.get(), room_tool_mediator.get(), this);
+    opened_room_manager = ScopedPtr<OpenedRoomManager>::make(this);
 
     tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_mediator.get(), this);
 
@@ -207,7 +231,7 @@ public:
     auto* layout = new QGridLayout(this);
     layout->addWidget(room_table_editor->get_widget(), 0,  0, 1,  4);
     layout->addWidget(tool_control.get(),              1,  0, 1,  4);
-    layout->addWidget(room_view->get_widget(),         0,  4, 2, 15);
+    layout->addWidget(opened_room_manager.get(),       0,  4, 2, 15);
     layout->addWidget(tool_panel.get(),                0, 19, 2,  1);
   }
 protected:
@@ -225,7 +249,45 @@ protected:
   /// This function is called when a room is selected from the room table.
   /// @param index The index of the room that was selected.
   void on_room_selected(std::size_t index) {
+
     room_model->change_room(index);
+
+    make_room_view(index);
+  }
+  /// Creates a room view for a specified room.
+  /// @param room_index The index of the room to make the view for.
+  /// @returns True on success, false on failure.
+  bool make_room_view(std::size_t room_index) {
+
+    const auto* room_table = project->access_room_table();
+    if (!room_table) {
+      return false;
+    }
+
+    const auto* room = room_table->access_room(room_index);
+    if (!room) {
+      return false;
+    }
+
+    auto room_view = RoomView::make(this);
+
+    for (std::size_t y = 0; y < room->get_height(); y++) {
+
+      auto row = TileRowView::make(room_view.get());
+
+      for (std::size_t x = 0; x  < room->get_width(); x++) {
+
+        auto tile = TileView::make(row.get());
+
+        row->add_tile(std::move(tile));
+      }
+
+      room_view->add_row(std::move(row));
+    }
+
+    opened_room_manager->add(std::move(room_view));
+
+    return true;
   }
 };
 
