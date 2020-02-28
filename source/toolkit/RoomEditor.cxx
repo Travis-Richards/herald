@@ -4,7 +4,7 @@
 
 #include "Project.h"
 #include "RoomModel.h"
-#include "RoomToolModel.h"
+#include "RoomToolMediator.h"
 #include "RoomToolPanel.h"
 #include "RoomToolView.h"
 #include "RoomView.h"
@@ -144,16 +144,16 @@ class ToolControl final : public QTabWidget {
 public:
   /// Constructs a new instance of the tool control widget.
   /// @param room_model A pointer to the room model.
-  /// @param room_tool_model A pointer to the room tool model.
+  /// @param room_tool_mediator A pointer to the room tool model.
   /// @param parent A pointer to the parent widget.
   ToolControl(RoomModel* room_model,
-              RoomToolModel* room_tool_model,
+              RoomToolMediator* room_tool_mediator,
               QWidget* parent) : QTabWidget(parent) {
 
     addTab(new RoomPropertiesView(room_model, this), tr("Room Properties"));
-    addTab(new RoomToolView(room_tool_model, this), tr("Tool Properties"));
+    addTab(new RoomToolView(room_tool_mediator, this), tr("Tool Properties"));
 
-    connect(room_tool_model, &RoomToolModel::tool_changed, this, &ToolControl::on_tool_changed);
+    connect(room_tool_mediator, &RoomToolMediator::tool_changed, this, &ToolControl::on_tool_changed);
   }
 protected:
   /// Handles a tool being changed by
@@ -168,7 +168,7 @@ class RoomEditor final : public QWidget {
   /// Identifies the "New Room" button.
   static constexpr std::size_t new_room_button_id = 0;
   /// The data model for the room tools.
-  ScopedPtr<RoomToolModel> room_tool_model;
+  ScopedPtr<RoomToolMediator> room_tool_mediator;
   /// The model for the room table.
   ScopedPtr<RoomTableModel> room_table_model;
   /// The room table editor.
@@ -186,7 +186,7 @@ public:
   /// @param parent A pointer to the parent widget.
   RoomEditor(Project* m, QWidget* parent) : QWidget(parent) {
 
-    room_tool_model = RoomToolModel::make(m, this);
+    room_tool_mediator = RoomToolMediator::make(m, this);
 
     room_table_model = ScopedPtr<RoomTableModel>::make(m);
 
@@ -195,11 +195,11 @@ public:
 
     room_model = ScopedPtr<RoomModel>::make(m, this);
 
-    room_view = RoomView::make(room_model.get(), room_tool_model.get(), this);
+    room_view = RoomView::make(room_model.get(), room_tool_mediator.get(), this);
 
-    tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_model.get(), this);
+    tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_mediator.get(), this);
 
-    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), room_tool_model.get(), this);
+    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), room_tool_mediator.get(), this);
 
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);

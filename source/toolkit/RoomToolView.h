@@ -6,7 +6,7 @@ namespace herald {
 
 namespace tk {
 
-class RoomToolModel;
+class RoomToolMediator;
 
 enum class RoomToolID : int;
 
@@ -14,9 +14,9 @@ enum class RoomToolID : int;
 class RoomToolView final : public QStackedWidget {
 public:
   /// Constructs a new room tool view instance.
-  /// @param model A model of the room tool data.
+  /// @param mediator The mediator of the room tools.
   /// @param parent A pointer to the parent widget.
-  RoomToolView(RoomToolModel* model, QWidget* parent);
+  RoomToolView(RoomToolMediator* mediator, QWidget* parent);
 protected:
   /// Updates the tool view being being shown.
   /// @param tool_id The ID of the tool to show.

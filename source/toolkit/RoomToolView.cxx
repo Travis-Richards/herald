@@ -1,6 +1,6 @@
 #include "RoomToolView.h"
 
-#include "RoomToolModel.h"
+#include "RoomToolMediator.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -27,15 +27,15 @@ public:
 class StampToolView final : public QWidget {
   /// The layout of the stamp tool.
   QFormLayout layout;
-  /// A pointer to the room tool data model.
-  RoomToolModel* tool_model;
+  /// A pointer to the room tool data mediator.
+  RoomToolMediator* tool_mediator;
   /// The combo box for selecting a texture.
   ScopedPtr<QComboBox> texture_combo_box;
 public:
   /// Constructs a new instance of the stamp tool view.
-  /// @param m A pointer to the room tool data model.
+  /// @param m A pointer to the room tool data mediator.
   /// @param parent A pointer to the parent widget.
-  StampToolView(RoomToolModel* m, QWidget* parent) : QWidget(parent), layout(this), tool_model(m) {
+  StampToolView(RoomToolMediator* m, QWidget* parent) : QWidget(parent), layout(this), tool_mediator(m) {
 
     texture_combo_box = ScopedPtr<QComboBox>::make(this);
 
@@ -49,7 +49,7 @@ protected:
   /// Fills the texture combo box with the texture options.
   void fill_texture_options() {
 
-    auto* stamp_tool = tool_model->get_stamp_tool();
+    auto* stamp_tool = tool_mediator->get_stamp_tool();
 
     auto textures = stamp_tool->list_textures();
 
@@ -61,7 +61,7 @@ protected:
   /// @param index The index of the texture to use.
   void select_texture(int index) {
 
-    auto* stamp_tool = tool_model->get_stamp_tool();
+    auto* stamp_tool = tool_mediator->get_stamp_tool();
 
     stamp_tool->set_current_texture((std::size_t) index);
   }
@@ -69,7 +69,7 @@ protected:
 
 } // namespace
 
-RoomToolView::RoomToolView(RoomToolModel* model, QWidget* parent) : QStackedWidget(parent) {
+RoomToolView::RoomToolView(RoomToolMediator* mediator, QWidget* parent) : QStackedWidget(parent) {
 
   // placeholder
   addWidget(new PlaceholderView(this));
@@ -84,11 +84,11 @@ RoomToolView::RoomToolView(RoomToolModel* model, QWidget* parent) : QStackedWidg
   addWidget(new PlaceholderView(this));
 
   // stamp
-  addWidget(new StampToolView(model, this));
+  addWidget(new StampToolView(mediator, this));
 
   setCurrentIndex(0);
 
-  connect(model, &RoomToolModel::tool_changed, this, &RoomToolView::update_tool_view);
+  connect(mediator, &RoomToolMediator::tool_changed, this, &RoomToolView::update_tool_view);
 }
 
 void RoomToolView::update_tool_view(RoomToolID tool_id) {

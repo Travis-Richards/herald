@@ -1,7 +1,7 @@
 #include "RoomView.h"
 
 #include "RoomModel.h"
-#include "RoomToolModel.h"
+#include "RoomToolMediator.h"
 #include "TileModel.h"
 
 #include <herald/ScopedPtr.h>
@@ -92,22 +92,22 @@ class TileView final : public QWidget {
   QWidget highlight;
   /// A reference to the tile data.
   TileModel model;
-  /// A pointer to the tool model,
+  /// A pointer to the tool mediator,
   /// for when this tile view is clicked.
-  RoomToolModel* tool_model;
+  RoomToolMediator* tool_mediator;
 public:
   /// Constructs a new instance of a tile view.
   /// @param m A reference to a model for this tile.
-  /// @param tm A pointer to the tool model for this tile view.
+  /// @param tm A pointer to the tool mediator for this tile view.
   /// @param parent A pointer to the parent widget.
   /// This is expected to be a @ref TileRowView widget.
-  TileView(const TileModel& m, RoomToolModel* tm, QWidget* parent)
+  TileView(const TileModel& m, RoomToolMediator* tm, QWidget* parent)
     : QWidget(parent),
       layout(this),
       image(this),
       highlight(this),
       model(m),
-      tool_model(tm) {
+      tool_mediator(tm) {
 
     layout.setStackingMode(QStackedLayout::StackAll);
     layout.addWidget(&highlight);
@@ -141,7 +141,7 @@ protected:
 
     TileViewModifier modifier(model, *this);
 
-    tool_model->get_current_tool()->accept(modifier);
+    tool_mediator->get_current_tool()->accept(modifier);
 
     QWidget::mousePressEvent(event);
   }
@@ -342,13 +342,13 @@ class RoomViewImpl final : public RoomView {
   /// A pointer to the room model being modified.
   RoomModel* model;
   /// A model of the room tools.
-  RoomToolModel* tool_model;
+  RoomToolMediator* tool_mediator;
 public:
   /// Constructs a new instance of the room view.
   /// @param parent A pointer to the parent widget.
   /// @param m The room model to be viewed.
   /// @param tm The room tool model, used for editing.
-  RoomViewImpl(RoomModel* m, RoomToolModel* tm, QWidget* parent) : model(m), tool_model(tm) {
+  RoomViewImpl(RoomModel* m, RoomToolMediator* tm, QWidget* parent) : model(m), tool_mediator(tm) {
 
     root_widget = ScopedPtr<QWidget>::make(parent);
 
@@ -434,7 +434,7 @@ protected:
   /// @param parent A pointer to the parent widget.
   /// @returns A new tile view instance.
   ScopedPtr<TileView> make_tile(std::size_t x, std::size_t y, QWidget* parent) {
-    return new TileView(TileModel(model, x, y), tool_model, parent);
+    return new TileView(TileModel(model, x, y), tool_mediator, parent);
   }
   /// Adjusts the tile width of the
   /// view to the width of the model.
@@ -483,8 +483,8 @@ protected:
 
 } // namespace
 
-ScopedPtr<RoomView> RoomView::make(RoomModel* model, RoomToolModel* tool_model, QWidget* parent) {
-  return new RoomViewImpl(model, tool_model, parent);
+ScopedPtr<RoomView> RoomView::make(RoomModel* model, RoomToolMediator* tool_mediator, QWidget* parent) {
+  return new RoomViewImpl(model, tool_mediator, parent);
 }
 
 } // namespace tk

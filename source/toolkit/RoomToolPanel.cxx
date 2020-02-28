@@ -1,6 +1,6 @@
 #include "RoomToolPanel.h"
 
-#include "RoomToolModel.h"
+#include "RoomToolMediator.h"
 
 #include <QIcon>
 
@@ -8,29 +8,29 @@ namespace herald {
 
 namespace tk {
 
-RoomToolPanel::RoomToolPanel(RoomToolModel* m, QWidget* parent) : QToolBar(parent), model(m) {
+RoomToolPanel::RoomToolPanel(RoomToolMediator* m, QWidget* parent) : QToolBar(parent), mediator(m) {
 
   setMovable(true);
   setFloatable(true);
   setOrientation(Qt::Vertical);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-  connect(model, &RoomToolModel::tool_changed, this, &RoomToolPanel::change_selected_icon);
+  connect(mediator, &RoomToolMediator::tool_changed, this, &RoomToolPanel::change_selected_icon);
 
   stamp = addAction(QIcon(":/icons/room-editor/stamp.svg"), tr("Tile Stamp"), [this]() {
-    model->set_current_tool(RoomToolID::Stamp);
+    mediator->set_current_tool(RoomToolID::Stamp);
   });
 
   move = addAction(QIcon(":/icons/room-editor/move.svg"), tr("Move"), [this]() {
-    model->set_current_tool(RoomToolID::Move);
+    mediator->set_current_tool(RoomToolID::Move);
   });
 
   rotate = addAction(QIcon(":/icons/room-editor/rotate.svg"), tr("Rotate"), [this]() {
-    model->set_current_tool(RoomToolID::Rotate);
+    mediator->set_current_tool(RoomToolID::Rotate);
   });
 
   eraser = addAction(QIcon(":/icons/room-editor/eraser.svg"), tr("Eraser"), [this]() {
-    model->set_current_tool(RoomToolID::Eraser);
+    mediator->set_current_tool(RoomToolID::Eraser);
   });
 
   eraser->setCheckable(true);

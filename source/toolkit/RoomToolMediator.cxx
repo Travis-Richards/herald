@@ -1,4 +1,4 @@
-#include "RoomToolModel.h"
+#include "RoomToolMediator.h"
 
 #include <herald/ScopedPtr.h>
 
@@ -54,7 +54,7 @@ public:
 };
 
 /// This is the implementation of the room tool model.
-class RoomToolModelImpl final : public RoomToolModel {
+class RoomToolMediatorImpl final : public RoomToolMediator {
   /// The ID of the current tool.
   RoomToolID current_tool_id;
   /// The stamp tool data model.
@@ -64,8 +64,8 @@ class RoomToolModelImpl final : public RoomToolModel {
 public:
   /// Constructs a new room tool model.
   /// @param project_model The project data to read tool data from.
-  RoomToolModelImpl(const Project* project, QObject* parent)
-    : RoomToolModel(parent),
+  RoomToolMediatorImpl(const Project* project, QObject* parent)
+    : RoomToolMediator(parent),
       stamp_tool(project) {
 
     current_tool_id = RoomToolID::None;
@@ -106,8 +106,8 @@ public:
 
 } // namespace
 
-ScopedPtr<RoomToolModel> RoomToolModel::make(const Project* project, QObject* parent) {
-  return new RoomToolModelImpl(project, parent);
+ScopedPtr<RoomToolMediator> RoomToolMediator::make(const Project* project, QObject* parent) {
+  return new RoomToolMediatorImpl(project, parent);
 }
 
 } // namespace tk

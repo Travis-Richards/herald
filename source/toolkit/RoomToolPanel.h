@@ -6,7 +6,7 @@ namespace herald {
 
 namespace tk {
 
-class RoomToolModel;
+class RoomToolMediator;
 
 enum class RoomToolID : int;
 
@@ -15,16 +15,16 @@ enum class RoomToolID : int;
 class RoomToolPanel : public QToolBar {
 public:
   /// Constructs a new room tool panel instance.
-  /// @param model A pointer to the room tool data model.
+  /// @param mediator A pointer to the room tool data model.
   /// @param parent A pointer to the parent widget.
-  RoomToolPanel(RoomToolModel* model, QWidget* parent);
+  RoomToolPanel(RoomToolMediator* mediator, QWidget* parent);
 protected:
   /// Changes the selected item from the tool bar.
   /// @param tool_id The ID of the tool that was selected.
   void change_selected_icon(RoomToolID tool_id);
 private:
-  /// The data model for the room tools.
-  RoomToolModel* model;
+  /// The mediator for the room tools.
+  RoomToolMediator* mediator;
   /// The eraser action.
   QAction* eraser;
   /// The tile moving action.

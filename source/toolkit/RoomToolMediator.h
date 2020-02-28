@@ -94,14 +94,14 @@ public:
 };
 
 /// This is the data model for the room tools.
-class RoomToolModel : public QObject {
+class RoomToolMediator : public QObject {
   Q_OBJECT
 public:
   /// Creates a new room tool model instance.
   /// @param project A pointer to the project data.
   /// This is used to access texture and animation info for the room tools.
   /// @param parent A pointer to the parent object.
-  static ScopedPtr<RoomToolModel> make(const Project* project, QObject* parent);
+  static ScopedPtr<RoomToolMediator> make(const Project* project, QObject* parent);
   /// Sets the current room tool being used.
   /// @param id The ID of the tool to assign.
   virtual void set_current_tool(RoomToolID id) = 0;
@@ -118,7 +118,7 @@ signals:
 protected:
   /// Constructs teh base of the room tool model.
   /// @param parent A pointer to the parent object.
-  RoomToolModel(QObject* parent) : QObject(parent) {}
+  RoomToolMediator(QObject* parent) : QObject(parent) {}
 };
 
 } // namespace tk

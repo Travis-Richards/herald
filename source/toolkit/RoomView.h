@@ -12,17 +12,17 @@ class ScopedPtr;
 namespace tk {
 
 class RoomModel;
-class RoomToolModel;
+class RoomToolMediator;
 
 /// Used to display a room within the room editor.
 class RoomView {
 public:
   /// Creates a new room view instance.
   /// @param room A pointer to the room model to view.
-  /// @param room_tools A pointer to the room tool model.
+  /// @param tool mediator A pointer to the room tool mediator.
   /// @param parent A pointer to the parent widget.
   /// @returns A new room view instance.
-  static ScopedPtr<RoomView> make(RoomModel* room, RoomToolModel* room_tools, QWidget* parent);
+  static ScopedPtr<RoomView> make(RoomModel* room, RoomToolMediator* tool_mediator, QWidget* parent);
   /// Just a stub.
   virtual ~RoomView() {}
   /// Accesses a pointer to the widget for the room view.
