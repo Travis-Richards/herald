@@ -176,21 +176,46 @@ protected:
   }
 };
 
+/// This is a single tab for an opened room.
+class OpenedRoom final {
+  /// The room being modified.
+  Room* room;
+  /// A view of the room.
+  ScopedPtr<RoomView> view;
+public:
+  /// Constructs a new opened room instance.
+  /// @param r The room that's opened.
+  /// @param v A view of the room.
+  OpenedRoom(Room* r, ScopedPtr<RoomView>&& v) : room(r), view(v) { }
+  /// Constructs an opened room via move semantics.
+  /// @param other The opened room instance to move the data from.
+  OpenedRoom(OpenedRoom&& other) : room(other.room), view(std::move(other.view)) { }
+  /// Gets the name of the opened room.
+  /// @returns The name of the opened room.
+  QString get_name() const {
+    return room->get_name();
+  }
+  /// Gets a pointer to the root widget.
+  QWidget* get_widget() noexcept {
+    return view.get();
+  }
+};
+
 /// Manages all opened rooms.
 class OpenedRoomManager final : public QTabWidget {
   /// The list of opened rooms.
-  std::vector<ScopedPtr<RoomView>> opened_rooms;
+  std::vector<OpenedRoom> opened_rooms;
 public:
   /// Constructs a new instance of the opened room manager.
   /// @param parent A pointer to the parent widget.
   OpenedRoomManager(QWidget* parent) : QTabWidget(parent) { }
   /// Adds a room view to the opened room manager.
   /// @param room_view The room view to add.
-  void add(ScopedPtr<RoomView>&& room_view) {
+  void add(OpenedRoom&& room) {
 
-    addTab(room_view.get(), "");
+    addTab(room.get_widget(), room.get_name());
 
-    opened_rooms.emplace_back(std::move(room_view));
+    opened_rooms.emplace_back(std::move(room));
   }
 };
 
@@ -268,12 +293,12 @@ protected:
   /// @returns True on success, false on failure.
   bool make_room_view(std::size_t room_index) {
 
-    const auto* room_table = project->access_room_table();
+    auto* room_table = project->modify_room_table();
     if (!room_table) {
       return false;
     }
 
-    const auto* room = room_table->access_room(room_index);
+    auto* room = room_table->modify_room(room_index);
     if (!room) {
       return false;
     }
@@ -294,7 +319,7 @@ protected:
       room_view->add_row(std::move(row));
     }
 
-    opened_room_manager->add(std::move(room_view));
+    opened_room_manager->add(OpenedRoom(room, std::move(room_view)));
 
     return true;
   }
