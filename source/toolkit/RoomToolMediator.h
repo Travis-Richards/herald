@@ -93,14 +93,17 @@ public:
   virtual void set_current_texture(std::size_t index) = 0;
 };
 
-/// This is the data model for the room tools.
+/// This class acts as a mediator between the room
+/// editor and the room tools.
 class RoomToolMediator : public QObject {
   Q_OBJECT
 public:
-  /// Creates a new room tool model instance.
+  /// Constructs a new room tool mediator.
   /// @param project A pointer to the project data.
-  /// This is used to access texture and animation info for the room tools.
+  /// This is required by some tools to access textures
+  /// and other resources.
   /// @param parent A pointer to the parent object.
+  /// @returns A new room tool mediator instance.
   static ScopedPtr<RoomToolMediator> make(const Project* project, QObject* parent);
   /// Sets the current room tool being used.
   /// @param id The ID of the tool to assign.
@@ -116,7 +119,7 @@ signals:
   /// @param id The ID of the selected tool.
   void tool_changed(RoomToolID id);
 protected:
-  /// Constructs teh base of the room tool model.
+  /// Constructs the base of the room tool mediator.
   /// @param parent A pointer to the parent object.
   RoomToolMediator(QObject* parent) : QObject(parent) {}
 };
