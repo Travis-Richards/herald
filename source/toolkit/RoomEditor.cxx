@@ -4,6 +4,7 @@
 
 #include "Project.h"
 #include "RoomMediator.h"
+#include "RoomPropertiesView.h"
 #include "RoomToolMediator.h"
 #include "RoomToolPanel.h"
 #include "RoomToolView.h"
@@ -12,9 +13,7 @@
 #include "TableEditor.h"
 #include "TableModel.h"
 
-#include <QFormLayout>
 #include <QGridLayout>
-#include <QSpinBox>
 #include <QTabWidget>
 
 #include <vector>
@@ -96,103 +95,6 @@ public:
   /// @returns True on success, false on failure.
   bool rename(std::size_t index, const QString& name) override {
     return project->modify_room_table()->rename(index, name);
-  }
-};
-
-/// Used for viewing and modifying the room properties.
-class RoomPropertiesView final : public QWidget {
-  /// A pointer to the room mediator.
-  RoomMediator* mediator;
-  /// The form layout of the room properties.
-  ScopedPtr<QFormLayout> layout;
-  /// The room width spin box.
-  ScopedPtr<QSpinBox> w_spin_box;
-  /// The room height spin box.
-  ScopedPtr<QSpinBox> h_spin_box;
-public:
-  /// Constructs a new instance of the room properties view.
-  /// @param m A pointer to the room data model.
-  /// @param parent A pointer to the parent widget.
-  RoomPropertiesView(RoomMediator* m, QWidget* parent) : QWidget(parent), mediator(m) {
-
-    layout = ScopedPtr<QFormLayout>::make(this);
-
-    setup();
-
-    connect(mediator, &RoomMediator::room_changed, this, &RoomPropertiesView::update_room);
-  }
-protected:
-  /// Constructs the properties view.
-  void setup() {
-
-    w_spin_box = ScopedPtr<QSpinBox>::make(this);
-    h_spin_box = ScopedPtr<QSpinBox>::make(this);
-
-    w_spin_box->setMinimum(1);
-    h_spin_box->setMinimum(1);
-
-    // This is just a safe bet, since
-    // the product of these two values
-    // is less than or equal to the max
-    // of a 32-bit integer.
-    w_spin_box->setMaximum(0xffff);
-    h_spin_box->setMaximum(0x7fff);
-
-    layout->addRow(tr("Width"), w_spin_box.get());
-    layout->addRow(tr("Height"), h_spin_box.get());
-
-    using valueChanged = void(QSpinBox::*)(int);
-
-    connect(w_spin_box.get(), static_cast<valueChanged>(&QSpinBox::valueChanged), this, &RoomPropertiesView::update_room_width);
-    connect(h_spin_box.get(), static_cast<valueChanged>(&QSpinBox::valueChanged), this, &RoomPropertiesView::update_room_height);
-  }
-  /// Updates the data for the current room.
-  void update_room() {
-    const auto* room = mediator->access_room();
-    if (room) {
-      w_spin_box->setValue(room->get_width());
-      h_spin_box->setValue(room->get_height());
-    }
-  }
-  /// Sets the width of the room.
-  /// @param width The width to assign the room.
-  void update_room_width(int width) {
-    auto* room = mediator->modify_room();
-    if (room) {
-      room->set_width((std::size_t) width);
-    }
-  }
-  /// Sets the height of the room.
-  /// @param height The height to assign the room.
-  void update_room_height(int height) {
-    auto* room = mediator->modify_room();
-    if (room) {
-      room->set_height((std::size_t) height);
-    }
-  }
-};
-
-/// Used for controlling the currently selected tool.
-class ToolControl final : public QTabWidget {
-public:
-  /// Constructs a new instance of the tool control widget.
-  /// @param room_mediator A pointer to the room model.
-  /// @param room_tool_mediator A pointer to the room tool model.
-  /// @param parent A pointer to the parent widget.
-  ToolControl(RoomMediator* room_mediator,
-              RoomToolMediator* room_tool_mediator,
-              QWidget* parent) : QTabWidget(parent) {
-
-    addTab(new RoomPropertiesView(room_mediator, this), tr("Room Properties"));
-    addTab(new RoomToolView(room_tool_mediator, this), tr("Tool Properties"));
-
-    connect(room_tool_mediator, &RoomToolMediator::tool_changed, this, &ToolControl::on_tool_changed);
-  }
-protected:
-  /// Handles a tool being changed by
-  /// switching over to the tool properties widget.
-  void on_tool_changed(RoomToolID) {
-    setCurrentIndex(1);
   }
 };
 
@@ -297,8 +199,10 @@ class RoomEditor final : public QWidget {
   ScopedPtr<OpenedRoomManager> opened_room_manager;
   /// The tool panel for the room editor.
   ScopedPtr<RoomToolPanel> tool_panel;
+  /// The control panel for the room properties.
+  RoomPropertiesView* room_properties_view;
   /// The widget used for controlling tool behavior.
-  ScopedPtr<ToolControl> tool_control;
+  ScopedPtr<QTabWidget> tool_control;
 public:
   /// Constructs a new room editor instance.
   /// @param parent A pointer to the parent widget.
@@ -317,7 +221,17 @@ public:
 
     tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_mediator.get(), this);
 
-    tool_control = ScopedPtr<ToolControl>::make(room_mediator.get(), room_tool_mediator.get(), this);
+    tool_control = ScopedPtr<QTabWidget>::make(this);
+
+    room_properties_view = RoomPropertiesView::make(tool_control.get()).release();
+
+    auto* room_tool_view = new RoomToolView(room_tool_mediator.get(), tool_control.get());
+
+    tool_control->addTab(room_properties_view, tr("Room Properties"));
+    tool_control->addTab(room_tool_view, tr("Tool Properties"));
+
+    connect(room_properties_view, &RoomPropertiesView::height_changed, this, &RoomEditor::update_room_height);
+    connect(room_properties_view, &RoomPropertiesView::width_changed,  this, &RoomEditor::update_room_width);
 
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);
@@ -365,29 +279,11 @@ protected:
   /// @returns True on success, false on failure.
   bool open_room(Room* room) {
 
-    const auto* textures = project->access_texture_table();
+    room_properties_view->update_room_data(room);
 
     auto room_view = RoomView::make(this);
 
-    for (std::size_t y = 0; y < room->get_height(); y++) {
-
-      auto row = TileRowView::make(room_view.get());
-
-      for (std::size_t x = 0; x  < room->get_width(); x++) {
-
-        auto* tile = room->access_tile(x, y);
-
-        auto tile_view = make_tile_view(row.get());
-
-        if (tile) {
-          tile_view->load_texture_data(textures->find_texture_data(tile->get_texture()));
-        }
-
-        row->add_tile(std::move(tile_view));
-      }
-
-      room_view->add_row(std::move(row));
-    }
+    create_rows(room_view.get(), room, room->get_height());
 
     opened_room_manager->add(OpenedRoom(room, std::move(room_view)));
 
@@ -437,6 +333,67 @@ protected:
     TileModifier tile_modifier(tile, tile_view);
 
     room_tool->accept(tile_modifier);
+  }
+  /// Updates the height of the currently opened room.
+  /// @param height The height to adjust the current room to.
+  void update_room_height(std::size_t height) {
+
+    auto* opened_room = opened_room_manager->get_current();
+    if (!opened_room) {
+      return;
+    }
+
+    auto* room = opened_room->get_room();
+
+    auto original_height = room->get_height();
+
+    room->set_height(height);
+
+    if (original_height > height) {
+      remove_rows(opened_room->get_view(), original_height - height);
+    } else {
+      create_rows(opened_room->get_view(), room, height - original_height);
+    }
+  }
+  /// Removes rows from the room view.
+  /// @param view The view to remove rows from.
+  /// @param count The number of rows to remove.
+  void remove_rows(RoomView* view, std::size_t count) {
+    for (std::size_t i = 0; i < count; i++) {
+      view->remove_last_row();
+    }
+  }
+  /// Creates rows for the room view.
+  /// @param view The view to put the rows into.
+  /// @param room The room to make the rows for.
+  /// @param count The number of rows to make.
+  void create_rows(RoomView* view, const Room* room, std::size_t count) {
+
+    const auto* textures = project->access_texture_table();
+
+    auto y_initial = view->row_count();
+
+    for (std::size_t y = 0; y < count; y++) {
+
+      auto row = TileRowView::make(view);
+
+      for (std::size_t x = 0; x  < room->get_width(); x++) {
+
+        auto* tile = room->access_tile(x, y + y_initial);
+
+        auto tile_view = make_tile_view(row.get());
+
+        if (tile) {
+          tile_view->load_texture_data(textures->find_texture_data(tile->get_texture()));
+        }
+
+        row->add_tile(std::move(tile_view));
+      }
+
+      view->add_row(std::move(row));
+    }
+  }
+  void update_room_width(std::size_t) {
   }
 };
 

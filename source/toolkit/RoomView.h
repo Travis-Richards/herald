@@ -84,6 +84,11 @@ public:
   virtual void hide_grid() = 0;
   /// Shows the grid of the room.
   virtual void show_grid() = 0;
+  /// Removes the last row in the view.
+  virtual void remove_last_row() = 0;
+  /// Indicates the number of rows currently in the room view.
+  /// @returns The number of rows in the room view.
+  virtual std::size_t row_count() const noexcept = 0;
 protected:
   /// Constructs a new room view instance.
   /// @param parent A pointer to the parent widget.

@@ -200,6 +200,10 @@ public:
   const TileRowView* get_row(std::size_t y) const noexcept {
     return (y < rows.size()) ? rows[y].get() : nullptr;
   }
+  /// Removes the last row in the tile map.
+  void remove_last_row() {
+    rows.pop_back();
+  }
   /// Indicates the number of rows in the tile map view.
   /// @returns The number of rows in the tile map view.
   std::size_t row_count() const noexcept {
@@ -359,6 +363,14 @@ public:
       grid_enabled = true;
       update();
     }
+  }
+  /// Removes the last row in the room view.
+  void remove_last_row() override {
+    tile_map_view->remove_last_row();
+  }
+  /// Indicates the number of rows in the view.
+  std::size_t row_count() const noexcept override {
+    return tile_map_view->row_count();
   }
 protected:
   /// Overrides the paint event in order to draw the grid.
