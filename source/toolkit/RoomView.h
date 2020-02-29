@@ -14,6 +14,7 @@ namespace tk {
 /// This class represents a single
 /// view of a tile.
 class TileView : public QWidget {
+  Q_OBJECT
 public:
   /// Constructs a new tile view instance.
   /// @param parent A pointer to the parent widget.
@@ -25,6 +26,10 @@ public:
   /// @param data The texture data to load for the tile view.
   /// @returns True if the texture data is valid, false otherwise.
   virtual bool load_texture_data(const QByteArray& data) = 0;
+signals:
+  /// This signal gets emitted when the tile view is clicked.
+  /// @param tile_view A pointer to the tile view instance.
+  void clicked(TileView* tile_view);
 protected:
   /// Constructs a base tile view.
   /// @param parent A pointer to the parent widget.
@@ -43,6 +48,12 @@ public:
   /// Adds a tile view to the row.
   /// @param tile The tile view to add to the row.
   virtual void add_tile(ScopedPtr<TileView>&& tile) = 0;
+  /// Accesses a tile at a specific location.
+  /// @param x The coordinate of the tile within the row.
+  /// This value must start at zero.
+  /// @returns On success, a pointer to the tile.
+  /// On failure, a null pointer.
+  virtual const TileView* get_tile(std::size_t x) const noexcept = 0;
   /// Indicates the number of tiles in the row.
   virtual std::size_t tile_count() const noexcept = 0;
 protected:
@@ -63,8 +74,12 @@ public:
   /// Adds a row to the room view.
   /// @param row The row to add to the room view.
   virtual void add_row(ScopedPtr<TileRowView>&& row) = 0;
-  /// Clears the contens of a room view.
-  virtual void clear() = 0;
+  /// Finds the location of a tile.
+  /// @param tile_view The tile view to find.
+  /// @param x The variable to receive the X coordinate.
+  /// @param y The variable to receive the Y coordinate.
+  /// @returns True on success, false on failure.
+  virtual bool find_location(TileView* tile_view, std::size_t& x, std::size_t& y) const = 0;
   /// Hides the grid of the room.
   virtual void hide_grid() = 0;
   /// Shows the grid of the room.

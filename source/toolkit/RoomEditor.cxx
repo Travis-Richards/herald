@@ -21,13 +21,33 @@
 
 #include <climits>
 
-#include <QDebug>
-
 namespace herald {
 
 namespace tk {
 
 namespace {
+
+/// Modifies a tile based on the current room tool.
+class TileModifier final : public RoomToolVisitor {
+  /// A pointer to the tile to be modified.
+  Tile* tile;
+  /// A pointer to the tile view to be modified.
+  TileView* tile_view;
+public:
+  /// Constructs a new instance of the tool modifier.
+  /// @param t A pointer to the tile to be modified.
+  /// @param tv A view of the tile view to modify.
+  TileModifier(Tile* t, TileView* tv) : tile(t), tile_view(tv) {}
+protected:
+  /// Applies the stamp tool to the tile.
+  /// @param stamp_tool The stamp tool to get the data from.
+  void visit(const StampTool& stamp_tool) override {
+
+    tile->set_texture(stamp_tool.get_texture_name());
+
+    tile_view->load_texture_data(stamp_tool.get_texture_data());
+  }
+};
 
 /// An implementation of the table model for the room table.
 class RoomTableModel final : public TableModel {
@@ -156,14 +176,14 @@ protected:
 class ToolControl final : public QTabWidget {
 public:
   /// Constructs a new instance of the tool control widget.
-  /// @param room_model A pointer to the room model.
+  /// @param room_mediator A pointer to the room model.
   /// @param room_tool_mediator A pointer to the room tool model.
   /// @param parent A pointer to the parent widget.
-  ToolControl(RoomMediator* room_model,
+  ToolControl(RoomMediator* room_mediator,
               RoomToolMediator* room_tool_mediator,
               QWidget* parent) : QTabWidget(parent) {
 
-    addTab(new RoomPropertiesView(room_model, this), tr("Room Properties"));
+    addTab(new RoomPropertiesView(room_mediator, this), tr("Room Properties"));
     addTab(new RoomToolView(room_tool_mediator, this), tr("Tool Properties"));
 
     connect(room_tool_mediator, &RoomToolMediator::tool_changed, this, &ToolControl::on_tool_changed);
@@ -199,6 +219,20 @@ public:
   QWidget* get_widget() noexcept {
     return view.get();
   }
+  /// Gets a pointer to the opened room.
+  Room* get_room() noexcept {
+    return room;
+  }
+  /// Gets a pointer to the room view.
+  RoomView* get_view() noexcept {
+    return view.get();
+  }
+  /// Indicates if this room has a certain name.
+  /// @param name The name to check for.
+  /// @returns True if this room has the specified name, false otherwise.
+  bool has_name(const QString& name) const {
+    return room->get_name() == name;
+  }
 };
 
 /// Manages all opened rooms.
@@ -217,6 +251,32 @@ public:
 
     opened_rooms.emplace_back(std::move(room));
   }
+  /// Accesses a pointer to the currently opened room.
+  /// @returns A pointer to the currently opened room.
+  OpenedRoom* get_current() {
+
+    auto index = currentIndex();
+    if (index < 0) {
+      return nullptr;
+    }
+
+    return &opened_rooms[(std::size_t) index];
+  }
+  /// Switches to an existing opened room, if it is actually open.
+  /// @param room The room to switch to.
+  /// @returns True on success, false on failure.
+  /// This function will fail if the room hasn't been opened.
+  bool open_existing(const Room* room) {
+
+    for (std::size_t i = 0; i < opened_rooms.size(); i++) {
+      if (opened_rooms[i].has_name(room->get_name())) {
+        setCurrentIndex((int) i);
+        return true;
+      }
+    }
+
+    return false;
+  }
 };
 
 /// A widget used for editing rooms.
@@ -232,7 +292,7 @@ class RoomEditor final : public QWidget {
   /// The room table editor.
   ScopedPtr<TableEditor> room_table_editor;
   /// The data model of the room being viewed.
-  ScopedPtr<RoomMediator> room_model;
+  ScopedPtr<RoomMediator> room_mediator;
   /// Contains all of the opened rooms.
   ScopedPtr<OpenedRoomManager> opened_room_manager;
   /// The tool panel for the room editor.
@@ -251,13 +311,13 @@ public:
     room_table_editor = TableEditor::make(room_table_model.get(), this);
     room_table_editor->add_button(new_room_button_id, tr("New Room"));
 
-    room_model = ScopedPtr<RoomMediator>::make(project, this);
+    room_mediator = ScopedPtr<RoomMediator>::make(project, this);
 
     opened_room_manager = ScopedPtr<OpenedRoomManager>::make(this);
 
     tool_panel = ScopedPtr<RoomToolPanel>::make(room_tool_mediator.get(), this);
 
-    tool_control = ScopedPtr<ToolControl>::make(room_model.get(), room_tool_mediator.get(), this);
+    tool_control = ScopedPtr<ToolControl>::make(room_mediator.get(), room_tool_mediator.get(), this);
 
     connect(room_table_editor.get(), &TableEditor::button_clicked, this, &RoomEditor::on_table_button);
     connect(room_table_editor.get(), &TableEditor::selected,       this, &RoomEditor::on_room_selected);
@@ -284,24 +344,28 @@ protected:
   /// @param index The index of the room that was selected.
   void on_room_selected(std::size_t index) {
 
-    room_model->change_room(index);
-
-    make_room_view(index);
-  }
-  /// Creates a room view for a specified room.
-  /// @param room_index The index of the room to make the view for.
-  /// @returns True on success, false on failure.
-  bool make_room_view(std::size_t room_index) {
-
     auto* room_table = project->modify_room_table();
     if (!room_table) {
-      return false;
+      return;
     }
 
-    auto* room = room_table->modify_room(room_index);
+    auto* room = room_table->modify_room(index);
     if (!room) {
-      return false;
+      return;
     }
+
+    room_mediator->change_room(index);
+
+    if (!opened_room_manager->open_existing(room)) {
+      open_room(room);
+    }
+  }
+  /// Opens a room for editing.
+  /// @param room A pointer to the room to open.
+  /// @returns True on success, false on failure.
+  bool open_room(Room* room) {
+
+    const auto* textures = project->access_texture_table();
 
     auto room_view = RoomView::make(this);
 
@@ -311,9 +375,15 @@ protected:
 
       for (std::size_t x = 0; x  < room->get_width(); x++) {
 
-        auto tile = TileView::make(row.get());
+        auto* tile = room->access_tile(x, y);
 
-        row->add_tile(std::move(tile));
+        auto tile_view = make_tile_view(row.get());
+
+        if (tile) {
+          tile_view->load_texture_data(textures->find_texture_data(tile->get_texture()));
+        }
+
+        row->add_tile(std::move(tile_view));
       }
 
       room_view->add_row(std::move(row));
@@ -322,6 +392,51 @@ protected:
     opened_room_manager->add(OpenedRoom(room, std::move(room_view)));
 
     return true;
+  }
+  /// Creates a new tile view instance.
+  /// @param parent A pointer to the parent widget.
+  /// @returns A pointer to the new tile view instance.
+  ScopedPtr<TileView> make_tile_view(QWidget* parent) {
+
+    auto tile_view = TileView::make(parent);
+
+    auto mod_functor = [this](TileView* tile_view) { modify_tile(tile_view); };
+
+    connect(tile_view.get(), &TileView::clicked, mod_functor);
+
+    return tile_view;
+  }
+  /// Modifies a clicked tile, based on
+  /// the currently selected tool.
+  /// @param tile_view A pointer to the tile view that was clicked.
+  void modify_tile(TileView* tile_view) {
+
+    auto* opened_room = opened_room_manager->get_current();
+    if (!opened_room) {
+      return;
+    }
+
+    auto* view = opened_room->get_view();
+
+    std::size_t x = 0;
+    std::size_t y = 0;
+
+    if (!view->find_location(tile_view, x, y)) {
+      return;
+    }
+
+    auto* room = opened_room->get_room();
+
+    auto* tile = room->modify_tile(x, y);
+    if (!tile) {
+      return;
+    }
+
+    auto* room_tool = room_tool_mediator->get_current_tool();
+
+    TileModifier tile_modifier(tile, tile_view);
+
+    room_tool->accept(tile_modifier);
   }
 };
 

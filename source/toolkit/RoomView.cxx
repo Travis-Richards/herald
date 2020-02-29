@@ -15,33 +15,6 @@ namespace tk {
 
 namespace {
 
-class TileViewImpl;
-
-#if 0
-/// Used for modifying a tile based off of a room tool.
-class TileViewModifier final : public RoomToolVisitor {
-  /// The tile model to assign the texture to.
-  TileModel& tile_model;
-  /// The tile being modified.
-  TileViewImpl& tile_view;
-public:
-  /// Constructs an instance of the modifier.
-  /// @param t A reference to the tile view being modified.
-  TileViewModifier(TileModel& m, TileViewImpl& t)
-    : tile_model(m), tile_view(t) {}
-protected:
-  /// Applies the stamp to the tile view.
-  /// @param stamp_tool The stamp tool containing the texture data.
-  void apply_stamp(const StampTool& stamp_tool);
-  /// Visits a stamp tool.
-  /// This function will stamp the tile with the
-  /// current texture assigned to the stamp tool.
-  void visit(const StampTool& stamp_tool) override {
-    apply_stamp(stamp_tool);
-  }
-};
-#endif
-
 /// The image displayed by the tile.
 class TileImage final : public QWidget {
   /// The original pixmap to display.
@@ -128,21 +101,11 @@ protected:
   /// order to perform a tool action.
   void mousePressEvent(QMouseEvent* event) override {
 
-#if 0
-    TileViewModifier modifier(model, *this);
+    emit clicked(this);
 
-    tool_mediator->get_current_tool()->accept(modifier);
-#endif
     QWidget::mousePressEvent(event);
   }
 };
-
-#if 0
-void TileViewModifier::apply_stamp(const StampTool& stamp_tool) {
-  tile_model.set_texture(stamp_tool.get_texture_name());
-  tile_view.load_texture_data(stamp_tool.get_texture_data());
-}
-#endif
 
 /// A view of a row within a tile map.
 class TileRowViewImpl final : public TileRowView {
@@ -162,6 +125,17 @@ public:
   void add_tile(ScopedPtr<TileView>&& tile) override {
     layout.addWidget(tile.get());
     tiles.emplace_back(std::move(tile));
+  }
+  /// Gets a tile at a specified location.
+  /// @param x The index within the row to get the tile from.
+  /// @returns On success, a pointer to the tile.
+  /// On failure, a null pointer.
+  const TileView* get_tile(std::size_t x) const noexcept override {
+    if (x >= tiles.size()) {
+      return nullptr;
+    } else {
+      return tiles[x].get();
+    }
   }
   /// Shrinks the row to a certain size.
   /// @param count The number of columns to shrink to.
@@ -200,13 +174,30 @@ public:
     rows.emplace_back(std::move(row));
   }
   /// Deletes all rows in the tile map.
-  void clear() {
-    rows.clear();
-  }
   /// Gets a row at a certain index.
   /// @param y The index of the row to get.
   /// @returns A pointer to the specified row.
   TileRowView* get_row(std::size_t y) noexcept {
+    return (y < rows.size()) ? rows[y].get() : nullptr;
+  }
+  /// Gets that maximum number of tiles that appear in one row.
+  std::size_t get_max_width() const {
+
+    std::size_t max = 0;
+
+    for (std::size_t i = 0; i < row_count(); i++) {
+      auto tmp = rows[i]->tile_count();
+      if (tmp > max) {
+        max = tmp;
+      }
+    }
+
+    return max;
+  }
+  /// Gets a row at a certain index.
+  /// @param y The index of the row to get.
+  /// @returns A pointer to the specified row.
+  const TileRowView* get_row(std::size_t y) const noexcept {
     return (y < rows.size()) ? rows[y].get() : nullptr;
   }
   /// Indicates the number of rows in the tile map view.
@@ -223,63 +214,47 @@ public:
   }
 };
 
-/// A view of the tile map grid.
-class GridView final : public QWidget {
+/// Used to paint a grid view on top of the room view.
+class GridPainter final {
+  /// The grid painter.
+  QPainter painter;
   /// The number of vertical lines.
-  int grid_width;
+  int width;
   /// The number of horizontal lines.
-  int grid_height;
+  int height;
 public:
-  /// Constructs a grid view.
-  /// @param parent A pointer to the parent widget.
-  GridView(QWidget* parent) : QWidget(parent), grid_width(1), grid_height(1) {
-
-  }
-  /// Sets the grid width.
-  /// @param w The number of vertical lines to draw.
-  void set_width(int w) {
-    grid_width = (w < 1) ? 1 : w;
-    update();
-  }
-  /// Sets the grid height.
-  /// @param w The number of horizontal lines to draw.
-  void set_height(std::size_t h) {
-    grid_height = (h < 1) ? 1 : h;
-    update();
-  }
-protected:
-  /// Overrides the paint event to draw the grid pattern.
-  /// @param event A pointer to the paint event instance.
-  void paintEvent(QPaintEvent* event) override {
-
-    QPainter painter(this);
+  /// Constructs a new instance of the grid painter.
+  /// @param device The device to paint on.
+  /// @param w The width of the grid.
+  /// @param h The height of the grid.
+  GridPainter(QPaintDevice* device, int w, int h) : painter(device), width(w), height(h) { }
+  /// Paints the grid onto the paint device.
+  void paint() {
 
     QPen pen(Qt::DashLine);
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(pen);
 
-    for (auto y = 0; y < grid_height; y++) {
+    for (auto y = 0; y < height; y++) {
 
       draw_horizontal_line(painter, y);
 
-      for (auto x = 0; x < grid_width; x++) {
+      for (auto x = 0; x < width; x++) {
         draw_vertical_line(painter, x, y);
       }
 
-      draw_vertical_line(painter, grid_width, y);
+      draw_vertical_line(painter, width, y);
     }
 
-    draw_horizontal_line(painter, grid_height);
-
-    QWidget::paintEvent(event);
+    draw_horizontal_line(painter, height);
   }
   /// Draws a horizontal grid line.
   /// @param painter The painter to draw the horizontal grid line with.
   /// @param y The vertical grid offset to draw the line at.
   void draw_horizontal_line(QPainter& painter, int y) {
     auto p1 = to_point(painter, 0, y);
-    auto p2 = to_point(painter, grid_width, y);
+    auto p2 = to_point(painter, width, y);
     painter.drawLine(p1, p2);
   }
   /// Draws a vertical line, starting at @p y and ending
@@ -298,11 +273,11 @@ protected:
   /// @returns The pixel point for the grid coordinate.
   QPoint to_point(QPainter& painter, int x, int y) {
 
-    auto x_max = grid_width;
-    auto y_max = grid_height;
+    auto x_max = width;
+    auto y_max = height;
 
-    auto pixel_x = (width() * x) / x_max;
-    auto pixel_y = (height() * y) / y_max;
+    auto pixel_x = (painter.device()->width() * x) / x_max;
+    auto pixel_y = (painter.device()->height() * y) / y_max;
 
     auto pen_size = painter.pen().width();
 
@@ -331,40 +306,80 @@ class RoomViewImpl final : public RoomView {
   ScopedPtr<QStackedLayout> root_layout;
   /// A view of the tile map.
   ScopedPtr<TileMapView> tile_map_view;
-  /// A view of the tile grid.
-  ScopedPtr<GridView> grid_view;
+  /// Whether or not the grid is enabled.
+  bool grid_enabled;
 public:
   /// Constructs a new instance of the room view.
   /// @param parent A pointer to the parent widget.
-  RoomViewImpl(QWidget* parent) : RoomView(parent) {
+  RoomViewImpl(QWidget* parent) : RoomView(parent), grid_enabled(true) {
 
     tile_map_view = ScopedPtr<TileMapView>::make(this);
-
-    grid_view = ScopedPtr<GridView>::make(this);
 
     root_layout = ScopedPtr<QStackedLayout>::make(this);
     root_layout->setStackingMode(QStackedLayout::StackAll);
     root_layout->addWidget(tile_map_view.get());
-    root_layout->addWidget(grid_view.get());
   }
   /// Adds a row to the room view.
   /// @param row The row to add to the room view.
   void add_row(ScopedPtr<TileRowView>&& row) override {
     tile_map_view->add_row(std::move(row));
   }
-  /// Clears all contents of the room view.
-  void clear() override {
-    tile_map_view->clear();
-    grid_view->set_width(1);
-    grid_view->set_height(1);
+  /// Locates the position of a tile view.
+  /// @param tile_view The tile view to search for.
+  /// @returns True if it's found, false otherwise.
+  bool find_location(TileView* tile_view, std::size_t& x_out, std::size_t& y_out) const override {
+
+    for (std::size_t y = 0; y < tile_map_view->row_count(); y++) {
+
+      auto* row = tile_map_view->get_row(y);
+
+      for (std::size_t x = 0; x < row->tile_count(); x++) {
+
+        const auto* tile = row->get_tile(x);
+        if (tile == tile_view) {
+          x_out = x;
+          y_out = y;
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
   /// Hides the grid view.
   void hide_grid() override {
-    grid_view->hide();
+    if (grid_enabled) {
+      grid_enabled = false;
+      update();
+    }
   }
   /// Shows the grid view.
   void show_grid() override {
-    grid_view->show();
+    if (!grid_enabled) {
+      grid_enabled = true;
+      update();
+    }
+  }
+protected:
+  /// Overrides the paint event in order to draw the grid.
+  /// @param event A pointer to the event info.
+  void paintEvent(QPaintEvent* event) override {
+
+    if (grid_enabled) {
+      paint_grid(event);
+    }
+
+    RoomView::paintEvent(event);
+  }
+  /// Paints a grid onto the widget.
+  void paint_grid(QPaintEvent*) {
+
+    auto w = (int) tile_map_view->get_max_width();
+    auto h = (int) tile_map_view->row_count();
+
+    GridPainter painter(this, w, h);
+
+    painter.paint();
   }
 };
 

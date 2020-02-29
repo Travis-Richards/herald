@@ -28,6 +28,10 @@ public:
   /// @param path The path of the texture to add to the table.
   /// @returns The ID of the texture.
   virtual QString add(const QString& path) = 0;
+  /// Locates texture data by name.
+  /// @param name The name of the texture to locate.
+  /// @returns The data of the specified texture.
+  virtual QByteArray find_texture_data(const QString& name) const = 0;
   /// Gets the image data of a texture.
   /// @param index The index of the texture to get the data for.
   /// @returns The image data of the specified image.
