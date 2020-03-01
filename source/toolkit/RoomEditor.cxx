@@ -114,9 +114,6 @@ public:
   /// @param r The room that's opened.
   /// @param v A view of the room.
   OpenedRoom(Room* r, ScopedPtr<RoomView>&& v) : room(r), view(v) { }
-  /// Constructs an opened room via move semantics.
-  /// @param other The opened room instance to move the data from.
-  OpenedRoom(OpenedRoom&& other) : room(other.room), view(std::move(other.view)) { }
   /// Gets the name of the opened room.
   /// @returns The name of the opened room.
   QString get_name() const {
