@@ -176,7 +176,11 @@ public:
     auto success = true;
 
     for (auto& texture : textures) {
-      success &= texture->reload();
+      if (texture->reload()) {
+        emit reloaded(texture->name);
+      } else {
+        success = false;
+      }
     }
 
     return success;

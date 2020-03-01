@@ -59,6 +59,9 @@ public:
   /// @returns The size of the texture table.
   virtual std::size_t size() const noexcept = 0;
 signals:
+  /// This signal is emitted when the texture for a tile is reloaded.
+  /// @param name The name of the texture that was reloaded.
+  void reloaded(const QString& name);
   /// This signal is emitted when a item in the table is renamed.
   /// @param index The index of the item that was renamed.
   void renamed(std::size_t index);
