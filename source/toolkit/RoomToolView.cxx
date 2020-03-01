@@ -43,11 +43,15 @@ public:
 
     fill_texture_options();
 
+    connect(tool_mediator->get_stamp_tool(), &StampTool::texture_table_updated, this, &StampToolView::fill_texture_options);
+
     connect(texture_combo_box.get(), QOverload<int>::of(&QComboBox::activated), this, &StampToolView::select_texture);
   }
 protected:
   /// Fills the texture combo box with the texture options.
   void fill_texture_options() {
+
+    texture_combo_box->clear();
 
     auto* stamp_tool = tool_mediator->get_stamp_tool();
 

@@ -54,14 +54,18 @@ public:
   /// Indicates the size of the texture table.
   /// @returns The size of the texture table.
   virtual std::size_t size() const noexcept = 0;
-protected:
-  /// Constructs the base of the object table.
-  /// @param parent A pointer to the parent object.
-  inline TextureTable(QObject* parent) : QObject(parent) {}
 signals:
   /// This signal is emitted when a item in the table is renamed.
   /// @param index The index of the item that was renamed.
   void renamed(std::size_t index);
+  /// This signal is emitted when a texture is added to the table.
+  void added(std::size_t index);
+  /// This signal is emitted when a texture is removed from the table.
+  void removed(std::size_t index);
+protected:
+  /// Constructs the base of the object table.
+  /// @param parent A pointer to the parent object.
+  inline TextureTable(QObject* parent) : QObject(parent) {}
 };
 
 /// This is the interface for a single

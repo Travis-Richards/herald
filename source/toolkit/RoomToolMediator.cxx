@@ -21,6 +21,11 @@ public:
   /// @param p A pointer to the project.
   StampToolImpl(const Project* p) : project(p), texture_index(0) {
 
+    auto* texture_table = project->access_texture_table();
+
+    connect(texture_table, &TextureTable::renamed, this, &StampToolImpl::on_renamed);
+    connect(texture_table, &TextureTable::added,   this, &StampToolImpl::on_added);
+    connect(texture_table, &TextureTable::removed, this, &StampToolImpl::on_removed);
   }
   /// Accesses the current texture data.
   QByteArray get_texture_data() const override {
@@ -50,6 +55,19 @@ public:
   /// @param index The index of the texture to use.
   void set_current_texture(std::size_t index) override {
     texture_index = index;
+  }
+protected:
+  /// Called when a texture is added.
+  void on_added(std::size_t) {
+    emit texture_table_updated();
+  }
+  /// Called when a texture is removed.
+  void on_removed(std::size_t) {
+    emit texture_table_updated();
+  }
+  /// Called when a texture is renamed.
+  void on_renamed(std::size_t) {
+    emit texture_table_updated();
   }
 };
 

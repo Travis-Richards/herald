@@ -107,8 +107,14 @@ public:
 
     textures.emplace_back(ScopedPtr<Texture>::make(path, mod_flag));
 
+    emit added(textures.size() - 1);
+
     return textures[textures.size() - 1]->name;
   }
+  /// Locates data associated with a texture.
+  /// @param name The name of the texture to find the data of.
+  /// @returns The data for the specified texture.
+  /// If the texture wasn't found, then an empty byte array is returned.
   QByteArray find_texture_data(const QString& name) const override {
 
     for (const auto& texture : textures) {
@@ -163,6 +169,7 @@ public:
     } else {
       mod_flag->set(true);
       textures.erase(textures.begin() + index);
+      emit removed(index);
       return true;
     }
   }
@@ -179,6 +186,8 @@ public:
     mod_flag->set(true);
 
     textures[index]->name = name;
+
+    emit renamed(index);
 
     return true;
   }

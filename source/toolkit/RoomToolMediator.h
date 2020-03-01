@@ -52,13 +52,17 @@ public:
 };
 
 /// The base class of a room tool.
-class RoomTool {
+class RoomTool : public QObject {
+  Q_OBJECT
 public:
   /// Just a stub.
   virtual ~RoomTool() {}
   /// Accepts a room tool visitor.
   /// @param visitor The visitor to accept.
   virtual void accept(RoomToolVisitor& visitor) const = 0;
+protected:
+  /// Constructs the room tool base.
+  RoomTool() : QObject() {}
 };
 
 /// The eraser tool.
@@ -86,6 +90,7 @@ public:
 /// The tile stamp tool.
 /// Used to put textures onto a tile.
 class StampTool : public RoomTool {
+  Q_OBJECT
 public:
   /// Just a stub.
   virtual ~StampTool() {}
@@ -106,6 +111,11 @@ public:
   /// Sets the index of the texture currently used texture.
   /// @param index The index of the texture to use.
   virtual void set_current_texture(std::size_t index) = 0;
+signals:
+  /// This signal is emitted when the texture
+  /// table has been modified. That way, the room
+  /// tool view can update the texture list.
+  void texture_table_updated();
 };
 
 /// This class acts as a mediator between the room
