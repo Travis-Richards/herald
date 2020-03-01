@@ -43,13 +43,15 @@ public:
 struct Texture final {
   /// The name given to the texture.
   QString name;
+  /// The path that the image originated from.
+  QString path;
   /// The image data of the texture.
   QByteArray data;
   /// The modification flag.
   ModifyFlag* mod_flag;
   /// Constructs a new entry instance.
-  /// @param path The path of the entry.
-  Texture(const QString& path, ModifyFlag* mf) : name(QFileInfo(path).baseName()), mod_flag(mf) {
+  /// @param p The path of the entry.
+  Texture(const QString& p, ModifyFlag* mf) : name(QFileInfo(path).baseName()), path(p), mod_flag(mf) {
     read_data(path);
   }
   /// Constructs the texture from a JSON value.
@@ -58,6 +60,7 @@ struct Texture final {
   Texture(const QJsonValue& json_value, ModifyFlag* mf) : mod_flag(mf) {
     auto obj = json_value.toObject();
     name = obj["name"].toString();
+    path = obj["path"].toString();
     data = QByteArray::fromBase64(obj["data"].toString().toUtf8());
   }
   /// Converts the texture to a JSON value.
@@ -65,6 +68,7 @@ struct Texture final {
   QJsonValue to_json() const {
     QJsonObject object;
     object["name"] = name;
+    object["path"] = path;
     object["data"] = QString(data.toBase64());
     return object;
   }
