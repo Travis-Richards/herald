@@ -331,6 +331,8 @@ public:
 
     const auto* texture_table = project->access_texture_table();
 
+    connect(room_tool_mediator.get(), &RoomToolMediator::tool_changed, this, &RoomEditor::on_tool_changed);
+
     connect(texture_table, &TextureTable::added,    this, &RoomEditor::add_texture);
     connect(texture_table, &TextureTable::reloaded, this, &RoomEditor::reload_texture);
     connect(texture_table, &TextureTable::removed,  this, &RoomEditor::remove_texture);
@@ -582,6 +584,10 @@ protected:
   /// Removes rooms that don't exist.
   void remove_deleted_rooms() {
     opened_room_manager->remove_deleted(project->access_room_table());
+  }
+  /// Called when the room tool changes.
+  void on_tool_changed(RoomToolID) {
+    tool_control->setCurrentIndex(1);
   }
 };
 
