@@ -331,6 +331,7 @@ public:
 
     const auto* texture_table = project->access_texture_table();
 
+    connect(texture_table, &TextureTable::added,    this, &RoomEditor::add_texture);
     connect(texture_table, &TextureTable::reloaded, this, &RoomEditor::reload_texture);
     connect(texture_table, &TextureTable::removed,  this, &RoomEditor::remove_texture);
 
@@ -566,6 +567,17 @@ protected:
   /// @param texture_name The name of the texture to remove.
   void remove_texture(const QString& texture_name) {
     opened_room_manager->remove_texture(texture_name);
+  }
+  /// This updates the views of all tiles that reference a certain texture.
+  /// @param index The index of the texture that was added.
+  void add_texture(std::size_t index) {
+
+    const auto* texture_table = project->access_texture_table();
+
+    auto name = texture_table->get_name(index);
+    auto data = texture_table->get_data(index);
+
+    opened_room_manager->reload_texture(name, data);
   }
   /// Removes rooms that don't exist.
   void remove_deleted_rooms() {
