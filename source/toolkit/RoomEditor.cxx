@@ -168,16 +168,21 @@ public:
 /// Manages all opened rooms.
 class OpenedRoomManager final : public QTabWidget {
   /// The list of opened rooms.
-  std::vector<OpenedRoom> opened_rooms;
+  std::vector<ScopedPtr<OpenedRoom>> opened_rooms;
 public:
   /// Constructs a new instance of the opened room manager.
   /// @param parent A pointer to the parent widget.
-  OpenedRoomManager(QWidget* parent) : QTabWidget(parent) { }
+  OpenedRoomManager(QWidget* parent) : QTabWidget(parent) {
+
+    setTabsClosable(true);
+
+    connect(this, &QTabWidget::tabCloseRequested, this, &OpenedRoomManager::close_room);
+  }
   /// Adds a room view to the opened room manager.
   /// @param room_view The room view to add.
-  void add(OpenedRoom&& room) {
+  void add(ScopedPtr<OpenedRoom>&& room) {
 
-    addTab(room.get_widget(), room.get_name());
+    addTab(room->get_widget(), room->get_name());
 
     opened_rooms.emplace_back(std::move(room));
   }
@@ -190,7 +195,7 @@ public:
       return nullptr;
     }
 
-    return &opened_rooms[(std::size_t) index];
+    return opened_rooms[(std::size_t) index].get();
   }
   /// Switches to an existing opened room, if it is actually open.
   /// @param room The room to switch to.
@@ -199,7 +204,7 @@ public:
   bool open_existing(const Room* room) {
 
     for (std::size_t i = 0; i < opened_rooms.size(); i++) {
-      if (opened_rooms[i].has_name(room->get_name())) {
+      if (opened_rooms[i]->has_name(room->get_name())) {
         setCurrentIndex((int) i);
         return true;
       }
@@ -212,7 +217,18 @@ public:
   /// @param texture_data The new texture data.
   void reload_texture(const QString& texture_name, const QByteArray& texture_data) {
     for (auto& room : opened_rooms) {
-      room.reload_texture(texture_name, texture_data);
+      room->reload_texture(texture_name, texture_data);
+    }
+  }
+protected:
+  /// Closes a specified tab.
+  /// @param index The index of the tab to close.
+  void close_room(int index) {
+
+    auto u_index = (std::size_t) index;
+
+    if (u_index < opened_rooms.size()) {
+      opened_rooms.erase(opened_rooms.begin() + u_index);
     }
   }
 };
@@ -325,7 +341,7 @@ protected:
 
     create_rows(room_view.get(), room, room->get_height());
 
-    opened_room_manager->add(OpenedRoom(room, std::move(room_view)));
+    opened_room_manager->add(new OpenedRoom(room, std::move(room_view)));
 
     return true;
   }
