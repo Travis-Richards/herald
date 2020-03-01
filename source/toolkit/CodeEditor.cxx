@@ -462,6 +462,9 @@ protected:
     build_button = ScopedPtr<QPushButton>(new QPushButton(QObject::tr("Build"), buttons_widget.get()));
     run_button   = ScopedPtr<QPushButton>(new QPushButton(QObject::tr("Run"),   buttons_widget.get()));
 
+    // Disabled since it's not implemented
+    run_button->setEnabled(false);
+
     process_queue->enable_on_completion(build_button.get());
     process_queue->enable_on_completion(run_button.get());
 
