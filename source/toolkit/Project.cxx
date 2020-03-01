@@ -191,12 +191,17 @@ public:
   bool remove(std::size_t index) override {
     if (index >= textures.size()) {
       return false;
-    } else {
-      mod_flag->set(true);
-      textures.erase(textures.begin() + index);
-      emit removed(index);
-      return true;
     }
+
+    mod_flag->set(true);
+
+    QString name = textures[index]->name;
+
+    textures.erase(textures.begin() + index);
+
+    emit removed(name);
+
+    return true;
   }
   /// Renames a texture.
   /// @param index The index of the texture to rename.

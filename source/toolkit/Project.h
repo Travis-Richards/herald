@@ -68,7 +68,8 @@ signals:
   /// This signal is emitted when a texture is added to the table.
   void added(std::size_t index);
   /// This signal is emitted when a texture is removed from the table.
-  void removed(std::size_t index);
+  /// @param name The name of the texture that was removed.
+  void removed(const QString& name);
 protected:
   /// Constructs the base of the object table.
   /// @param parent A pointer to the parent object.

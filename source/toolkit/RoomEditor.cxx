@@ -160,6 +160,28 @@ public:
       }
     }
   }
+  /// Removes texture data, if it is contained by this room.
+  /// @param name The name of the texture to remove.
+  void remove_texture(const QString& name) {
+
+    for (std::size_t y = 0; y < room->get_height(); y++) {
+
+      auto* row = view->get_row(y);
+
+      for (std::size_t x = 0; x < room->get_width(); x++) {
+
+        auto* tile_view = row->get_tile(x);
+
+        auto* tile = room->access_tile(x, y);
+        if (!tile) {
+          // Tile has no data
+          continue;
+        } else if (tile->get_texture() == name) {
+          tile_view->load_texture_data(QByteArray());
+        }
+      }
+    }
+  }
 };
 
 /// Manages all opened rooms.
@@ -221,6 +243,12 @@ public:
   void reload_texture(const QString& texture_name, const QByteArray& texture_data) {
     for (auto& room : opened_rooms) {
       room->reload_texture(texture_name, texture_data);
+    }
+  }
+  /// Removes a texture from the tiles that use it.
+  void remove_texture(const QString& texture_name) {
+    for (auto& room : opened_rooms) {
+      room->remove_texture(texture_name);
     }
   }
   /// Removes deleted rooms from the manager.
@@ -304,6 +332,7 @@ public:
     const auto* texture_table = project->access_texture_table();
 
     connect(texture_table, &TextureTable::reloaded, this, &RoomEditor::reload_texture);
+    connect(texture_table, &TextureTable::removed,  this, &RoomEditor::remove_texture);
 
     connect(room_properties_view, &RoomPropertiesView::height_changed, this, &RoomEditor::update_room_height);
     connect(room_properties_view, &RoomPropertiesView::width_changed,  this, &RoomEditor::update_room_width);
@@ -532,6 +561,11 @@ protected:
     auto texture_data = texture_table->find_texture_data(texture_name);
 
     opened_room_manager->reload_texture(texture_name, texture_data);
+  }
+  /// Removes a texture from the tiles that use it.
+  /// @param texture_name The name of the texture to remove.
+  void remove_texture(const QString& texture_name) {
+    opened_room_manager->remove_texture(texture_name);
   }
   /// Removes rooms that don't exist.
   void remove_deleted_rooms() {

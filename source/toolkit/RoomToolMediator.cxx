@@ -62,7 +62,7 @@ protected:
     emit texture_table_updated();
   }
   /// Called when a texture is removed.
-  void on_removed(std::size_t) {
+  void on_removed(const QString&) {
     emit texture_table_updated();
   }
   /// Called when a texture is renamed.
