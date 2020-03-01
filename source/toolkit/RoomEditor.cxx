@@ -204,6 +204,8 @@ public:
 
     addTab(room->get_widget(), room->get_name());
 
+    setCurrentIndex(count() - 1);
+
     opened_rooms.emplace_back(std::move(room));
   }
   /// Accesses a pointer to the currently opened room.
