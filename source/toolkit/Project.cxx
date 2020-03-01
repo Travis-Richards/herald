@@ -303,12 +303,19 @@ class RoomImpl final : public Room {
   QString name;
   /// The project modification flag.
   ModifyFlag* mod_flag;
+  /// The width of the room, in terms of tiles.
+  std::size_t width;
+  /// The height of the room, in terms of tiles.
+  std::size_t height;
 public:
   /// Constructs a new room instance.
   /// @param name_ The name to give the room.
   /// @param mf The project modification flag.
   /// @param parent A pointer to the parent object.
-  RoomImpl(const QString& name_, ModifyFlag* mf, QObject* parent) : Room(parent), name(name_), mod_flag(mf) { }
+  RoomImpl(const QString& name_, ModifyFlag* mf, QObject* parent) : Room(parent), name(name_), mod_flag(mf) {
+    width = 5;
+    height = 5;
+  }
   /// Constructs a room from a JSON value.
   /// @param mf The project modification flag.
   /// @param room The JSON room to get the data from.
@@ -317,8 +324,8 @@ public:
     auto room_object = room.toObject();
 
     name = room_object["name"].toString();
-    set_width((std::size_t) room_object["width"].toInt(1));
-    set_height((std::size_t) room_object["height"].toInt(1));
+    width = (std::size_t) room_object["width"].toInt(1);
+    height = (std::size_t) room_object["height"].toInt(1);
 
     auto json_tiles = room_object["tiles"].toArray();
     for (auto json_tile : json_tiles) {
@@ -336,9 +343,17 @@ public:
     }
     return nullptr;
   }
+  /// Accesses the height of the room.
+  std::size_t get_height() const noexcept override {
+    return height;
+  }
   /// Accesses the name of the room.
   const QString& get_name() const noexcept override {
     return name;
+  }
+  /// Accesses the width of the room.
+  std::size_t get_width() const noexcept override {
+    return width;
   }
   /// Indicates if the room has a certain name.
   /// @param other_name The name to check for.
@@ -365,7 +380,7 @@ public:
   /// @param h The height to assign to the room.
   void set_height(std::size_t h) override {
     mod_flag->set(true);
-    Room::set_height(h);
+    height = h;
   }
   /// Modifies the name of the room.
   void set_name(const QString& name_) override {
@@ -376,7 +391,7 @@ public:
   /// @param w The width to assign the room.
   void set_width(std::size_t w) override {
     mod_flag->set(true);
-    Room::set_width(w);
+    width = w;
   }
   /// Converts the room to a JSON value.
   QJsonValue to_json() const {

@@ -97,10 +97,6 @@ protected:
 
 /// This is the interface for a single room.
 class Room : public QObject {
-  /// The width of the room, in terms of tiles.
-  std::size_t width;
-  /// The height of the room, in terms of tiles.
-  std::size_t height;
 public:
   /// Just a stub.
   virtual ~Room() {}
@@ -119,21 +115,21 @@ public:
   /// always makes the tile if it doesn't exist.
   virtual Tile* modify_tile(std::size_t x, std::size_t y) = 0;
   /// Accesses the height of the room, in terms of tiles.
-  virtual std::size_t get_height() const noexcept { return height; }
+  virtual std::size_t get_height() const noexcept = 0;
   /// Accesses the name of the room.
   virtual const QString& get_name() const noexcept = 0;
   /// Accesses the width of the room, in terms of tiles.
-  virtual std::size_t get_width() const noexcept { return width; }
+  virtual std::size_t get_width() const noexcept = 0;
   /// Sets the height of the room.
-  virtual void set_height(std::size_t h) { height = h; }
+  virtual void set_height(std::size_t h) = 0;
   /// Sets the name of the room.
   virtual void set_name(const QString& name) = 0;
   /// Sets the width of the room.
-  virtual void set_width(std::size_t w) { width = w; }
+  virtual void set_width(std::size_t w) = 0;
 protected:
   /// Constructs a new room base.
   /// @param parent A pointer to the parent object.
-  Room(QObject* parent) : QObject(parent), width(5), height(5) {}
+  Room(QObject* parent) : QObject(parent) {}
 };
 
 /// The room table contains all
