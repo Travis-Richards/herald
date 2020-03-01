@@ -33,6 +33,9 @@ RoomToolPanel::RoomToolPanel(RoomToolMediator* m, QWidget* parent) : QToolBar(pa
     mediator->set_current_tool(RoomToolID::Eraser);
   });
 
+  move->setEnabled(false);
+  rotate->setEnabled(false);
+
   eraser->setCheckable(true);
   move->setCheckable(true);
   rotate->setCheckable(true);
