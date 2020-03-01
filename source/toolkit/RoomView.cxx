@@ -137,6 +137,17 @@ public:
       return tiles[x].get();
     }
   }
+  /// Gets a tile at a specified location.
+  /// @param x The index within the row to get the tile from.
+  /// @returns On success, a pointer to the tile.
+  /// On failure, a null pointer.
+  TileView* get_tile(std::size_t x) noexcept override {
+    if (x >= tiles.size()) {
+      return nullptr;
+    } else {
+      return tiles[x].get();
+    }
+  }
   /// Removes a certain number of columns from the row view.
   /// @param count The number of columns to remove.
   void shrink(std::size_t count) override {

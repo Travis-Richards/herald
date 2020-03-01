@@ -54,6 +54,12 @@ public:
   /// @returns On success, a pointer to the tile.
   /// On failure, a null pointer.
   virtual const TileView* get_tile(std::size_t x) const noexcept = 0;
+  /// Accesses a tile at a specific location.
+  /// @param x The coordinate of the tile within the row.
+  /// This value must start at zero.
+  /// @returns On success, a pointer to the tile.
+  /// On failure, a null pointer.
+  virtual TileView* get_tile(std::size_t x) noexcept = 0;
   /// Removes a certain number of columns from the row view.
   /// @param count The number of columns to remove.
   virtual void shrink(std::size_t count) = 0;

@@ -140,6 +140,29 @@ public:
   bool has_name(const QString& name) const {
     return room->get_name() == name;
   }
+  /// Reloads texture data.
+  /// @param name The name of the texture.
+  /// @param data The new texture data.
+  void reload_texture(const QString& name, const QByteArray& data) {
+
+    for (std::size_t y = 0; y < room->get_height(); y++) {
+
+      auto* row = view->get_row(y);
+
+      for (std::size_t x = 0; x < room->get_width(); x++) {
+
+        auto* tile_view = row->get_tile(x);
+
+        auto* tile = room->access_tile(x, y);
+        if (!tile) {
+          // Tile has no data
+          continue;
+        } else if (tile->get_texture() == name) {
+          tile_view->load_texture_data(data);
+        }
+      }
+    }
+  }
 };
 
 /// Manages all opened rooms.
@@ -183,6 +206,14 @@ public:
     }
 
     return false;
+  }
+  /// Reloads the tiles that have a certain texture.
+  /// @param texture_name The name of the texture that was reloaded.
+  /// @param texture_data The new texture data.
+  void reload_texture(const QString& texture_name, const QByteArray& texture_data) {
+    for (auto& room : opened_rooms) {
+      room.reload_texture(texture_name, texture_data);
+    }
   }
 };
 
@@ -234,6 +265,10 @@ public:
 
     tool_control->addTab(room_properties_view, tr("Room Properties"));
     tool_control->addTab(room_tool_view, tr("Tool Properties"));
+
+    const auto* texture_table = project->access_texture_table();
+
+    connect(texture_table, &TextureTable::reloaded, this, &RoomEditor::reload_texture);
 
     connect(room_properties_view, &RoomPropertiesView::height_changed, this, &RoomEditor::update_room_height);
     connect(room_properties_view, &RoomPropertiesView::width_changed,  this, &RoomEditor::update_room_width);
@@ -452,6 +487,16 @@ protected:
         row->add_tile(std::move(tile_view));
       }
     }
+  }
+  /// Reloads a texture for the tiles that have it.
+  /// @param texture_name The name of the texture that was reloaded.
+  void reload_texture(const QString& texture_name) {
+
+    const auto* texture_table = project->access_texture_table();
+
+    auto texture_data = texture_table->find_texture_data(texture_name);
+
+    opened_room_manager->reload_texture(texture_name, texture_data);
   }
 };
 
