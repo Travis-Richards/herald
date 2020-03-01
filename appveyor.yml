@@ -10,7 +10,7 @@ environment:
 before_build:
         - mkdir "build"
         - cd "build"
-        - cmake .. -G "Visual Studio 15 2017 Win64"
+        - cmake .. -G "Visual Studio 15 2017 Win64" "-DCMAKE_INSTALL_PREFIX=herald"
 
 build:
         project: build\ALL_BUILD.vcxproj
@@ -18,6 +18,8 @@ build:
 
 after_build:
         - cmake --build "." --config Release --target install
+        - C:\Qt\5.13.2\msvc2017_64\bin\windeployqt herald\bin\herald-hub.exe herald\bin\herald-toolkit.exe --dir herald\bin
+        - cmake -E tar cfv herald-w64.zip --format=zip herald
 
 artifacts:
         - path: build/herald-w64.zip

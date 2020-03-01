@@ -99,23 +99,3 @@ target_compile_options("herald-hub" PRIVATE ${cxxflags})
 
 install(TARGETS "herald-hub"
   RUNTIME DESTINATION "bin")
-
-if(WIN32 AND Qt5_FOUND)
-
-  get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
-
-  get_filename_component(qt_binary_dir "${qmake_executable}" DIRECTORY)
-
-  find_program(win_deploy_qt windeployqt HINTS "${qt_binary_dir}")
-
-  set(pkg_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64")
-  set(zip_path "${CMAKE_CURRENT_BINARY_DIR}/herald-w64.zip")
-
-  add_custom_command(TARGET herald-hub POST_BUILD
-      COMMAND set PATH=%PATH%$<SEMICOLON>${qt_binary_dir}
-      COMMAND "${win_deploy_qt}" "$<TARGET_FILE:herald-hub>" --dir "${pkg_path}"
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:herald-hub>" "${pkg_path}/$<TARGET_FILE_NAME:herald-hub>"
-      COMMAND "${CMAKE_COMMAND}" -E tar cfv "${zip_path}" --format=zip "${pkg_path}"
-      COMMENT "Running windeployqt...")
-
-endif(WIN32 AND Qt5_FOUND)

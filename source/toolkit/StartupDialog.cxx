@@ -146,9 +146,7 @@ protected:
       return false;
     }
 
-    return game_dir.mkdir("audio")
-        && game_dir.mkdir("source")
-        && game_dir.mkdir("textures");
+    return game_dir.mkdir("source")
   }
   /// Creates all initial files for the project.
   /// This includes JSON files and source code files.
