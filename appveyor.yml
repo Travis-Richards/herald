@@ -16,6 +16,9 @@ build:
         project: build\ALL_BUILD.vcxproj
         verbosity: minimal
 
+after_build:
+        - cmake --build "build" --config Release --target install
+
 artifacts:
         - path: build/herald-w64.zip
           name: Herald
