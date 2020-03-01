@@ -31,9 +31,17 @@ public:
   }
   /// Updates the data for the current room.
   void update_room_data(const Room* room) override {
+
     if (room) {
+
+      w_spin_box->blockSignals(true);
+      h_spin_box->blockSignals(true);
+
       w_spin_box->setValue(room->get_width());
       h_spin_box->setValue(room->get_height());
+
+      w_spin_box->blockSignals(false);
+      h_spin_box->blockSignals(false);
     }
   }
 protected:
