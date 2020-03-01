@@ -54,6 +54,9 @@ public:
   /// @returns On success, a pointer to the tile.
   /// On failure, a null pointer.
   virtual const TileView* get_tile(std::size_t x) const noexcept = 0;
+  /// Removes a certain number of columns from the row view.
+  /// @param count The number of columns to remove.
+  virtual void shrink(std::size_t count) = 0;
   /// Indicates the number of tiles in the row.
   virtual std::size_t tile_count() const noexcept = 0;
 protected:
@@ -74,6 +77,11 @@ public:
   /// Adds a row to the room view.
   /// @param row The row to add to the room view.
   virtual void add_row(ScopedPtr<TileRowView>&& row) = 0;
+  /// Gets a row from the room view.
+  /// @param y The index of the row to get.
+  /// @returns A pointer to the specified row.
+  /// If the index is out of bounds, a null pointer is returned.
+  virtual TileRowView* get_row(std::size_t y) = 0;
   /// Finds the location of a tile.
   /// @param tile_view The tile view to find.
   /// @param x The variable to receive the X coordinate.

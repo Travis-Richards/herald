@@ -137,10 +137,10 @@ public:
       return tiles[x].get();
     }
   }
-  /// Shrinks the row to a certain size.
-  /// @param count The number of columns to shrink to.
-  void shrink(std::size_t count) {
-    for (auto i = tiles.size(); i > count; i--) {
+  /// Removes a certain number of columns from the row view.
+  /// @param count The number of columns to remove.
+  void shrink(std::size_t count) override {
+    for (std::size_t i = 0; (i < count) && tiles.size(); i++) {
       tiles.pop_back();
     }
   }
@@ -208,13 +208,6 @@ public:
   /// @returns The number of rows in the tile map view.
   std::size_t row_count() const noexcept {
     return rows.size();
-  }
-  /// Shrinks the name to a certain number of rows.
-  /// @param count The number of rows to shrink to.
-  void shrink(std::size_t count) {
-    for (std::size_t i = rows.size(); i > count; i--) {
-      rows.pop_back();
-    }
   }
 };
 
@@ -349,6 +342,12 @@ public:
     }
 
     return false;
+  }
+  /// Accesses a row from the tile map.
+  /// @param y The index of the row to access.
+  /// @returns A pointer to the specified row view.
+  TileRowView* get_row(std::size_t y) override {
+    return tile_map_view->get_row(y);
   }
   /// Hides the grid view.
   void hide_grid() override {

@@ -393,7 +393,60 @@ protected:
       view->add_row(std::move(row));
     }
   }
-  void update_room_width(std::size_t) {
+  /// Updates the width of the room being viewed.
+  /// @param width The width to assign the room.
+  void update_room_width(std::size_t width) {
+
+    auto* opened_room = opened_room_manager->get_current();
+    if (!opened_room) {
+      return;
+    }
+
+    auto* room = opened_room->get_room();
+
+    auto original_width = room->get_width();
+
+    room->set_width(width);
+
+    if (original_width > width) {
+      remove_columns(opened_room->get_view(), original_width - width);
+    } else {
+      create_columns(opened_room->get_view(), room, width - original_width);
+    }
+  }
+  /// Removes columns from the room view.
+  /// @param room_view The room view to remove columns from.
+  /// @param count The number of columns to remove from each row in the room view.
+  void remove_columns(RoomView* room_view, std::size_t count) {
+    for (std::size_t y = 0; y < room_view->row_count(); y++) {
+      room_view->get_row(y)->shrink(count);
+    }
+  }
+  /// Creates columns in the room view.
+  /// @param room_view The room view to put the columns into.
+  /// @param room The room data to get the tile information from.
+  /// @param count The number of columns to add to each row in the room view.
+  void create_columns(RoomView* room_view, const Room* room, std::size_t count) {
+
+    const auto* textures = project->access_texture_table();
+
+    for (std::size_t y = 0; y < room_view->row_count(); y++) {
+
+      auto* row = room_view->get_row(y);
+
+      for (std::size_t x = 0; x < count; x++) {
+
+        auto* tile = room->access_tile(x, y);
+
+        auto tile_view = make_tile_view(row);
+
+        if (tile) {
+          tile_view->load_texture_data(textures->find_texture_data(tile->get_texture()));
+        }
+
+        row->add_tile(std::move(tile_view));
+      }
+    }
   }
 };
 
