@@ -57,7 +57,9 @@ public:
 class RoomToolMediatorImpl final : public RoomToolMediator {
   /// The ID of the current tool.
   RoomToolID current_tool_id;
-  /// The stamp tool data model.
+  /// The eraser tool instance.
+  EraserTool eraser_tool;
+  /// The stamp tool instance.
   StampToolImpl stamp_tool;
   /// A placeholder tool instance.
   NullRoomTool null_tool;
@@ -87,7 +89,7 @@ public:
       case RoomToolID::None:
         break;
       case RoomToolID::Eraser:
-        break;
+        return &eraser_tool;
       case RoomToolID::Move:
         break;
       case RoomToolID::Rotate:

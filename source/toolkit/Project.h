@@ -111,7 +111,7 @@ public:
   /// Accesses the name of the room.
   virtual const QString& get_name() const noexcept = 0;
   /// Accesses the width of the room, in terms of tiles.
-  std::size_t get_width() const noexcept { return width; }
+  virtual std::size_t get_width() const noexcept { return width; }
   /// Sets the height of the room.
   virtual void set_height(std::size_t h) { height = h; }
   /// Sets the name of the room.

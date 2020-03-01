@@ -32,6 +32,7 @@ enum class RoomToolID : int {
   Stamp
 };
 
+class EraserTool;
 class NullRoomTool;
 class StampTool;
 
@@ -40,6 +41,8 @@ class RoomToolVisitor {
 public:
   /// Just a stub.
   virtual ~RoomToolVisitor() {}
+  /// Visits an eraser tool.
+  virtual void visit(const EraserTool&) = 0;
   /// Visits a null tool.
   /// In most cases, nothing needs to be done here.
   virtual void visit(const NullRoomTool&) { }
@@ -58,6 +61,17 @@ public:
   virtual void accept(RoomToolVisitor& visitor) const = 0;
 };
 
+/// The eraser tool.
+/// Used to remove information from a tile.
+class EraserTool final : public RoomTool {
+public:
+  /// Accepts a room tool visitor.
+  /// @param visitor The visitor to accept.
+  void accept(RoomToolVisitor& visitor) const override {
+    visitor.visit(*this);
+  }
+};
+
 /// This is either a room tool with
 /// no associated data or a placeholder
 /// until a room tool is selected.
@@ -70,6 +84,7 @@ public:
 };
 
 /// The tile stamp tool.
+/// Used to put textures onto a tile.
 class StampTool : public RoomTool {
 public:
   /// Just a stub.

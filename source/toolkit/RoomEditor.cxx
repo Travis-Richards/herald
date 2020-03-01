@@ -38,6 +38,11 @@ public:
   /// @param tv A view of the tile view to modify.
   TileModifier(Tile* t, TileView* tv) : tile(t), tile_view(tv) {}
 protected:
+  /// Erases a texture from a tile.
+  void visit(const EraserTool&) override {
+    tile->set_texture("");
+    tile_view->load_texture_data(QByteArray());
+  }
   /// Applies the stamp tool to the tile.
   /// @param stamp_tool The stamp tool to get the data from.
   void visit(const StampTool& stamp_tool) override {

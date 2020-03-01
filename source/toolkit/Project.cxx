@@ -318,6 +318,23 @@ public:
 
     return tiles[tiles.size() - 1].get();
   }
+  /// Sets the height of the room.
+  /// @param h The height to assign to the room.
+  void set_height(std::size_t h) override {
+    mod_flag->set(true);
+    Room::set_height(h);
+  }
+  /// Modifies the name of the room.
+  void set_name(const QString& name_) override {
+    mod_flag->set(true);
+    name = name_;
+  }
+  /// Sets the width of the room.
+  /// @param w The width to assign the room.
+  void set_width(std::size_t w) override {
+    mod_flag->set(true);
+    Room::set_width(w);
+  }
   /// Converts the room to a JSON value.
   QJsonValue to_json() const {
 
@@ -334,11 +351,6 @@ public:
     object["tiles"] = json_tiles;
 
     return object;
-  }
-  /// Modifies the name of the room.
-  void set_name(const QString& name_) override {
-    mod_flag->set(true);
-    name = name_;
   }
 };
 
