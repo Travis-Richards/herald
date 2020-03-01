@@ -116,4 +116,5 @@ target_link_libraries("herald-toolkit" PRIVATE
 set_target_properties("herald-toolkit" PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
-install(TARGETS "herald-toolkit")
+install(TARGETS "herald-toolkit"
+  RUNTIME DESTINATION "bin")
