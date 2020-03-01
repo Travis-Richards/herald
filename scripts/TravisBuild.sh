@@ -38,4 +38,4 @@ fi
 
 # This is just for debugging
 ls -la
-ls -la herald
+ls -la herald/bin
