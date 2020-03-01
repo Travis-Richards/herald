@@ -51,7 +51,7 @@ struct Texture final {
   ModifyFlag* mod_flag;
   /// Constructs a new entry instance.
   /// @param p The path of the entry.
-  Texture(const QString& p, ModifyFlag* mf) : name(QFileInfo(path).baseName()), path(p), mod_flag(mf) {
+  Texture(const QString& p, ModifyFlag* mf) : name(QFileInfo(p).baseName()), path(p), mod_flag(mf) {
     read_data(path);
   }
   /// Constructs the texture from a JSON value.
