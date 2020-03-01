@@ -97,7 +97,7 @@ target_include_directories("herald-hub" PRIVATE ${INCLUDE_DIRS})
 
 target_compile_options("herald-hub" PRIVATE ${cxxflags})
 
-install(TARGETS "herald-hub" DESTINATION "bin")
+install(TARGETS "herald-hub")
 
 if(WIN32 AND Qt5_FOUND)
 
