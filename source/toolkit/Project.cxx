@@ -63,6 +63,15 @@ struct Texture final {
     path = obj["path"].toString();
     data = QByteArray::fromBase64(obj["data"].toString().toUtf8());
   }
+  /// Reloads the texture data.
+  /// @returns True on success, false on failure.
+  bool reload() {
+    if (!path.isEmpty()) {
+      return read_data(path);
+    } else {
+      return true;
+    }
+  }
   /// Converts the texture to a JSON value.
   /// @returns The JSON representation of the texture.
   QJsonValue to_json() const {
@@ -159,6 +168,18 @@ public:
     }
 
     return true;
+  }
+  /// Reloads all textures in the texture table.
+  /// @returns True on success, false on failure.
+  bool reload_all() override {
+
+    auto success = true;
+
+    for (auto& texture : textures) {
+      success &= texture->reload();
+    }
+
+    return success;
   }
   /// Removes a texture from the model.
   /// @param index The index of the item to remove.

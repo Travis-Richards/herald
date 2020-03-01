@@ -47,6 +47,11 @@ public:
   QByteArray get_data(std::size_t index) const {
     return project->access_texture_table()->get_data(index);
   }
+  /// Reloads the data associated with all of the textures.
+  /// @returns True on success, false if there was an error.
+  bool reload_all() {
+    return project->modify_texture_table()->reload_all();
+  }
 protected:
   /// Removes a texture from the model.
   /// @param index The index of the texture to remove.
@@ -77,6 +82,8 @@ protected:
 class TextureEditorImpl final : public TextureEditor {
   /// Identifies the "Import" button.
   static constexpr std::size_t import_button_id = 0;
+  /// Identifies the "Reload All" button.
+  static constexpr std::size_t reload_all_button_id = 1;
   /// The root widget.
   ScopedPtr<QSplitter> root_widget;
   /// The model for the texture table.
@@ -85,11 +92,15 @@ class TextureEditorImpl final : public TextureEditor {
   ScopedPtr<TableEditor> table_editor;
   /// The widget displaying the texture.
   ScopedPtr<TextureView> texture_widget;
+  /// The index of the current texture being displayed.
+  std::size_t current_texture;
 public:
   /// Constructs a new texture editor instance.
   /// @param project The project data to get the textures from.
   /// @param parent A pointer to the parent widget.
   TextureEditorImpl(Project* project, QWidget* parent) {
+
+    current_texture = 0;
 
     root_widget = ScopedPtr<QSplitter>(new QSplitter(Qt::Horizontal, parent));
 
@@ -97,6 +108,7 @@ public:
 
     table_editor = TableEditor::make(table_model.get(), root_widget.get());
     table_editor->add_button(import_button_id, QObject::tr("Import"));
+    table_editor->add_button(reload_all_button_id, QObject::tr("Reload All"));
 
     texture_widget = TextureView::make(root_widget.get());
 
@@ -119,6 +131,7 @@ protected:
   /// Displays a texture from the model.
   /// @param index The index of the texture to display.
   void display(std::size_t index) {
+    current_texture = index;
     texture_widget->open_texture(table_model->get_data(index));
   }
   /// Handles a button being clicked.
@@ -132,6 +145,8 @@ protected:
       }
     } else if (button_id.has_id(import_button_id)) {
       return add_texture();
+    } else if (button_id.has_id(reload_all_button_id)) {
+      return reload_all();
     }
 
     return true;
@@ -147,6 +162,16 @@ protected:
     }
 
     return true;
+  }
+  /// Reloads all textures in the table.
+  /// @returns True on success, false if there was an error.
+  bool reload_all() {
+
+    auto success = table_model->reload_all();
+
+    display(current_texture);
+
+    return success;
   }
 };
 

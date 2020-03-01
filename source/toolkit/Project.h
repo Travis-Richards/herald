@@ -42,6 +42,10 @@ public:
   /// @returns The name of the specified texture.
   /// If the index is out of bounds, then an empty string is returned.
   virtual QString get_name(std::size_t index) const = 0;
+  /// Reloads the data for all textures in the texture table.
+  /// @returns True if there was no errors, false if there was
+  /// at least one error.
+  virtual bool reload_all() = 0;
   /// Removes a texture from the texture table.
   /// @param index The index of the item to remove.
   /// @returns True on success, false on failure.
