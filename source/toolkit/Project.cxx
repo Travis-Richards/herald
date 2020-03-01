@@ -432,6 +432,17 @@ public:
 
     return QString();
   }
+  /// Indicates if a certain room exists or not.
+  /// @param room The room to check for.
+  /// @returns True if it exists, false otherwise.
+  bool exists(const Room* room) const noexcept override {
+    for (auto& r : rooms) {
+      if (r.get() == room) {
+        return true;
+      }
+    }
+    return false;
+  }
   /// Gets the name of a room in the room table.
   /// @param index The index of the room to get the name of.
   QString get_name(std::size_t index) const override {

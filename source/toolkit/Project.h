@@ -150,6 +150,10 @@ public:
   /// Creates a new room.
   /// @returns The name of the newly made room.
   virtual QString create_room() = 0;
+  /// Indicates if a room exists in the room table.
+  /// @param room The room to search for.
+  /// @returns True if the room exists, false otherwise.
+  virtual bool exists(const Room* room) const noexcept = 0;
   /// Gets the name of a room in the room table.
   /// @param index The index of the room to get the name of.
   virtual QString get_name(std::size_t index) const = 0;

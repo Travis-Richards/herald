@@ -172,6 +172,7 @@ public:
   OpenedRoomManager(QWidget* parent) : QTabWidget(parent) {
 
     setTabsClosable(true);
+    setMovable(true);
 
     connect(this, &QTabWidget::tabCloseRequested, this, &OpenedRoomManager::close_room);
   }
@@ -188,11 +189,16 @@ public:
   OpenedRoom* get_current() {
 
     auto index = currentIndex();
-    if (index < 0) {
-      return nullptr;
+
+    auto name = tabText(index);
+
+    for (std::size_t i = 0; i < opened_rooms.size(); i++) {
+      if (opened_rooms[i]->has_name(name)) {
+        return opened_rooms[i].get();
+      }
     }
 
-    return opened_rooms[(std::size_t) index].get();
+    return nullptr;
   }
   /// Switches to an existing opened room, if it is actually open.
   /// @param room The room to switch to.
@@ -217,15 +223,31 @@ public:
       room->reload_texture(texture_name, texture_data);
     }
   }
+  /// Removes deleted rooms from the manager.
+  void remove_deleted(const RoomTable* room_table) {
+
+    std::size_t i = 0;
+
+    while (i < opened_rooms.size()) {
+      if (!room_table->exists(opened_rooms[i]->get_room())) {
+        removeTab((int) i);
+        opened_rooms.erase(opened_rooms.begin() + i);
+      } else {
+        i++;
+      }
+    }
+  }
 protected:
   /// Closes a specified tab.
   /// @param index The index of the tab to close.
   void close_room(int index) {
 
-    auto u_index = (std::size_t) index;
+    auto room_name = tabText(index);
 
-    if (u_index < opened_rooms.size()) {
-      opened_rooms.erase(opened_rooms.begin() + u_index);
+    for (std::size_t i = 0; i < opened_rooms.size(); i++) {
+      if (opened_rooms[i]->has_name(room_name)) {
+        opened_rooms.erase(opened_rooms.begin() + i);
+      }
     }
   }
 };
@@ -301,7 +323,7 @@ protected:
   void on_table_button(const TableButtonID& button_id) {
     if (button_id.is_predefined()) {
       if (button_id.has_id(TableEditor::remove_button_id)) {
-        // Remove
+        remove_deleted_rooms();
       }
     } else if (button_id.has_id(new_room_button_id)) {
       room_table_model->create_room();
@@ -510,6 +532,10 @@ protected:
     auto texture_data = texture_table->find_texture_data(texture_name);
 
     opened_room_manager->reload_texture(texture_name, texture_data);
+  }
+  /// Removes rooms that don't exist.
+  void remove_deleted_rooms() {
+    opened_room_manager->remove_deleted(project->access_room_table());
   }
 };
 
